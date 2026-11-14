@@ -11,7 +11,8 @@ by distance (Gaussian, sigma about 150 m) gives:
   median  years until half of them stopped being listed, where that point is reached
   n       how many shops the estimate rests on (sum of weights)
 
-Green means shops last, red means they do not. Where the estimate rests on few shops the
+The colour scale is centred on the district's own three-year figure: yellow is typical for
+the district, green means shops last longer than that, red shorter. Where the estimate rests on few shops the
 colour fades toward white, so paler means less data. Nothing is drawn more than about 45 m
 from a shop.
 
@@ -126,12 +127,17 @@ def main():
     median = median.reshape(GRID, GRID)
     n_eff = n_eff.reshape(GRID, GRID)
 
-    # colour stops from the spread of well-supported cells, rounded to 5 points
+    # colour stops centred on the district's own figure, so yellow means "typical for the
+    # district", green better and red worse; the ends sit where the well-supported cells reach
+    at = onehot[:, ::-1].cumsum(1)[:, ::-1].sum(0)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        hz = np.where(at > 0, deaths_by_t.sum(0) / at, 0.0)
+    district = float(np.cumprod(1 - hz)[min(HORIZON, T - 1)])
+    centre = round(district, 2)
     ok = n_eff >= 8
-    q = np.quantile(surv3[ok], [0.05, 0.25, 0.5, 0.75, 0.95])
-    stops_v = [round(float(v) * 20) / 20 for v in q]
-    for i in range(1, len(stops_v)):
-        stops_v[i] = round(max(stops_v[i], stops_v[i - 1] + 0.05), 2)
+    lo, hi = np.quantile(surv3[ok], [0.05, 0.95])
+    half = max(0.1, math.ceil(max(centre - lo, hi - centre) * 20 - 1e-9) / 20)
+    stops_v = [round(centre + k * half / 2, 3) for k in (-2, -1, 0, 1, 2)]
     stops = [[v, c] for v, c in zip(stops_v, RAMP)]
 
     def up(a):
@@ -180,6 +186,7 @@ def main():
         "image": "heat/lifespan.png",
         "bounds": [[nw[0], nw[1]], [se[0], nw[1]], [se[0], se[1]], [nw[0], se[1]]],
         "stops": stops,
+        "district": centre,
         "horizon_months": HORIZON,
         "sigma_m": SIGMA,
         "new_histories": int(len(dur)),
