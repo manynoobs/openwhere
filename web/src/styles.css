@@ -436,3 +436,27 @@ details.records[open] summary svg { transform: rotate(90deg); }
 .site-prices .pb i { display: block; height: 100%; border-radius: 4px; background: var(--ink-2); }
 .site-prices .pc { text-align: right; font-weight: 600; }
 .site-prices .fine { margin-top: 6px; }
+
+/* ---------- examples under the search box ---------- */
+.examples { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 12px 12px; margin-top: -4px; font-size: 12.5px; color: var(--ink-3); }
+.examples button {
+  display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 14px;
+  border: 0; background: var(--fill); color: var(--ink-2); font-size: 12px; white-space: nowrap;
+}
+.examples button:hover { background: var(--fill-2); color: var(--ink); }
+.examples button[aria-pressed="true"] { background: var(--ink); color: var(--glass-solid); }
+@media (max-width: 720px) {
+  .examples { display: none; }
+}
+
+/* ---------- filters: brand, cuisine, price ---------- */
+.ftext { height: 36px; border-radius: 10px; border: 0; background: var(--fill); padding: 0 12px; font-size: 14px; color: var(--ink); outline-offset: 2px; min-width: 0; }
+.ftext::placeholder { color: var(--ink-3); }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.frow select { min-width: 0; width: 100%; text-overflow: ellipsis; padding-right: 28px; }
+
+/* ---------- site check: benchmark and full list ---------- */
+.site-bench { margin: 10px 0 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-2); }
+.site-bench b { color: var(--ink); font-weight: 600; }
+.site-more { margin: 4px 0 0 8px; font-size: 12.5px; }
+.cmp-site { margin-top: 2px; }

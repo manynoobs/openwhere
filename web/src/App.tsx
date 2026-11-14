@@ -12,12 +12,57 @@ import { dataUrl, heatAt, loadHeatGrid, loadMeta, type HeatGrid } from "./data";
 import { SiteCheck, type Place, type SiteResult, type SiteState } from "./components/SiteCheck";
 import { metres } from "./map/geo";
 import { PLACE_KINDS, PLACE_LABEL, type PlaceKind } from "./map/places";
-import { DEFAULT_FILTERS, YEARS, type Filters, type Meta, type UnitProps } from "./types";
+import { CUISINE_LABEL, DEFAULT_FILTERS, normName, YEARS, type Filters, type Meta, type UnitProps } from "./types";
 
 type FullMeta = Meta & { heat: Meta["heat"] & { stops: [number, string][] }; district?: string };
 type Hover = { x: number; y: number; props?: UnitProps; lngLat: [number, number] } | null;
 
 const LAST = YEARS[YEARS.length - 1];
+const listedNow = (u: UnitProps) => u.l[u.l.length - 1] === "1";
+const COMPARE_RADIUS = 200; // metres, for the same-cuisine count in Compare
+
+// one-click examples under the search box; shops are found by address so a data rebuild can't break them
+const EXAMPLE_SHOPS = [
+  { label: "100 Portland St", start: "G/F, 100 PORTLAND STREET" },
+  { label: "11A Hau Fook", start: "GROUND FLOOR, 11A HAU FOOK STREET" },
+];
+const EXAMPLE_BRAND = "McDonald’s";
+
+/** does the unit pass the filters in the year at index i (the same rules as the map's filter) */
+function passes(u: UnitProps, i: number, f: Filters, brandIds: Set<number> | null) {
+  const l = u.l[i];
+  if (l === "0") return false;
+  if (brandIds) {
+    if (!brandIds.has(u.id)) return false;
+  } else if (f.streetOnly && !u.sl) return false;
+  if (f.cuisine && u.cu !== f.cuisine) return false;
+  if (f.price >= 0 && u.pr !== f.price) return false;
+  if (f.type === "RR" && !u.rr) return false;
+  if (f.type === "RL" && u.rr) return false;
+  if (f.seat && !u.seat) return false;
+  if (f.prevOnly && l !== "2") return false;
+  if (f.minChanges && Number(u.c[i]) < f.minChanges) return false;
+  return true;
+}
+
+const median = (xs: number[]) => {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor((s.length - 1) / 2)];
+};
+
+/** what the address bar carries so a view can be shared: #shop=399 or #site=lon,lat,radius,cuisine, plus &mode=lifespan */
+function readHash() {
+  const q = new URLSearchParams(window.location.hash.slice(1));
+  const site = q.get("site")?.split(",");
+  return {
+    shop: q.has("shop") ? Number(q.get("shop")) : null,
+    site: site && site.length >= 3 && site.slice(0, 3).every((x) => Number.isFinite(Number(x)))
+      ? { lon: Number(site[0]), lat: Number(site[1]), radius: Math.min(500, Math.max(50, Number(site[2]))), cuisine: site[3] in CUISINE_LABEL ? site[3] : "" }
+      : null,
+    lifespan: q.get("mode") === "lifespan",
+  };
+}
 
 export default function App() {
   const [meta, setMeta] = useState<FullMeta | null>(null);
@@ -25,12 +70,13 @@ export default function App() {
   const [year, setYear] = useState<number>(LAST);
   const [playing, setPlaying] = useState(false);
   const [pulse, setPulse] = useState(0);
-  const [heat, setHeat] = useState(false);
+  const [heat, setHeatOn] = useState(false);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [selected, setSelected] = useState<UnitProps | null>(null);
   const [pinned, setPinned] = useState<number[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [fly, setFly] = useState<FlyTarget | null>(null);
+  const [fit, setFit] = useState<{ points: [number, number][]; key: number } | null>(null);
   const [hover, setHover] = useState<Hover>(null);
   const [grid, setGrid] = useState<HeatGrid | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
@@ -44,8 +90,17 @@ export default function App() {
     loadMeta().then(setMeta).catch((e: Error) => setFailed(e.message));
   }, []);
   useEffect(() => {
-    if ((heat || siteOpen) && !grid) loadHeatGrid().then(setGrid);
-  }, [heat, siteOpen, grid]);
+    if ((heat || siteOpen || pinned.length > 0) && !grid) loadHeatGrid().then(setGrid);
+  }, [heat, siteOpen, pinned, grid]);
+
+  // shop lifespan covers the whole ten years, so the year bar steps aside and the pins show today
+  const setHeat = useCallback((on: boolean) => {
+    setHeatOn(on);
+    if (on) {
+      setPlaying(false);
+      setYear(LAST);
+    }
+  }, []);
   useEffect(() => {
     fetch(dataUrl("facilities.geojson"))
       .then((r) => r.json())
@@ -67,6 +122,38 @@ export default function App() {
     return c;
   }, [all]);
 
+  // a brand typed into Filters: every unit whose current or last sign contains it
+  const brandIds = useMemo(() => {
+    const q = normName(filters.brand);
+    if (q.length < 2) return null;
+    return all.filter((u) => normName(u.s ?? "").includes(q)).map((u) => u.id);
+  }, [all, filters.brand]);
+  const mapFilters = useMemo<Filters>(() => ({ ...filters, brandIds }), [filters, brandIds]);
+  // once typing pauses, frame every branch
+  useEffect(() => {
+    if (!brandIds?.length) return;
+    const t = window.setTimeout(() => {
+      const ids = new Set(brandIds);
+      const points = all.filter((u) => ids.has(u.id)).map((u) => [u.lon!, u.lat!] as [number, number]);
+      setFit({ points, key: Date.now() });
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [brandIds, all]);
+
+  // the typical spot: around each restaurant listed now, how many others (of the chosen cuisine) are within the radius
+  const typical = useMemo(() => {
+    if (!siteOpen) return null;
+    const now = all.filter(listedNow);
+    const rivals = site.cuisine ? now.filter((u) => u.cu === site.cuisine) : now;
+    return median(
+      now.map((u) => {
+        let n = 0;
+        for (const r of rivals) if (r.id !== u.id && metres(u.lon!, u.lat!, r.lon!, r.lat!) <= site.radius) n += 1;
+        return n;
+      }),
+    );
+  }, [siteOpen, all, site.radius, site.cuisine]);
+
   const siteResult = useMemo<SiteResult | null>(() => {
     if (!siteOpen || site.lon == null || site.lat == null) return null;
     const { lon, lat, radius } = site;
@@ -74,7 +161,7 @@ export default function App() {
       .map((u) => ({ ...u, dist: metres(lon, lat, u.lon!, u.lat!) }))
       .filter((u) => u.dist <= radius)
       .sort((a, b) => a.dist - b.dist);
-    const now = near.filter((u) => u.l[u.l.length - 1] === "1");
+    const now = near.filter(listedNow);
     const counts = Object.fromEntries(PLACE_KINDS.map((k) => [k, 0])) as Record<PlaceKind, number>;
     let mtr: SiteResult["mtr"] = null;
     for (const p of places) {
@@ -125,19 +212,9 @@ export default function App() {
   }, [playing]);
 
   const shown = useMemo(() => {
-    const i = year - YEARS[0];
-    return all.filter((u) => {
-      const l = u.l[i];
-      if (l === "0") return false;
-      if (filters.streetOnly && !u.sl) return false;
-      if (filters.type === "RR" && !u.rr) return false;
-      if (filters.type === "RL" && u.rr) return false;
-      if (filters.seat && !u.seat) return false;
-      if (filters.prevOnly && l !== "2") return false;
-      if (filters.minChanges && Number(u.c[i]) < filters.minChanges) return false;
-      return true;
-    }).length;
-  }, [all, year, filters]);
+    const ids = brandIds ? new Set(brandIds) : null;
+    return all.filter((u) => passes(u, year - YEARS[0], filters, ids)).length;
+  }, [all, year, filters, brandIds]);
 
   const select = useCallback((id: number | null, props?: UnitProps, at?: [number, number]) => {
     if (id == null || !props) {
@@ -156,6 +233,73 @@ export default function App() {
   };
   const focusIds = useMemo(() => pinned, [pinned]);
 
+  const open = useCallback((u: UnitProps) => {
+    setSiteOpen(false);
+    setSelected(u);
+    if (!u.sl) setFilters((f) => (f.streetOnly ? { ...f, streetOnly: false } : f));
+    if (u.lon != null && u.lat != null) setFly({ lon: u.lon, lat: u.lat, key: Date.now() });
+  }, []);
+
+  const examples = useMemo(
+    () => EXAMPLE_SHOPS.map((e) => ({ ...e, unit: all.find((u) => u.en.startsWith(e.start)) })).filter((e) => e.unit),
+    [all],
+  );
+
+  // what Compare adds for each pinned shopfront: price, MTR, how long shops last nearby, same-cuisine shops around it
+  const compareFacts = useMemo(() => {
+    const now = all.filter(listedNow);
+    return Object.fromEntries(
+      pinned.flatMap((id) => {
+        const u = byId.get(id);
+        if (!u) return [];
+        const on = listedNow(u);
+        const cu = on && u.cu && u.cu !== "unknown" ? u.cu : "";
+        const life = grid ? heatAt(grid, u.lon!, u.lat!) : null;
+        return [[id, {
+          price: on && u.pr >= 0 ? meta?.price_bands[u.pr] ?? null : null,
+          listed: on,
+          mtr: u.mtr,
+          mtrx: u.mtrx,
+          life: life?.v ?? null,
+          cuisine: cu ? CUISINE_LABEL[cu] : "",
+          rivals: now.filter((r) => r.id !== id && (!cu || r.cu === cu) && metres(u.lon!, u.lat!, r.lon!, r.lat!) <= COMPARE_RADIUS).length,
+        }]];
+      }),
+    );
+  }, [pinned, byId, all, grid, meta]);
+
+  // shareable view: read the address once the shops are loaded, then keep it in step
+  const hashRead = useRef(false);
+  useEffect(() => {
+    if (!all.length) return;
+    const apply = () => {
+      const h = readHash();
+      if (h.lifespan) setHeat(true);
+      const u = h.shop != null ? byId.get(h.shop) : undefined;
+      if (u) open(u);
+      else if (h.site) {
+        setSite(h.site);
+        setSelected(null);
+        setSiteOpen(true);
+        setFly({ lon: h.site.lon, lat: h.site.lat, key: Date.now() });
+      }
+      hashRead.current = true;
+    };
+    apply();
+    window.addEventListener("hashchange", apply);
+    return () => window.removeEventListener("hashchange", apply);
+  }, [all, byId, open, setHeat]);
+  useEffect(() => {
+    if (!hashRead.current) return;
+    const parts: string[] = [];
+    if (selected) parts.push(`shop=${selected.id}`);
+    else if (siteOpen && site.lon != null && site.lat != null)
+      parts.push(`site=${site.lon.toFixed(5)},${site.lat.toFixed(5)},${site.radius}${site.cuisine ? `,${site.cuisine}` : ""}`);
+    if (heat) parts.push("mode=lifespan");
+    const hash = parts.length ? `#${parts.join("&")}` : "";
+    if (hash !== window.location.hash) history.replaceState(null, "", hash || window.location.pathname + window.location.search);
+  }, [selected, siteOpen, site, heat]);
+
   if (failed) {
     return (
       <div className="topleft glass" style={{ padding: 16 }}>
@@ -173,11 +317,12 @@ export default function App() {
         <MapView
           year={year}
           heat={heat}
-          filters={filters}
+          filters={mapFilters}
           heatMeta={meta.heat}
           selectedId={selected?.id ?? null}
           focusIds={focusIds}
           fly={fly}
+          fit={fit}
           pulse={pulse}
           panelOpen={panelOpen}
           onSelect={select}
@@ -205,13 +350,25 @@ export default function App() {
           district={meta?.district ?? "Yau Tsim"}
           onPick={(r) => {
             const props = byId.get(r[0]);
-            if (props) {
-              setSelected(props);
-              setFly({ lon: r[5], lat: r[6], key: Date.now() });
-              if (!props.sl && filters.streetOnly) setFilters({ ...filters, streetOnly: false });
-            }
+            if (props) open(props);
           }}
         />
+        {examples.length > 0 && !selected && !siteOpen && (
+          <div className="examples">
+            {examples.map((e) => (
+              <button key={e.label} onClick={() => open(e.unit!)}>
+                <PinMark n={e.unit!.chg} size={15} />
+                {e.label}
+              </button>
+            ))}
+            <button
+              aria-pressed={normName(filters.brand) === normName(EXAMPLE_BRAND)}
+              onClick={() => setFilters((f) => ({ ...f, brand: normName(f.brand) === normName(EXAMPLE_BRAND) ? "" : EXAMPLE_BRAND }))}
+            >
+              {EXAMPLE_BRAND}
+            </button>
+          </div>
+        )}
       </div>
 
       <Controls
@@ -234,19 +391,17 @@ export default function App() {
           site={site}
           result={siteResult}
           grid={grid}
+          typical={typical}
+          district={meta?.heat.district ?? null}
           counts={cuisineCounts}
           priceBands={meta?.price_bands ?? []}
           onChange={setSite}
           onClose={() => setSiteOpen(false)}
-          onOpen={(u) => {
-            setSiteOpen(false);
-            setSelected(u);
-            if (u.lon != null && u.lat != null) setFly({ lon: u.lon, lat: u.lat, key: Date.now() });
-          }}
+          onOpen={open}
         />
       )}
-      <Legend heat={heat} stops={meta?.heat.stops ?? null} year={year} />
-      <YearBar year={year} setYear={setYear} playing={playing} setPlaying={setPlaying} />
+      <Legend heat={heat} stops={meta?.heat.stops ?? null} district={meta?.heat.district} year={year} />
+      {!heat && <YearBar year={year} setYear={setYear} playing={playing} setPlaying={setPlaying} />}
 
       {pinned.length > 0 && !compareOpen && (
         <button className="iconbtn glass comparebtn" onClick={() => setCompareOpen(true)}>
@@ -257,14 +412,12 @@ export default function App() {
       {compareOpen && pinned.length > 0 && (
         <CompareSheet
           ids={pinned}
+          facts={compareFacts}
           onClose={() => setCompareOpen(false)}
           onUnpin={(id) => setPinned((p) => p.filter((x) => x !== id))}
           onOpen={(u) => {
             const props = byId.get(u.id);
-            if (props) {
-              setSelected(props);
-              setFly({ lon: u.lon, lat: u.lat, key: Date.now() });
-            }
+            if (props) open(props);
           }}
         />
       )}
@@ -293,7 +446,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <PrintSheet ids={pinned} />
+      <PrintSheet ids={pinned} facts={compareFacts} />
     </div>
   );
 }

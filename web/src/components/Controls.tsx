@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DEFAULT_FILTERS, type Filters, type Meta } from "../types";
+import { activeFilters, CUISINES, DEFAULT_FILTERS, type Filters, type Meta } from "../types";
 import { monthYear } from "../data";
 import { Icon } from "./Icon";
 
@@ -19,8 +19,7 @@ interface Props {
 export function Controls({ heat, setHeat, filters, setFilters, shown, meta, places, setPlaces, siteOpen, setSiteOpen }: Props) {
   const [open, setOpen] = useState<"filters" | "about" | null>(null);
   const box = useRef<HTMLDivElement>(null);
-  const active =
-    (filters.streetOnly ? 0 : 1) + (filters.type !== "all" ? 1 : 0) + (filters.seat ? 1 : 0) + (filters.prevOnly ? 1 : 0) + (filters.minChanges ? 1 : 0);
+  const active = activeFilters(filters);
 
   useEffect(() => {
     if (!open) return;
@@ -42,7 +41,7 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta, plac
     <div className="topright" ref={box}>
       <div className="segmented glass" role="group" aria-label="Map mode">
         <button aria-pressed={!heat} onClick={() => setHeat(false)}>Shops</button>
-        <button aria-pressed={heat} onClick={() => setHeat(true)}>Shop lifespan</button>
+        <button aria-pressed={heat} onClick={() => setHeat(true)} title="Share of new shops still listed after three years">Shop lifespan</button>
       </div>
       <button className={`iconbtn glass ${siteOpen ? "on" : ""}`} aria-pressed={siteOpen} onClick={() => setSiteOpen(!siteOpen)}>
         <Icon name="target" />
@@ -60,6 +59,38 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta, plac
         </button>
         {open === "filters" && (
           <div className="popover glass" role="dialog" aria-label="Filters">
+            <div className="fgroup">
+              <label className="site-field">
+                <span>Brand or shop name</span>
+                <input
+                  type="search"
+                  className="ftext"
+                  value={filters.brand}
+                  placeholder="McDonald’s, 譚仔, Starbucks"
+                  onChange={(e) => set({ brand: e.target.value })}
+                />
+              </label>
+            </div>
+            <div className="fgroup frow">
+              <label className="site-field">
+                <span>Cuisine now</span>
+                <select value={filters.cuisine} onChange={(e) => set({ cuisine: e.target.value })}>
+                  <option value="">Any</option>
+                  {CUISINES.map(([k, l]) => (
+                    <option key={k} value={k}>{l}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="site-field">
+                <span>Price per person</span>
+                <select value={filters.price} onChange={(e) => set({ price: Number(e.target.value) })}>
+                  <option value={-1}>Any</option>
+                  {(meta?.price_bands ?? []).map((b, i) => (
+                    <option key={b} value={i}>{b}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <div className="fgroup">
               <h2>Floors</h2>
               <div className="fseg">
@@ -107,7 +138,7 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta, plac
             </div>
             <div className="pfoot">
               <span className="num">{shown.toLocaleString()} shopfronts shown</span>
-              <button className="linkbtn" disabled={active === 0 && filters.streetOnly} onClick={() => setFilters(DEFAULT_FILTERS)}>
+              <button className="linkbtn" disabled={active === 0} onClick={() => setFilters(DEFAULT_FILTERS)}>
                 Reset
               </button>
             </div>
@@ -143,7 +174,8 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
         colour fades where it rests on few shops.
       </p>
       <p>
-        <b>Cuisine</b> is guessed from each current shop’s name, and is left as unclear when the name doesn’t say. <b>Places</b>{" "}
+        <b>Price per person and cuisine</b> come from OpenRice where a listing matched the shop. Otherwise cuisine is guessed
+        from the shop’s name, and left as unclear when the name doesn’t say. <b>Places</b>{" "}
         and MTR exits come from OpenStreetMap; distances are straight-line.
       </p>
       <dl className="num">

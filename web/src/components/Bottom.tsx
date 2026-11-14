@@ -2,17 +2,18 @@ import { PinMark } from "./PinMark";
 import { YEARS } from "../types";
 import { Icon } from "./Icon";
 
-export function Legend({ heat, stops, year }: { heat: boolean; stops: [number, string][] | null; year: number }) {
+export function Legend({ heat, stops, district, year }: { heat: boolean; stops: [number, string][] | null; district?: number; year: number }) {
   if (heat && stops) {
     const lo = stops[0][0];
     const hi = stops[stops.length - 1][0];
     const grad = `linear-gradient(90deg, ${stops.map(([v, c]) => `${c} ${((v - lo) / (hi - lo)) * 100}%`).join(", ")})`;
     return (
       <div className="legend glass" aria-live="polite">
-        <div className="cap">How long new shops last here</div>
+        <div className="cap">New shops still listed after 3 years</div>
         <div className="gradient" style={{ background: grad }} />
         <div className="gticks num">
-          <span>{Math.round(lo * 100)}% last 3 years</span>
+          <span>{Math.round(lo * 100)}%</span>
+          {district != null && <span>{Math.round(district * 100)}% district average</span>}
           <span>{Math.round(hi * 100)}%</span>
         </div>
         <div className="key">

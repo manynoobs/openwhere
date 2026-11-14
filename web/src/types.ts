@@ -113,6 +113,7 @@ export interface Meta {
     bounds: [[number, number], [number, number], [number, number], [number, number]];
     image: string;
     stops: [number, string][];
+    district: number; // the district's own three-year share, the middle of the colour scale
     horizon_months: number;
     new_histories: number;
   };
@@ -129,6 +130,21 @@ export interface Filters {
   seat: boolean;
   prevOnly: boolean;
   minChanges: number; // 0 = all
+  cuisine: string; // "" = any; applies to shops listed now
+  price: number; // index into meta.price_bands; -1 = any
+  brand: string; // part of a shop name, e.g. "McDonald's"; "" = any
+  /** ids of the units whose sign matches `brand`, worked out once in App */
+  brandIds?: number[] | null;
 }
 
-export const DEFAULT_FILTERS: Filters = { streetOnly: true, type: "all", seat: false, prevOnly: false, minChanges: 0 };
+export const DEFAULT_FILTERS: Filters = {
+  streetOnly: true, type: "all", seat: false, prevOnly: false, minChanges: 0, cuisine: "", price: -1, brand: "",
+};
+
+/** how many filters differ from the default, for the count on the Filters button */
+export const activeFilters = (f: Filters) =>
+  (f.streetOnly ? 0 : 1) + (f.type !== "all" ? 1 : 0) + (f.seat ? 1 : 0) + (f.prevOnly ? 1 : 0) + (f.minChanges ? 1 : 0) +
+  (f.cuisine ? 1 : 0) + (f.price >= 0 ? 1 : 0) + (f.brand.trim() ? 1 : 0);
+
+/** shop names compared without case, spaces or punctuation, so "mcdonalds" finds "McDonald’s" */
+export const normName = (s: string) => s.toLowerCase().replace(/[\s,.'’()\-/·]+/g, "");

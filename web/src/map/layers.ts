@@ -36,7 +36,11 @@ const stepColor = (year: number): ExpressionSpecification => [
 
 export function unitFilter(year: number, f: Filters): FilterSpecification {
   const all: unknown[] = ["all", ["!=", listedChar(year), "0"]];
-  if (f.streetOnly) all.push(["==", ["get", "sl"], 1]);
+  // a brand search shows every branch, whatever floor it is on
+  if (f.brandIds) all.push(["in", ["get", "id"], ["literal", f.brandIds]]);
+  else if (f.streetOnly) all.push(["==", ["get", "sl"], 1]);
+  if (f.cuisine) all.push(["==", ["get", "cu"], f.cuisine]);
+  if (f.price >= 0) all.push(["==", ["get", "pr"], f.price]);
   if (f.type === "RR") all.push(["==", ["get", "rr"], 1]);
   if (f.type === "RL") all.push(["==", ["get", "rr"], 0]);
   if (f.seat) all.push(["==", ["get", "seat"], 1]);
@@ -50,7 +54,7 @@ const badgeImage = (year: number): ExpressionSpecification => [
   "b-",
   ["to-string", changesAt(year)],
   "-",
-  ["case", ["==", listedChar(year), "2"], "h", ["==", ["get", "res"], "b"], "d", "f"],
+  ["case", ["==", listedChar(year), "2"], "h", "f"],
 ];
 
 // below BADGE_FROM the map shows coloured dots; badges with digits fade in above it

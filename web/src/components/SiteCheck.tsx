@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CUISINES, CUISINE_LABEL, type UnitProps } from "../types";
 import type { HeatGrid } from "../data";
 import { heatAt } from "../data";
@@ -35,6 +36,10 @@ interface Props {
   site: SiteState;
   result: SiteResult | null;
   grid: HeatGrid | null;
+  /** the same count around a typical restaurant in the district, to read this spot against */
+  typical: number | null;
+  /** the district's own share of new shops lasting three years */
+  district: number | null;
   counts: Record<string, number>;
   priceBands: string[];
   onChange: (s: SiteState) => void;
@@ -60,7 +65,11 @@ function PlaceIcon({ k }: { k: PlaceKind }) {
   );
 }
 
-export function SiteCheck({ site, result, grid, counts, priceBands, onChange, onOpen, onClose }: Props) {
+const SHORT = 4; // rows shown before "Show all"
+
+export function SiteCheck({ site, result, grid, typical, district, counts, priceBands, onChange, onOpen, onClose }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  const list = result ? (site.cuisine ? result.comp : result.inside) : [];
   const label = site.cuisine ? CUISINE_LABEL[site.cuisine] : "";
   const life = grid && site.lon != null && site.lat != null ? heatAt(grid, site.lon, site.lat) : null;
   return (
@@ -120,9 +129,11 @@ export function SiteCheck({ site, result, grid, counts, priceBands, onChange, on
             </span>
           </div>
 
-          {(site.cuisine ? result.comp : result.inside).length > 0 && (
+          {typical != null && <Benchmark n={list.length} typical={typical} radius={site.radius} what={label ? `${label} shops` : "restaurants"} />}
+
+          {list.length > 0 && (
             <ul className="site-list">
-              {(site.cuisine ? result.comp : result.inside).slice(0, 4).map((u) => (
+              {(showAll ? list : list.slice(0, SHORT)).map((u) => (
                 <li key={u.id}>
                   <button onClick={() => onOpen(u)}>
                     <PinMark n={u.chg} size={18} />
@@ -136,8 +147,13 @@ export function SiteCheck({ site, result, grid, counts, priceBands, onChange, on
               ))}
             </ul>
           )}
+          {list.length > SHORT && (
+            <button className="linkbtn site-more num" onClick={() => setShowAll(!showAll)}>
+              {showAll ? "Show nearest 4" : `Show all ${list.length}`}
+            </button>
+          )}
 
-          <Prices shops={site.cuisine ? result.comp : result.inside} bands={priceBands} cuisine={label} />
+          <Prices shops={list} bands={priceBands} cuisine={label} />
 
           <dl className="site-stats num">
             {site.cuisine && (
@@ -150,7 +166,7 @@ export function SiteCheck({ site, result, grid, counts, priceBands, onChange, on
               <dt>New shops here lasting 3 years</dt>
               <dd>
                 {life && life.v != null ? `${Math.round(life.v * 100)}%` : "Too few shops"}
-                {life && life.v != null && <small> of about {life.n}</small>}
+                {life && life.v != null && district != null && <small> · district {Math.round(district * 100)}%</small>}
               </dd>
             </div>
             <div>
@@ -190,6 +206,16 @@ export function SiteCheck({ site, result, grid, counts, priceBands, onChange, on
         </div>
       )}
     </section>
+  );
+}
+
+/** This spot's count read against the typical restaurant's surroundings in the district. */
+function Benchmark({ n, typical, radius, what }: { n: number; typical: number; radius: number; what: string }) {
+  const verdict = n >= typical * 1.5 && n - typical >= 2 ? "More than usual" : n <= typical / 1.5 && typical - n >= 2 ? "Fewer than usual" : "About usual";
+  return (
+    <p className="site-bench num">
+      <b>{verdict}.</b> A typical restaurant in Yau Tsim has {typical} other {what} within {radius} m
+    </p>
   );
 }
 

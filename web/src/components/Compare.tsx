@@ -41,14 +41,26 @@ function addressLines(en: string) {
   return [parts[street], [...parts.slice(0, street), ...parts.slice(street + 1)].join(" · ")];
 }
 
+/** what the map knows about a pinned shopfront's surroundings, worked out in App */
+export interface CompareFacts {
+  price: string | null;
+  listed: boolean;
+  mtr: number;
+  mtrx: string;
+  life: number | null; // share of new shops nearby still listed after three years
+  cuisine: string; // label, "" when unknown
+  rivals: number; // shops listed now within 200 m, of the same cuisine where known
+}
+
 interface Props {
   ids: number[];
+  facts: Record<number, CompareFacts>;
   onClose: () => void;
   onUnpin: (id: number) => void;
   onOpen: (u: UnitDetail) => void;
 }
 
-export function CompareSheet({ ids, onClose, onUnpin, onOpen }: Props) {
+export function CompareSheet({ ids, facts, onClose, onUnpin, onOpen }: Props) {
   const units = usePinned(ids);
   const empty = Math.max(0, 3 - ids.length);
   return (
@@ -75,7 +87,7 @@ export function CompareSheet({ ids, onClose, onUnpin, onOpen }: Props) {
           </div>
         </div>
         {units.map((u) => (
-          <Lane key={u.id} u={u} onOpen={() => onOpen(u)} onUnpin={() => onUnpin(u.id)} />
+          <Lane key={u.id} u={u} f={facts[u.id]} onOpen={() => onOpen(u)} onUnpin={() => onUnpin(u.id)} />
         ))}
         {Array.from({ length: empty }, (_, i) => (
           <div className="cmp-lane cmp-empty" key={`e${i}`}>
@@ -88,7 +100,10 @@ export function CompareSheet({ ids, onClose, onUnpin, onOpen }: Props) {
   );
 }
 
-function Lane({ u, onOpen, onUnpin }: { u: UnitDetail; onOpen: () => void; onUnpin: () => void }) {
+const rivalsWord = (f: CompareFacts) => `${f.cuisine ? `${f.cuisine} ` : ""}${f.rivals === 1 ? "shop" : "shops"} within 200 m`;
+const rivalsText = (f: CompareFacts) => `${f.rivals} ${rivalsWord(f)}`;
+
+function Lane({ u, f, onOpen, onUnpin }: { u: UnitDetail; f?: CompareFacts; onOpen: () => void; onUnpin: () => void }) {
   const hs = u.sign_histories;
   const now = hs.find((h) => h.listed_in_latest_snapshot);
   const [line1, line2] = addressLines(u.address_en);
@@ -183,13 +198,33 @@ function Lane({ u, onOpen, onUnpin }: { u: UnitDetail; onOpen: () => void; onUnp
           )}
           <span className="cmp-now">{now ? `Now: ${nameOf(now)}` : "No licence listed now"}</span>
         </div>
+        {f && (
+          <div className="cmp-facts cmp-site num">
+            {f.listed && (
+              <span>
+                Price per person <b>{f.price ?? "No data"}</b>
+              </span>
+            )}
+            <span>
+              MTR exit <b>{f.mtr} m</b>
+            </span>
+            {f.life != null && (
+              <span>
+                New shops nearby lasting 3 years <b>{Math.round(f.life * 100)}%</b>
+              </span>
+            )}
+            <span>
+              <b>{f.rivals}</b> {rivalsWord(f)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 /** What the browser prints: the pinned units, each fact with its source line. */
-export function PrintSheet({ ids }: { ids: number[] }) {
+export function PrintSheet({ ids, facts }: { ids: number[]; facts: Record<number, CompareFacts> }) {
   const units = usePinned(ids);
   if (!units.length) return null;
   return (
@@ -201,6 +236,18 @@ export function PrintSheet({ ids }: { ids: number[] }) {
             {shortAddress(u.address_en)} {u.address_tc ? `· ${u.address_tc}` : ""} — {u.store_changes} store change
             {u.store_changes === 1 ? "" : "s"} since 2016
           </h2>
+          {facts[u.id] && (
+            <p>
+              {[
+                facts[u.id].listed ? `Price per person: ${facts[u.id].price ?? "no data"} (OpenRice)` : null,
+                `Nearest MTR exit: ${facts[u.id].mtr} m, ${facts[u.id].mtrx} (OpenStreetMap, straight line)`,
+                facts[u.id].life != null ? `New shops nearby still listed after 3 years: ${Math.round(facts[u.id].life! * 100)}% (FEHD lists)` : null,
+                `${rivalsText(facts[u.id])}, listed now`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
           <table>
             <thead>
               <tr>

@@ -8,7 +8,7 @@ import { addUnitLayers, changedInFilter, setDarkTheme, setHeatMode, SRC, updateU
 import { heatUrl, unitsUrl } from "../data";
 import { addPlaces, showPlaces } from "./places";
 import { circlePolygon } from "./geo";
-import type { Filters, UnitProps } from "../types";
+import { YEARS, type Filters, type UnitProps } from "../types";
 
 maplibregl.addProtocol("pmtiles", new Protocol().tile);
 
@@ -26,6 +26,8 @@ interface Props {
   selectedId: number | null;
   focusIds: number[];
   fly: FlyTarget | null;
+  /** frame these points, e.g. every branch of a brand */
+  fit: { points: [number, number][]; key: number } | null;
   pulse: number; // increments when the year bar steps, to replay the change pulse
   panelOpen: boolean;
   onSelect: (id: number | null, props?: UnitProps, at?: [number, number]) => void;
@@ -39,7 +41,7 @@ interface Props {
   onPlaceHover: (h: { x: number; y: number; name: string; kind: string } | null) => void;
 }
 
-const HOME: [number, number] = [114.1705, 22.3082]; // Jordan / Yau Ma Tei, around Portland Street
+const HOME: [number, number] = [114.1735, 22.2988]; // Tsim Sha Tsui east of Nathan Road, the densest streets
 
 export function MapView(p: Props) {
   const el = useRef<HTMLDivElement>(null);
@@ -215,7 +217,6 @@ export function MapView(p: Props) {
     siteIds.current = [];
     if (!p.site) {
       src?.setData({ type: "FeatureCollection", features: [] });
-      map.setFilter("unit-badge-comp", ["in", ["get", "id"], ["literal", []]]);
       return;
     }
     const { lon, lat, radius, comp, inside } = p.site;
@@ -226,13 +227,20 @@ export function MapView(p: Props) {
         { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [lon, lat] } },
       ],
     });
-    map.setFilter("unit-badge-comp", ["in", ["get", "id"], ["literal", [...comp]]]);
     const ids = allIds.current;
     for (const id of ids) {
       map.setFeatureState({ source: SRC, id }, { site: comp.has(id) ? "comp" : inside.has(id) ? "in" : "out" });
     }
     siteIds.current = ids;
   }, [p.site]);
+
+  // pins that show at every zoom: a site check's competitors, or every branch of a searched brand
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready.current || !map.getLayer("unit-badge-comp")) return;
+    const ids = p.site ? [...p.site.comp] : p.filters.brandIds ?? [];
+    map.setFilter("unit-badge-comp", ["all", ["!=", ["slice", ["get", "l"], p.year - YEARS[0], p.year - YEARS[0] + 1], "0"], ["in", ["get", "id"], ["literal", ids]]]);
+  }, [p.site, p.filters, p.year]);
 
   // fly to a searched or selected unit, keeping it clear of the side panel
   useEffect(() => {
@@ -247,6 +255,19 @@ export function MapView(p: Props) {
       essential: true,
     });
   }, [p.fly]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !p.fit?.points.length) return;
+    const b = new maplibregl.LngLatBounds();
+    for (const pt of p.fit.points) b.extend(pt);
+    const wide = window.innerWidth > 720;
+    map.fitBounds(b, {
+      padding: wide ? { top: 90, bottom: 130, left: 360, right: 60 } : { top: 200, bottom: 130, left: 30, right: 30 },
+      maxZoom: 16.6,
+      duration: 900,
+    });
+  }, [p.fit]);
 
   // one ring pulse on units whose count rose in the year just shown
   useEffect(() => {

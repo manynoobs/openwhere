@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadSearch } from "../data";
-import type { SearchRow } from "../types";
+import { normName, type SearchRow } from "../types";
 import { PinMark } from "./PinMark";
 import { Icon } from "./Icon";
 
-const norm = (s: string) => s.toLowerCase().replace(/[\s,.'’()\-/]+/g, "");
+const norm = normName;
 
 interface Props {
   district: string;

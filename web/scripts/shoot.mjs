@@ -81,6 +81,26 @@ const shots = {
     await p.click("text=Filters");
     await p.waitForTimeout(400);
     await p.screenshot({ path: `${out}/filters.png` });
+    // a brand: every branch lights up and the map frames them
+    await p.fill(".ftext", "McDonald");
+    await settle(p, 2200);
+    await p.screenshot({ path: `${out}/brand.png` });
+  },
+  async share() {
+    // a shared link opens straight on its shop, and a site check link on its spot
+    const p = await page({ width: 1440, height: 900 }, "light", 1);
+    await p.click(".examples button");
+    await settle(p, 1800);
+    const shop = await p.evaluate(() => location.hash);
+    await p.goto(url + "#site=114.17220,22.29850,200,japanese&mode=lifespan");
+    await p.reload();
+    await p.waitForFunction(() => window.__map?.loaded() && window.__map.getLayer("unit-badge"), null, { timeout: 30000 });
+    await settle(p, 2500);
+    await p.screenshot({ path: `${out}/share-site.png` });
+    await p.click("text=Show all");
+    await p.waitForTimeout(300);
+    await p.screenshot({ path: `${out}/site-all.png` });
+    console.log("hash after example:", shop, "| after site link:", await p.evaluate(() => location.hash));
   },
   async dark() {
     const p = await page({ width: 1440, height: 900 }, "dark");
