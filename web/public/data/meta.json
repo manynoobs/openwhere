@@ -1,0 +1,105 @@
+{
+ "district": "Yau Tsim",
+ "district_detail": "Tsim Sha Tsui, Jordan and Yau Ma Tei (FEHD district 61)",
+ "first_file": "2016-01-01",
+ "latest_file": "2026-11-01",
+ "files_good": 262,
+ "files_quarantined": 0,
+ "versions_in_archive": 3828,
+ "units": 2200,
+ "units_street_level": 1121,
+ "street_units_total": 1195,
+ "street_units_mapped": 1121,
+ "units_resolved": 1744,
+ "renewal_lag": {
+  "months": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   16,
+   18
+  ],
+  "n": [
+   14393,
+   2891,
+   868,
+   279,
+   87,
+   46,
+   19,
+   13,
+   4,
+   3,
+   1,
+   1,
+   1
+  ]
+ },
+ "gap_threshold_months": 6,
+ "generated": "2026-11-14",
+ "heat": {
+  "bounds": [
+   [
+    114.15136842357938,
+    22.325264527712086
+   ],
+   [
+    114.1948315764206,
+    22.325264527712086
+   ],
+   [
+    114.1948315764206,
+    22.28505348257674
+   ],
+   [
+    114.15136842357938,
+    22.28505348257674
+   ]
+  ],
+  "years": [
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "stops": [
+   [
+    0.2,
+    "#9ADBD3"
+   ],
+   [
+    0.3,
+    "#FFD36A"
+   ],
+   [
+    0.45,
+    "#FF9A45"
+   ],
+   [
+    0.58,
+    "#E5372B"
+   ],
+   [
+    0.75,
+    "#8E1B3A"
+   ]
+  ],
+  "sigma_m": 100.0,
+  "min_shops": 5
+ }
+}
