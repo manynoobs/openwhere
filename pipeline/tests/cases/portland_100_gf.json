@@ -1,0 +1,333 @@
+{
+ "address": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+ "first_file": "20160101-0821",
+ "latest_file": "20261101-1721",
+ "expect": {
+  "licence_numbers": 7,
+  "sign_histories": 4,
+  "store_changes": 3,
+  "change_years": [
+   2018,
+   2022,
+   2026
+  ],
+  "links": [
+   [
+    "3861816676",
+    "2261816422",
+    "prov_then_full_same_sign"
+   ],
+   [
+    "3861821733",
+    "2261821695",
+    "prov_then_full_same_sign"
+   ],
+   [
+    "3861825203",
+    "2261825101",
+    "prov_then_full_no_sign"
+   ]
+  ]
+ },
+ "licences": [
+  {
+   "licno": "2261810691",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20160101-0821",
+   "last_snap": "20180606-1008",
+   "first_not_seen": "20180701-1002",
+   "first_seen": "2016-01-01",
+   "last_seen": "2018-06-06",
+   "expdate_last": "2019-03-17",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "八妹雞煲",
+     "tc": "八妹雞煲",
+     "first_seen": "2016-01-01",
+     "last_seen": "2018-06-06"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地鋪",
+     "first_seen": "2016-01-01"
+    }
+   ],
+   "src": [
+    [
+     "20160101-0821",
+     "20180606-1008"
+    ]
+   ],
+   "sign_set": [
+    "八妹雞煲"
+   ]
+  },
+  {
+   "licno": "3861816676",
+   "prefix": "38",
+   "dist": "61",
+   "first_snap": "20180801-1004",
+   "last_snap": "20190101-0944",
+   "first_not_seen": "20190204-0948",
+   "first_seen": "2018-08-01",
+   "last_seen": "2019-01-01",
+   "expdate_last": "2019-01-15",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "聚好味",
+     "tc": "聚好味",
+     "first_seen": "2018-08-01",
+     "last_seen": "2019-01-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地舖",
+     "first_seen": "2018-08-01"
+    }
+   ],
+   "src": [
+    [
+     "20180801-1004",
+     "20190101-0944"
+    ]
+   ],
+   "sign_set": [
+    "聚好味"
+   ]
+  },
+  {
+   "licno": "2261816422",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20190204-0948",
+   "last_snap": "20220601-1152",
+   "first_not_seen": "20220701-1033",
+   "first_seen": "2019-02-04",
+   "last_seen": "2022-06-01",
+   "expdate_last": "2022-12-30",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "聚好味",
+     "tc": "聚好味",
+     "first_seen": "2019-02-04",
+     "last_seen": "2022-06-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地舖",
+     "first_seen": "2019-02-04"
+    }
+   ],
+   "src": [
+    [
+     "20190204-0948",
+     "20220601-1152"
+    ]
+   ],
+   "sign_set": [
+    "聚好味"
+   ]
+  },
+  {
+   "licno": "3861821733",
+   "prefix": "38",
+   "dist": "61",
+   "first_snap": "20220701-1033",
+   "last_snap": "20221201-1152",
+   "first_not_seen": "20230101-1033",
+   "first_seen": "2022-07-01",
+   "last_seen": "2022-12-01",
+   "expdate_last": "2022-12-20",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "YANG CHENG CAFE",
+     "tc": "羊城冰室",
+     "first_seen": "2022-07-01",
+     "last_seen": "2022-12-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地舖",
+     "first_seen": "2022-07-01"
+    }
+   ],
+   "src": [
+    [
+     "20220701-1033",
+     "20221201-1152"
+    ]
+   ],
+   "sign_set": [
+    "YANG CHENG CAFE",
+    "羊城冰室"
+   ]
+  },
+  {
+   "licno": "2261821695",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20230301-1047",
+   "last_snap": "20250201-1106",
+   "first_not_seen": "20250301-1057",
+   "first_seen": "2023-03-01",
+   "last_seen": "2025-02-01",
+   "expdate_last": "2025-02-09",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "YANG CHENG CAFE",
+     "tc": "羊城冰室",
+     "first_seen": "2023-03-01",
+     "last_seen": "2025-02-01"
+    }
+   ],
+   "gaps": [
+    {
+     "from": "2024-03-02",
+     "to": "2024-04-01"
+    }
+   ],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地舖",
+     "first_seen": "2023-03-01"
+    }
+   ],
+   "src": [
+    [
+     "20230301-1047",
+     "20240201-1116"
+    ],
+    [
+     "20240401-1048",
+     "20250201-1106"
+    ]
+   ],
+   "sign_set": [
+    "YANG CHENG CAFE",
+    "羊城冰室"
+   ]
+  },
+  {
+   "licno": "3861825203",
+   "prefix": "38",
+   "dist": "61",
+   "first_snap": "20260401-1251",
+   "last_snap": "20260901-1156",
+   "first_not_seen": "20261001-1126",
+   "first_seen": "2026-04-01",
+   "last_seen": "2026-09-01",
+   "expdate_last": "2026-09-08",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "No Record",
+     "tc": "沒有記錄",
+     "first_seen": "2026-04-01",
+     "last_seen": "2026-09-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地下",
+     "first_seen": "2026-04-01"
+    }
+   ],
+   "src": [
+    [
+     "20260401-1251",
+     "20260901-1156"
+    ]
+   ],
+   "sign_set": [
+    "No Record",
+    "沒有記錄"
+   ]
+  },
+  {
+   "licno": "2261825101",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20261001-1126",
+   "last_snap": "20261101-1721",
+   "first_not_seen": null,
+   "first_seen": "2026-10-01",
+   "last_seen": "2026-11-01",
+   "expdate_last": "2027-08-27",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "喜洋洋魚湯飯專門店",
+     "tc": "喜洋洋魚湯飯專門店",
+     "first_seen": "2026-10-01",
+     "last_seen": "2026-11-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 100 PORTLAND STREET, YAU MA TEI, KOWLOON",
+     "tc": "九龍油麻地砵蘭街100號地下",
+     "first_seen": "2026-10-01"
+    }
+   ],
+   "src": [
+    [
+     "20261001-1126",
+     "20261101-1721"
+    ]
+   ],
+   "sign_set": [
+    "喜洋洋魚湯飯專門店"
+   ]
+  }
+ ]
+}

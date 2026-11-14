@@ -1,0 +1,295 @@
+{
+ "address": "GROUND FLOOR, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+ "first_file": "20160101-0821",
+ "latest_file": "20261101-1721",
+ "expect": {
+  "licence_numbers": 6,
+  "sign_histories": 5,
+  "store_changes": 4,
+  "change_years": [
+   2018,
+   2020,
+   2024,
+   2025
+  ],
+  "links": [
+   [
+    "3861819019",
+    "2261818905",
+    "prov_then_full_no_sign"
+   ]
+  ]
+ },
+ "licences": [
+  {
+   "licno": "2261160578",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20160101-0821",
+   "last_snap": "20180301-1040",
+   "first_not_seen": "20180401-1029",
+   "first_seen": "2016-01-01",
+   "last_seen": "2018-03-01",
+   "expdate_last": "2018-06-30",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "明苑粥麵小廚茶餐廳",
+     "tc": "明苑粥麵小廚茶餐廳",
+     "first_seen": "2016-01-01",
+     "last_seen": "2018-03-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "GROUND FLOOR, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A號地下",
+     "first_seen": "2016-01-01"
+    }
+   ],
+   "src": [
+    [
+     "20160101-0821",
+     "20180301-1040"
+    ]
+   ],
+   "sign_set": [
+    "明苑粥麵小廚茶餐廳"
+   ]
+  },
+  {
+   "licno": "3861816898",
+   "prefix": "38",
+   "dist": "61",
+   "first_snap": "20181001-1003",
+   "last_snap": "20190301-1408",
+   "first_not_seen": "20190401-1423",
+   "first_seen": "2018-10-01",
+   "last_seen": "2019-03-01",
+   "expdate_last": "2019-03-03",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "FISHERMAN",
+     "tc": "漁民麵館",
+     "first_seen": "2018-10-01",
+     "last_seen": "2019-03-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A 地下",
+     "first_seen": "2018-10-01"
+    }
+   ],
+   "src": [
+    [
+     "20181001-1003",
+     "20190301-1408"
+    ]
+   ],
+   "sign_set": [
+    "FISHERMAN",
+    "漁民麵館"
+   ]
+  },
+  {
+   "licno": "3861819019",
+   "prefix": "38",
+   "dist": "61",
+   "first_snap": "20200501-0955",
+   "last_snap": "20201001-0934",
+   "first_not_seen": "20201101-0927",
+   "first_seen": "2020-05-01",
+   "last_seen": "2020-10-01",
+   "expdate_last": "2020-10-21",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "No Record",
+     "tc": "沒有記錄",
+     "first_seen": "2020-05-01",
+     "last_seen": "2020-10-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A號地下",
+     "first_seen": "2020-05-01"
+    }
+   ],
+   "src": [
+    [
+     "20200501-0955",
+     "20201001-0934"
+    ]
+   ],
+   "sign_set": [
+    "No Record",
+    "沒有記錄"
+   ]
+  },
+  {
+   "licno": "2261818905",
+   "prefix": "22",
+   "dist": "61",
+   "first_snap": "20201101-0927",
+   "last_snap": "20240601-1055",
+   "first_not_seen": "20240701-1105",
+   "first_seen": "2020-11-01",
+   "last_seen": "2024-06-01",
+   "expdate_last": "2024-10-06",
+   "lic_types": [
+    "RL"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "Fukuoka Hambageu",
+     "tc": "福岡漢堡扒",
+     "first_seen": "2020-11-01",
+     "last_seen": "2024-06-01"
+    }
+   ],
+   "gaps": [
+    {
+     "from": "2022-11-01",
+     "to": "2022-12-01"
+    }
+   ],
+   "addresses": [
+    {
+     "en": "G/F, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A號地下",
+     "first_seen": "2020-11-01"
+    }
+   ],
+   "src": [
+    [
+     "20201101-0927",
+     "20221001-1022"
+    ],
+    [
+     "20221201-1152",
+     "20240601-1055"
+    ]
+   ],
+   "sign_set": [
+    "Fukuoka Hambageu",
+    "福岡漢堡扒"
+   ]
+  },
+  {
+   "licno": "3961811627",
+   "prefix": "39",
+   "dist": "61",
+   "first_snap": "20240801-1051",
+   "last_snap": "20250101-1052",
+   "first_not_seen": "20250201-1106",
+   "first_seen": "2024-08-01",
+   "last_seen": "2025-01-01",
+   "expdate_last": "2025-01-11",
+   "lic_types": [
+    "RR"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "九運來粉麵世家",
+     "tc": "九運來粉麵世家",
+     "first_seen": "2024-08-01",
+     "last_seen": "2025-01-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A號地下",
+     "first_seen": "2024-08-01"
+    }
+   ],
+   "src": [
+    [
+     "20240801-1051",
+     "20250101-1052"
+    ]
+   ],
+   "sign_set": [
+    "九運來粉麵世家"
+   ]
+  },
+  {
+   "licno": "3161810981",
+   "prefix": "31",
+   "dist": "61",
+   "first_snap": "20250201-1106",
+   "last_snap": "20261101-1721",
+   "first_not_seen": null,
+   "first_seen": "2025-02-01",
+   "last_seen": "2026-11-01",
+   "expdate_last": "2027-01-14",
+   "lic_types": [
+    "RR"
+   ],
+   "endorsements": [],
+   "info_last": [],
+   "signs": [
+    {
+     "en": "飽飽雲吞麵",
+     "tc": "飽飽雲吞麵",
+     "first_seen": "2025-02-01",
+     "last_seen": "2025-06-01"
+    },
+    {
+     "en": "WU ZHI JIAN BEEF NOODLE",
+     "tc": "五指間蘭州牛肉麵",
+     "first_seen": "2025-07-01",
+     "last_seen": "2026-11-01"
+    }
+   ],
+   "gaps": [],
+   "addresses": [
+    {
+     "en": "G/F, 11A HAU FOOK STREET, TSIM SHA TSUI, KOWLOON",
+     "tc": "九龍尖沙咀厚福街11A號地下",
+     "first_seen": "2025-02-01"
+    }
+   ],
+   "src": [
+    [
+     "20250201-1106",
+     "20250601-1058"
+    ],
+    [
+     "20250701-1249",
+     "20261101-1721"
+    ]
+   ],
+   "sign_set": [
+    "WU ZHI JIAN BEEF NOODLE",
+    "五指間蘭州牛肉麵",
+    "飽飽雲吞麵"
+   ]
+  }
+ ]
+}
