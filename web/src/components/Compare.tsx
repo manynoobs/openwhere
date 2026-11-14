@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadUnit, monthYear, signNames, TYPE_LABEL } from "../data";
+import { loadUnit, monthYear, signNames } from "../data";
 import { STEPS, stepOf } from "../ramp";
 import { YEARS, type SignHistory, type UnitDetail } from "../types";
 import { Icon } from "./Icon";
@@ -69,10 +69,6 @@ export function CompareSheet({ ids, facts, onClose, onUnpin, onOpen }: Props) {
         <h2>Compare</h2>
         <span className="sheet-count num">{ids.length} of 3 pinned</span>
         <span className="sheet-spacer" />
-        <button className="btn" onClick={() => window.print()}>
-          <Icon name="print" size={16} />
-          Print
-        </button>
         <button className="close" aria-label="Close compare" onClick={onClose}>
           <Icon name="close" size={16} />
         </button>
@@ -101,7 +97,6 @@ export function CompareSheet({ ids, facts, onClose, onUnpin, onOpen }: Props) {
 }
 
 const rivalsWord = (f: CompareFacts) => `${f.cuisine ? `${f.cuisine} ` : ""}${f.rivals === 1 ? "shop" : "shops"} within 200 m`;
-const rivalsText = (f: CompareFacts) => `${f.rivals} ${rivalsWord(f)}`;
 
 function Lane({ u, f, onOpen, onUnpin }: { u: UnitDetail; f?: CompareFacts; onOpen: () => void; onUnpin: () => void }) {
   const hs = u.sign_histories;
@@ -219,65 +214,6 @@ function Lane({ u, f, onOpen, onUnpin }: { u: UnitDetail; f?: CompareFacts; onOp
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/** What the browser prints: the pinned units, each fact with its source line. */
-export function PrintSheet({ ids, facts }: { ids: number[]; facts: Record<number, CompareFacts> }) {
-  const units = usePinned(ids);
-  if (!units.length) return null;
-  return (
-    <div className="print-only">
-      <h1>OpenWhere — comparison</h1>
-      {units.map((u) => (
-        <section key={u.id}>
-          <h2>
-            {shortAddress(u.address_en)} {u.address_tc ? `· ${u.address_tc}` : ""} — {u.store_changes} store change
-            {u.store_changes === 1 ? "" : "s"} since 2016
-          </h2>
-          {facts[u.id] && (
-            <p>
-              {[
-                facts[u.id].listed ? `Price per person: ${facts[u.id].price ?? "no data"} (OpenRice)` : null,
-                `Nearest MTR exit: ${facts[u.id].mtr} m, ${facts[u.id].mtrx} (OpenStreetMap, straight line)`,
-                facts[u.id].life != null ? `New shops nearby still listed after 3 years: ${Math.round(facts[u.id].life! * 100)}% (FEHD lists)` : null,
-                `${rivalsText(facts[u.id])}, listed now`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          )}
-          <table>
-            <thead>
-              <tr>
-                <th>Sign</th>
-                <th>Listed</th>
-                <th>Licence type</th>
-                <th>Source (licence no., first and last file)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {u.sign_histories.map((h, i) => (
-                <tr key={i}>
-                  <td>{h.signs.map(signNames).filter((n) => n.length).map((n) => n.join(" / ")).join(" → ") || "Sign not recorded"}</td>
-                  <td>
-                    {h.listed_before_2016 ? "before 2016" : monthYear(h.first_seen)} – {h.listed_in_latest_snapshot ? "now" : monthYear(h.last_seen)}
-                  </td>
-                  <td>{h.lic_types.map((t) => TYPE_LABEL[t] ?? t).join(", ")}</td>
-                  <td>
-                    {h.licences.map((l) => `${l.licno} (${l.src[0][0].slice(0, 8)}–${l.src[l.src.length - 1][1].slice(0, 8)})`).join("; ")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-      <footer>
-        Reconstructed from FEHD restaurant licence lists, monthly archived files via DATA.GOV.HK. Not a record of ownership,
-        tenancy or business performance.
-      </footer>
     </div>
   );
 }

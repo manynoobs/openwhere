@@ -41,7 +41,7 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta, plac
     <div className="topright" ref={box}>
       <div className="segmented glass" role="group" aria-label="Map mode">
         <button aria-pressed={!heat} onClick={() => setHeat(false)}>Shops</button>
-        <button aria-pressed={heat} onClick={() => setHeat(true)} title="Share of new shops still listed after three years">Shop lifespan</button>
+        <button aria-pressed={heat} onClick={() => setHeat(true)} title="Share of new shops no longer listed within three years">Shop lifespan</button>
       </div>
       <button className={`iconbtn glass ${siteOpen ? "on" : ""}`} aria-pressed={siteOpen} onClick={() => setSiteOpen(!siteOpen)}>
         <Icon name="target" />
@@ -169,8 +169,8 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
         A <b>store change</b> is a shop with a different sign listed at an address after the previous one stopped being listed.
       </p>
       <p>
-        <b>Shop lifespan</b> shows the share of shops that opened here since 2016 and were still listed three years later,
-        counting shops that are still open as lasting at least that long. Green means shops last; red means they don’t. The
+        <b>Shop lifespan</b> shows the share of shops that opened here since 2016 and were no longer listed three years later,
+        counting shops that are still open as lasting at least that long. Red means high turnover; green means low. The
         colour fades where it rests on few shops.
       </p>
       <p>

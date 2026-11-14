@@ -15,7 +15,7 @@ It is a reference for anyone in the food business, from a single noodle shop to 
 ## What you can do with it
 
 - **Scan a district.** Every shopfront that has held a restaurant licence since 2016 is a pin with one number, **store changes since 2016**. The pin's tip marks the shop. Green means the same sign the whole time, rising through lime, yellow and orange to red at four or more changes.
-- **See how long shops last.** *Shop lifespan* colours the streets by the share of new shops still listed three years after they opened. Yellow is the district average (75%), green is better and red is worse. Paler colour means the estimate rests on fewer shops.
+- **See how long shops last.** *Shop lifespan* colours the streets by turnover: the share of new shops no longer listed three years after they opened. Red means high turnover, green means low, and yellow is the district average (25%). Paler colour means the estimate rests on fewer shops.
 - **Check a site.** *Site check* lets you click any spot, choose your cuisine and drag the radius (50 to 500 m). You get:
   - same-cuisine competitors listed now, nearest first, highlighted on the map;
   - **how that count compares** with what a typical restaurant in the district has around it ("More than usual", "Fewer than usual");
@@ -36,7 +36,7 @@ It is a reference for anyone in the food business, from a single noodle shop to 
   Below that, every past shop at the address is one line, and the licence records are one tap away.
 - **Filter.** Narrow the map by cuisine, price per person, licence type, outside seating or number of store changes. Type a brand (`McDonald`, `譚仔`) to see every branch at once, on any floor.
 - **Play ten years.** The year bar replays 2016 to 2026, and units whose count rises that year pulse.
-- **Compare and print.** Pin up to three units to see their signs on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Each lane also gives the price per person, the distance to the MTR, how long new shops nearby last, and how many shops of the same cuisine are within 200 m. Then print a sheet that cites its source for every row.
+- **Compare.** Pin up to three units to see their signs on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Each lane also gives the price per person, the distance to the MTR, how long new shops nearby last, and how many shops of the same cuisine are within 200 m.
 - **Share a view.** The address bar always holds the open shop or site check, so a link reopens exactly what you were looking at.
 
 ![Site check: Japanese competitors within 200 m](docs/site.png)
@@ -88,7 +88,7 @@ Only shops that opened after January 2016 are used, so each one's start date is 
 
 - The colour is the share still listed three years after opening.
 - Across the district that share is **75%**, and half of new shops are still listed after about **7¼ years**.
-- The colour scale is centred on that 75%: yellow is the district average, 60% and below is red, 90% and above is green.
+- The legend reads this as turnover, the share no longer listed within three years: yellow is the district average (25%), 40% and above is red, 10% and below is green.
 - Colour fades toward white as the number of nearby shops falls from 15 to 3. Below 3 shops nothing is drawn.
 
 ### Cuisine

@@ -4,7 +4,7 @@ import { Search } from "./components/Search";
 import { Controls } from "./components/Controls";
 import { Legend, YearBar } from "./components/Bottom";
 import { UnitPanel } from "./components/UnitPanel";
-import { CompareSheet, PrintSheet } from "./components/Compare";
+import { CompareSheet } from "./components/Compare";
 import { Icon } from "./components/Icon";
 import { PinMark } from "./components/PinMark";
 import { LogoMark } from "./components/Logo";
@@ -23,7 +23,7 @@ const COMPARE_RADIUS = 200; // metres, for the same-cuisine count in Compare
 
 // one-click examples under the search box; shops are found by address so a data rebuild can't break them
 const EXAMPLE_SHOPS = [
-  { label: "100 Portland St", start: "G/F, 100 PORTLAND STREET" },
+  { label: "3B Waterloo Rd", start: "G/F, NO.3B WATERLOO ROAD" },
   { label: "11A Hau Fook", start: "GROUND FLOOR, 11A HAU FOOK STREET" },
 ];
 const EXAMPLE_BRAND = "McDonald’s";
@@ -446,7 +446,6 @@ export default function App() {
           </div>
         </div>
       )}
-      <PrintSheet ids={pinned} facts={compareFacts} />
     </div>
   );
 }
@@ -486,7 +485,7 @@ function Tooltip({
     return (
       <div className="tooltip glass num" style={{ left: hover.x, top: hover.y }}>
         <div>
-          <b>{Math.round(h.v * 100)}% of new shops here last 3 years</b>
+          <b>{Math.round((1 - h.v) * 100)}% of new shops here are no longer listed within 3 years</b>
           <div className="muted">
             {h.median != null ? `Half are gone within ${h.median.toFixed(1)} years` : "More than half are still listed"} · based on about{" "}
             {h.n} shops

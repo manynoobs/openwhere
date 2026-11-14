@@ -11,7 +11,6 @@ const paths = {
   target: <><circle cx="10" cy="10" r="6.5" /><circle cx="10" cy="10" r="2" /><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" /></>,
   places: <><path d="M10 17s-5-4.6-5-8.5a5 5 0 0 1 10 0c0 3.9-5 8.5-5 8.5z" /><circle cx="10" cy="8.5" r="1.8" /></>,
   pin: <><path d="M10 17v-4.2" /><path d="M6.2 12.8h7.6l-1.3-3.1V4.5h-5v5.2z" /></>,
-  print: <><path d="M6 7.5V3.5h8v4" /><rect x="3.5" y="7.5" width="13" height="6.5" rx="1.5" /><path d="M6 12h8v4.5H6z" /></>,
   compare: <><rect x="3.5" y="4" width="13" height="3" rx="1" /><rect x="3.5" y="8.5" width="9" height="3" rx="1" /><rect x="3.5" y="13" width="11" height="3" rx="1" /></>,
 };
 

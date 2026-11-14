@@ -303,20 +303,6 @@ details.records[open] summary svg { transform: rotate(90deg); }
 .about dt { color: var(--ink-2); }
 .about dd { margin: 0; font-weight: 600; text-align: right; }
 
-/* print: a sourced comparison sheet, nothing else */
-.print-only { display: none; }
-@media print {
-  body { overflow: visible; background: #fff; color: #000; }
-  #root > *:not(.print-only) { display: none !important; }
-  .print-only { display: block; font-size: 11pt; padding: 0 8mm; }
-  .print-only h1 { font-size: 16pt; margin: 0 0 4mm; }
-  .print-only section { break-inside: avoid; margin-bottom: 7mm; }
-  .print-only h2 { font-size: 12.5pt; margin: 0 0 2mm; }
-  .print-only table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
-  .print-only th, .print-only td { text-align: left; padding: 1.2mm 2mm 1.2mm 0; border-bottom: 0.3pt solid #999; vertical-align: top; }
-  .print-only footer { margin-top: 6mm; font-size: 9pt; color: #444; }
-}
-
 @media (max-width: 720px) {
   .brand .where { display: none; }
   /* phone: mode switch and buttons sit in a row under the search card */

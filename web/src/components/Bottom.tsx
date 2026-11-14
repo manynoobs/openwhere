@@ -4,17 +4,20 @@ import { Icon } from "./Icon";
 
 export function Legend({ heat, stops, district, year }: { heat: boolean; stops: [number, string][] | null; district?: number; year: number }) {
   if (heat && stops) {
-    const lo = stops[0][0];
-    const hi = stops[stops.length - 1][0];
-    const grad = `linear-gradient(90deg, ${stops.map(([v, c]) => `${c} ${((v - lo) / (hi - lo)) * 100}%`).join(", ")})`;
+    // the surface holds the share still listed after three years; the legend reads it as turnover,
+    // so it runs green (few new shops gone) to red (many gone), the same way as the pins
+    const turnover = [...stops].reverse().map(([v, c]) => [1 - v, c] as const);
+    const lo = turnover[0][0];
+    const hi = turnover[turnover.length - 1][0];
+    const grad = `linear-gradient(90deg, ${turnover.map(([v, c]) => `${c} ${((v - lo) / (hi - lo)) * 100}%`).join(", ")})`;
     return (
       <div className="legend glass" aria-live="polite">
-        <div className="cap">New shops still listed after 3 years</div>
+        <div className="cap">New shops no longer listed within 3 years</div>
         <div className="gradient" style={{ background: grad }} />
         <div className="gticks num">
-          <span>{Math.round(lo * 100)}%</span>
-          {district != null && <span>{Math.round(district * 100)}% district average</span>}
-          <span>{Math.round(hi * 100)}%</span>
+          <span>{Math.round(lo * 100)}% low</span>
+          {district != null && <span>{Math.round((1 - district) * 100)}% average</span>}
+          <span>{Math.round(hi * 100)}% high</span>
         </div>
         <div className="key">
           <span>Paler colour = fewer shops to go on</span>
