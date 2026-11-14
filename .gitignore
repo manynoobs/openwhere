@@ -19,3 +19,4 @@ web/scripts/_*.mjs
 data/cuisine.json
 data/cuisine_unmatched.json
 data/osm_facilities.json
+data/openrice/

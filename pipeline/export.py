@@ -67,6 +67,12 @@ def main():
 
     cuisine_path = ROOT / "data" / "cuisine.json"
     cuisine = json.load(open(cuisine_path)) if cuisine_path.exists() else {}
+    # OpenRice price band and cuisine for matched shops (pipeline/openrice.py); only these two
+    # facts reach the app, never OpenRice's own names, addresses or text
+    or_path = ROOT / "data" / "openrice" / "matches.json"
+    openrice = json.load(open(or_path)) if or_path.exists() else {}
+    from openrice import PRICE_BANDS, group_for
+    bands = list(PRICE_BANDS.values())
     features, search = [], []
     for i, r in enumerate(recs, start=1):
         sl = 1 if r["street_level"] else 0
@@ -84,9 +90,17 @@ def main():
             "seat": 1 if r["outside_seating_ever"] else 0,
             "sl": sl,
             "d": r["dist"],
-            # cuisine guessed from the current sign (pipeline/cuisine.py); only for shops listed now
-            "cu": cuisine.get(r["unit_id"], "") if r["listed_now"] else "",
+            # cuisine group for shops listed now: OpenRice's where matched, else guessed from the sign
+            "cu": "",
+            # price band index into meta.price_bands, -1 = no data
+            "pr": -1,
         }
+        if r["listed_now"]:
+            guessed = cuisine.get(r["unit_id"], "")
+            m = openrice.get(r["unit_id"])
+            props["cu"] = group_for(m, guessed) if m else guessed
+            if m and m["price"] in bands:
+                props["pr"] = bands.index(m["price"])
         features.append({"type": "Feature", "id": i,
                          "geometry": {"type": "Point", "coordinates": [round(r["lon"], 6), round(r["lat"], 6)]},
                          "properties": props})
@@ -96,6 +110,8 @@ def main():
         detail = {k: v for k, v in r.items() if k not in ("geocode_score",)}
         detail["id"] = i
         detail["cuisine"] = props["cu"] or None
+        m = openrice.get(r["unit_id"]) if r["listed_now"] else None
+        detail["openrice"] = {"price": m["price"], "cuisines": m["cuisines"]} if m else None
         with open(OUT / "units" / f"{i}.json", "w") as f:
             json.dump(detail, f, ensure_ascii=False, separators=(",", ":"))
 
@@ -128,6 +144,8 @@ def main():
         "units_resolved": sum(1 for f in features if f["properties"]["res"] == "r"),
         "renewal_lag": {"months": [m for m, _ in lag], "n": [n for _, n in lag]},
         "gap_threshold_months": 6,
+        "price_bands": bands,
+        "openrice_matched": sum(1 for f in features if f["properties"]["pr"] >= 0),
         "generated": date.today().isoformat(),
     })
     json.dump(meta, open(meta_path, "w"), ensure_ascii=False, indent=1)

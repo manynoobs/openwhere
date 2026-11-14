@@ -93,5 +93,14 @@
   "new_histories": 907,
   "min_shops": 3.0,
   "full_shops": 15.0
- }
+ },
+ "price_bands": [
+  "Under $50",
+  "$51–100",
+  "$101–200",
+  "$201–400",
+  "$401–800",
+  "Over $800"
+ ],
+ "openrice_matched": 963
 }

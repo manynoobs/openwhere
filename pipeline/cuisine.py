@@ -13,7 +13,7 @@ import re
 from ingest import ROOT
 
 LABELS = {
-    "cha_chaan_teng": "Cha chaan teng & café",
+    "cha_chaan_teng": "Hong Kong style & cha chaan teng",
     "noodles": "Noodles & congee",
     "chinese": "Chinese",
     "japanese": "Japanese",
