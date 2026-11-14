@@ -16,3 +16,6 @@ bin/
 playwright-report/
 web/scripts/_*.mjs
 .claude/
+data/cuisine.json
+data/cuisine_unmatched.json
+data/osm_facilities.json

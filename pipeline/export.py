@@ -1,6 +1,7 @@
 """Write the files the map app loads, for the demo district only.
 
-    python pipeline/export.py
+    python pipeline/export.py        # after histories.py and cuisine.py;
+                                     # then run facilities.py and heat.py
 
 web/public/data/
   units.geojson      one point per unit, slim properties (see web/src/types.ts UnitProps)
@@ -64,6 +65,8 @@ def main():
         shutil.rmtree(OUT / "units", ignore_errors=True)
     (OUT / "units").mkdir(parents=True, exist_ok=True)
 
+    cuisine_path = ROOT / "data" / "cuisine.json"
+    cuisine = json.load(open(cuisine_path)) if cuisine_path.exists() else {}
     features, search = [], []
     for i, r in enumerate(recs, start=1):
         sl = 1 if r["street_level"] else 0
@@ -81,6 +84,8 @@ def main():
             "seat": 1 if r["outside_seating_ever"] else 0,
             "sl": sl,
             "d": r["dist"],
+            # cuisine guessed from the current sign (pipeline/cuisine.py); only for shops listed now
+            "cu": cuisine.get(r["unit_id"], "") if r["listed_now"] else "",
         }
         features.append({"type": "Feature", "id": i,
                          "geometry": {"type": "Point", "coordinates": [round(r["lon"], 6), round(r["lat"], 6)]},
@@ -90,6 +95,7 @@ def main():
                        round(r["lon"], 6), round(r["lat"], 6)])
         detail = {k: v for k, v in r.items() if k not in ("geocode_score",)}
         detail["id"] = i
+        detail["cuisine"] = props["cu"] or None
         with open(OUT / "units" / f"{i}.json", "w") as f:
             json.dump(detail, f, ensure_ascii=False, separators=(",", ":"))
 
