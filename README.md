@@ -6,6 +6,8 @@
 - which competitors of the same cuisine are already nearby;
 - what draws people to the area.
 
+**Live demo: https://manynoobs.github.io/openwhere/** (nothing to install; works on a phone too)
+
 ![OpenWhere: Yau Tsim with numbered pins](docs/desktop.png)
 
 It is a reference for anyone in the food business, from a single noodle shop to a chain's site-selection team. It reports what the records show. It doesn't predict whether a business will do well, and it never says why a shop left.
@@ -13,12 +15,13 @@ It is a reference for anyone in the food business, from a single noodle shop to 
 ## What you can do with it
 
 - **Scan a district.** Every shopfront that has held a restaurant licence since 2016 is a pin with one number, **store changes since 2016**. The pin's tip marks the shop. Green means the same sign the whole time, rising through lime, yellow and orange to red at four or more changes.
-- **See how long shops last.** *Shop lifespan* colours the streets by the share of new shops still listed three years after they opened. Green means shops last and red means they don't. Paler colour means the estimate rests on fewer shops.
+- **See how long shops last.** *Shop lifespan* colours the streets by the share of new shops still listed three years after they opened. Yellow is the district average (75%), green is better and red is worse. Paler colour means the estimate rests on fewer shops.
 - **Check a site.** *Site check* lets you click any spot, choose your cuisine and drag the radius (50 to 500 m). You get:
   - same-cuisine competitors listed now, nearest first, highlighted on the map;
+  - **how that count compares** with what a typical restaurant in the district has around it ("More than usual", "Fewer than usual");
   - **what they charge per person**, as a bar per OpenRice price band;
   - all restaurants nearby;
-  - the local 3-year survival rate;
+  - the local 3-year survival rate, beside the district's;
   - units that held a licence before but have none now;
   - the licence mix (general or light refreshment);
   - the nearest MTR exit;
@@ -31,8 +34,10 @@ It is a reference for anyone in the food business, from a single noodle shop to 
   - whether a full kitchen is on record.
 
   Below that, every past shop at the address is one line, and the licence records are one tap away.
+- **Filter.** Narrow the map by cuisine, price per person, licence type, outside seating or number of store changes. Type a brand (`McDonald`, `譚仔`) to see every branch at once, on any floor.
 - **Play ten years.** The year bar replays 2016 to 2026, and units whose count rises that year pulse.
-- **Compare and print.** Pin up to three units to see their signs on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Then print a sheet that cites its source for every row.
+- **Compare and print.** Pin up to three units to see their signs on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Each lane also gives the price per person, the distance to the MTR, how long new shops nearby last, and how many shops of the same cuisine are within 200 m. Then print a sheet that cites its source for every row.
+- **Share a view.** The address bar always holds the open shop or site check, so a link reopens exactly what you were looking at.
 
 ![Site check: Japanese competitors within 200 m](docs/site.png)
 
@@ -83,16 +88,18 @@ Only shops that opened after January 2016 are used, so each one's start date is 
 
 - The colour is the share still listed three years after opening.
 - Across the district that share is **75%**, and half of new shops are still listed after about **7¼ years**.
-- Locally it runs from about 65% (red) to 90% (green).
+- The colour scale is centred on that 75%: yellow is the district average, 60% and below is red, 90% and above is green.
 - Colour fades toward white as the number of nearby shops falls from 15 to 3. Below 3 shops nothing is drawn.
 
 ### Cuisine
 
 The licence lists carry no cuisine, so it is guessed from each current shop's sign, in two passes:
 1. Keyword rules on the Chinese and English names labelled 857 shops.
-2. I read the remaining 730 names by hand (`data/cuisine_manual.json`).
+2. The remaining 730 names were labelled one at a time by Claude, the AI assistant this project was built with, reading each Chinese and English sign (`data/cuisine_manual.json`). No keyword rule is involved in this pass, and no person checked all 730.
 
-That gives 1,385 of the 1,587 shops listed now (87%) a cuisine. The other 202 stay "unclear from the name" rather than being guessed. A spot check of 45 rule labels found 41 right; the patterns behind the misses were then added. The app always says the cuisine was guessed from the name.
+From the name alone, 1,385 of the 1,587 shops listed now (87%) get a cuisine. The other 202 stay "unclear from the name" rather than being guessed. A spot check of 45 rule labels found 41 right; the patterns behind the misses were then added.
+
+OpenRice (next section) then replaces the guess where a shop has a matched listing, which also fills in 75 of those 202. That is why the table below says **1,460 of 1,587 (92%)**: 87% from the name, 92% once OpenRice is added, 127 still unclear. Where the cuisine comes only from the name, the app says so.
 
 ### Price and cuisine from OpenRice
 
@@ -103,7 +110,7 @@ A teammate collected 4,414 OpenRice listings (name, address, coordinates, price 
 
 Each listing and each shop is used once, best match first.
 
-Every match with a weaker name score was read by hand, and 12 were rejected. In the end, **963 of the 1,562 named shops listed now (62%) have an OpenRice price and cuisine**; a random sample of 35 strong matches was all correct. Shops without a match say "No data". OpenRice's cuisine replaces the guess from the name, except for dish types OpenRice doesn't record (hot pot, bar, café, noodles, fast food).
+Every match with a weaker name score was reviewed one at a time (by Claude, not by a person), and 12 were rejected. In the end, **963 of the 1,562 named shops listed now (62%) have an OpenRice price and cuisine**; a random sample of 35 strong matches was all correct. Shops without a match say "No data". OpenRice's cuisine replaces the guess from the name, except for dish types OpenRice doesn't record (hot pot, bar, café, noodles, fast food).
 
 OpenRice's terms restrict copying, so the raw listings stay out of this repository (`data/openrice/` is ignored). Only the matched price band and cuisine labels reach the app, credited to OpenRice.
 
@@ -166,13 +173,21 @@ python heat.py                         # shop lifespan surface
 
 ## How it was built
 
-This was built in one overnight session for a hackathon, and the commit history follows the build step by step:
+This was built in one overnight session for a hackathon, working with Claude Code, and the commit history follows the build step by step:
 1. The data pipeline: download, spans, address resolution, link rules.
 2. The choice of district.
 3. The map app.
 4. Rounds of fixes found by screenshotting the running app.
 5. A design review, a choice between four rendered marker concepts, and a compare redesign.
 6. Site check, shop lifespan, cuisine and places.
+7. OpenRice prices, and a shop card rebuilt around what a future tenant needs.
+8. A full review before submission: filters for cuisine, price and brand, a benchmark for the site check, shareable links, tests and this live demo.
+
+The link rules have tests. Two of them replay the real licence records of the hand-checked shopfronts above:
+
+```bash
+cd pipeline && python -m unittest discover tests
+```
 
 `PRODUCT.md` records who the product is for and what it must never claim. `DESIGN.md` records the design system. `web/scripts/shoot.mjs` regenerates every screenshot here from the running app.
 
@@ -180,6 +195,7 @@ This was built in one overnight session for a hackathon, and the commit history 
 
 ```
 pipeline/         download, ingest, address resolution, link rules, cuisine, places, export
+  tests/          link-rule tests and the two hand-checked shopfronts
 data/             snapshots.csv (files read) and cuisine_manual.json (hand labels); raw files are not committed
 web/              Vite + React + TypeScript + MapLibre GL app
   public/data/    exported Yau Tsim data
@@ -196,7 +212,7 @@ docs/             screenshots and brand files
 - Link rules can be wrong. Every link is labelled with the rule that made it, and the panel lists the records behind it.
 - Where OpenRice has no match, cuisine is a guess from the name, and 127 current shops can't be guessed at all.
 - OpenRice prices are the listing's own price band, as collected; they may be out of date for some shops.
-- Shop lifespan compares areas within this district only. Its colours come from Yau Tsim's own range.
+- Shop lifespan compares areas within this district only. Its colours are centred on Yau Tsim's own average.
 - No rent data: there is no reliable public source for the current rent of individual shops.
 
 ## Sources and credits
@@ -207,3 +223,7 @@ docs/             screenshots and brand files
 - Places, MTR exits and basemap: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), rendered with [Protomaps](https://protomaps.com) and [MapLibre GL JS](https://maplibre.org).
 
 Reconstructed from FEHD licence lists. Not a record of ownership, tenancy or business performance.
+
+## Licence
+
+The code is under the [MIT licence](LICENSE). The data keeps the terms of its sources listed above.
