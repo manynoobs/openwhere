@@ -46,6 +46,8 @@
  "gap_threshold_months": 6,
  "generated": "2026-11-14",
  "heat": {
+  "metric": "lifespan",
+  "image": "heat/lifespan.png",
   "bounds": [
    [
     114.15136842357938,
@@ -64,42 +66,32 @@
     22.28505348257674
    ]
   ],
-  "years": [
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ],
   "stops": [
    [
-    0.2,
-    "#DADDE3"
-   ],
-   [
-    0.3,
-    "#5CC6BA"
-   ],
-   [
-    0.45,
-    "#FFC53D"
-   ],
-   [
-    0.58,
-    "#FF8A3D"
+    0.65,
+    "#D92D20"
    ],
    [
     0.75,
-    "#D92D20"
+    "#FF8A3A"
+   ],
+   [
+    0.8,
+    "#FFCE3A"
+   ],
+   [
+    0.85,
+    "#B4D335"
+   ],
+   [
+    0.9,
+    "#3FBF6F"
    ]
   ],
-  "sigma_m": 100.0,
-  "min_shops": 5
+  "horizon_months": 36,
+  "sigma_m": 150.0,
+  "new_histories": 907,
+  "min_shops": 3.0,
+  "full_shops": 15.0
  }
 }
