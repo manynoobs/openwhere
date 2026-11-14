@@ -21,6 +21,14 @@ It is meant as a reference for anyone in the food business choosing a site, from
 
 ![Change heat over Tsim Sha Tsui](docs/heat.png)
 
+![Two pinned shopfronts compared on one time axis](docs/compare.png)
+
+<img src="docs/phone-panel.png" alt="History panel on a phone" width="320">
+
+## How it was built
+
+This was built in one overnight session for a hackathon, and the commit history follows the build step by step. The data pipeline came first: download, spans, address resolution, link rules. Then came the choice of district, which went to Yau Tsim after the same counting was run over all 19 districts. After that: the map app, a round of fixes found by screenshotting the running app, a design review pass, and this README. `PRODUCT.md` records who the product is for and what it must never claim. `web/scripts/shoot.mjs` regenerates every screenshot here from the running app.
+
 ## Run it
 
 You need Node 18 or newer. All the data the app needs is already in the repository, and the app runs offline. It makes no network requests at all, not even for map tiles.
