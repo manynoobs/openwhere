@@ -40,7 +40,7 @@ START, END = "20160101", (date.today() - timedelta(days=1)).strftime("%Y%m%d")
 def http_get(url, tries=6):
     for attempt in range(tries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "shopfront-past-lives/0.1"})
+            req = urllib.request.Request(url, headers={"User-Agent": "openwhere/0.1"})
             with urllib.request.urlopen(req, timeout=120) as r:
                 return r.read()
         except urllib.error.HTTPError as e:

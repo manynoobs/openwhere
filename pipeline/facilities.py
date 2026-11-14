@@ -57,7 +57,7 @@ def fetch():
     b = ",".join(str(v) for v in BBOX)
     data = urllib.parse.urlencode({"data": QUERY.replace("{b}", b)}).encode()
     req = urllib.request.Request("https://overpass-api.de/api/interpreter", data=data,
-                                 headers={"User-Agent": "shopfront-past-lives/0.1"})
+                                 headers={"User-Agent": "openwhere/0.1"})
     with urllib.request.urlopen(req, timeout=120) as r:
         body = json.load(r)
     json.dump(body, open(CACHE, "w"), ensure_ascii=False)

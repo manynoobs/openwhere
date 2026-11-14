@@ -126,7 +126,7 @@ def cache():
 def als(q):
     url = "https://www.als.gov.hk/lookup?" + urllib.parse.urlencode({"q": q, "n": 5})
     req = urllib.request.Request(url, headers={"Accept": "application/json",
-                                               "User-Agent": "shopfront-past-lives/0.1"})
+                                               "User-Agent": "openwhere/0.1"})
     for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
