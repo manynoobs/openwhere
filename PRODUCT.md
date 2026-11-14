@@ -18,9 +18,11 @@ Secondary audience: hackathon judges watching a three-minute demo and reading th
 
 ## Product Purpose
 
-鋪位前世 Shopfront Past Lives puts ten years of public restaurant licence records on one map of Hong Kong. Every licensed unit shows how many times its shop sign changed since 2016, and a switchable layer shows where changes are frequent across a whole district. Clicking a unit shows its sign history and the records behind it; units can be pinned and compared on one time axis.
+OpenWhere (formerly Shopfront Past Lives, 鋪位前世) puts ten years of public restaurant licence records on one map of Hong Kong. Every licensed unit shows how many times its shop sign changed since 2016, and a switchable layer shows where changes are frequent across a whole district. Clicking a unit shows its sign history and the records behind it; units can be pinned and compared on one time axis.
 
-Success: in the first seconds a user can see which streets change often and which are stable, and within a minute they can shortlist and compare specific units with the evidence in view.
+It also answers the site question directly: Site check shows same-cuisine competitors listed now within a chosen radius, how long new shops last around the spot, units licensed before with none listed now, the nearest MTR exit and the places nearby that draw people. Shop lifespan colours the streets by the share of new shops still listed three years after opening.
+
+Success: in the first seconds a user can see which streets change often and which are stable, and within a minute they can check a spot for their cuisine and shortlist units with the evidence in view.
 
 ## Positioning
 
@@ -35,8 +37,9 @@ Used on a laptop while scanning a district, and projected on stage during a thre
 - Shows only what the licence lists record. Never says closed, failed, left, vacant, operator or tenant. Operator identity is unknown.
 - Shows one number per unit: store changes since 2016. No raw licence-number counts and no raw-versus-reconstructed comparison in the interface.
 - Does not generate advice, questions to ask, scores, grades or predictions.
-- Change heat layer is off by default and switched on by the user.
-- Price evidence is out of scope for this build.
+- The shop lifespan layer and the places layer are off by default and switched on by the user.
+- Cuisine is guessed from shop names and always labelled as such; rent is not shown because no reliable public per-shop source exists.
+- Price ranges may come from a teammate's OpenRice data, pending; OpenRice terms restrict copying, so raw scraped data must not be committed to the public repository.
 - Interface language: English. Shop signs and addresses are shown in Chinese and English side by side.
 
 ## Evidence on Hand
@@ -58,4 +61,5 @@ Change counts are always available as digits, not colour alone. Colour ramps mus
 
 ## Brand Commitments
 
+- Name: OpenWhere. Logo: a map pin whose head holds a shop awning (docs/brand), ink with a green awning.
 - Visual direction: the category standard for map apps, played straight. Craft bar: Apple Maps (soft light basemap, translucent floating panels, system type, very smooth transitions). Chosen by the user over rolled directions on 14 Nov 2026.
