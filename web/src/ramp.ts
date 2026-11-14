@@ -10,12 +10,9 @@ export const STEPS = [
 
 export const stepOf = (n: number) => Math.min(Math.max(n, 0), 4);
 
-// Continuous ramp for the heat wash, in changes per shop since 2016.
-// Stops are mirrored in pipeline/heat.py so the image and the legend agree.
-export const HEAT_STOPS: [number, string][] = [
-  [0.0, "#9ADBD3"],
-  [0.25, "#FFD36A"],
-  [0.5, "#FF9A45"],
-  [0.8, "#E5372B"],
-  [1.2, "#8E1B3A"],
-];
+// On the dark basemap a light grey zero would be the brightest thing on screen; it recedes instead.
+export const ZERO_DARK = "#5E626B";
+export const zeroFill = (dark: boolean) => (dark ? ZERO_DARK : STEPS[0].fill);
+
+// The heat wash ramp and its stops are written by pipeline/heat.py into meta.json,
+// so the images and the legend always agree.

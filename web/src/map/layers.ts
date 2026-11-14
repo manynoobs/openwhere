@@ -1,8 +1,14 @@
 import type { ExpressionSpecification, FilterSpecification, Map as MLMap } from "maplibre-gl";
-import { STEPS } from "../ramp";
+import { STEPS, zeroFill } from "../ramp";
 import { YEARS, type Filters } from "../types";
 
 export const SRC = "units";
+
+let dark = false;
+/** set once from the map's theme before layers are added */
+export const setDarkTheme = (on: boolean) => {
+  dark = on;
+};
 
 const idx = (year: number) => year - YEARS[0];
 
@@ -16,7 +22,7 @@ const listedChar = (year: number): ExpressionSpecification => ["slice", ["get", 
 const stepColor = (year: number): ExpressionSpecification => [
   "step",
   changesAt(year),
-  STEPS[0].fill,
+  zeroFill(dark),
   1,
   STEPS[1].fill,
   2,
@@ -48,7 +54,9 @@ const badgeImage = (year: number): ExpressionSpecification => [
 
 // below BADGE_FROM the map shows coloured dots; badges with digits fade in above it
 const BADGE_FROM = 15.7;
-const DOT_FADE: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], BADGE_FROM + 0.1, 1, BADGE_FROM + 0.5, 0];
+// dots stay under the badges, so a badge hidden by a busier neighbour still shows as a coloured dot
+const DOT_FADE = 1;
+const BADGE_OPACITY: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], BADGE_FROM, 0, BADGE_FROM + 0.5, 1];
 const isZero = (year: number): ExpressionSpecification => ["==", changesAt(year), 0];
 // shops with no change step back: smaller, so the ones that changed read first
 const DOT_RADIUS = (year: number): ExpressionSpecification => [
@@ -99,10 +107,10 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
     source: SRC,
     filter,
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 7, 15, 15],
-      "circle-color": "rgba(10, 132, 255, 0.16)",
-      "circle-stroke-color": "rgba(10, 132, 255, 0.9)",
-      "circle-stroke-width": 2,
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 6, 15, 12, 17, 16],
+      "circle-color": "rgba(29, 29, 31, 0.10)",
+      "circle-stroke-color": "rgba(29, 29, 31, 0.55)",
+      "circle-stroke-width": 1.5,
       "circle-opacity": [
         "case",
         ["boolean", ["feature-state", "selected"], false],
@@ -129,16 +137,18 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
     minzoom: BADGE_FROM,
     layout: {
       "icon-image": badgeImage(year),
-      "icon-allow-overlap": true,
-      "icon-ignore-placement": true,
-      "symbol-sort-key": changesAt(year),
+      // badges never sit on top of each other; the unit with more changes places first
+      "icon-allow-overlap": false,
+      "icon-ignore-placement": false,
+      "icon-padding": 0,
+      "symbol-sort-key": ["-", 0, changesAt(year)],
       "icon-size": badgeSize(year),
     },
     paint: {
-      "icon-opacity": ["interpolate", ["linear"], ["zoom"], BADGE_FROM, 0, BADGE_FROM + 0.5, 1],
+      "icon-opacity": BADGE_OPACITY,
     },
   });
-  // in heat mode the badge for the hovered or selected unit stays visible
+  // the selected unit's badge lifts above the rest; in heat mode the hovered one shows too
   map.addLayer({
     id: "unit-badge-focus",
     type: "symbol",
@@ -148,8 +158,7 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
       "icon-image": badgeImage(year),
       "icon-allow-overlap": true,
       "icon-ignore-placement": true,
-      "icon-size": 1.05,
-      visibility: "none",
+      "icon-size": 1.3,
     },
   });
 }
@@ -166,7 +175,7 @@ export function updateUnitLayers(map: MLMap, year: number, f: Filters) {
   ]);
   map.setPaintProperty("unit-pulse", "circle-stroke-color", stepColor(year));
   map.setLayoutProperty("unit-badge", "icon-image", badgeImage(year));
-  map.setLayoutProperty("unit-badge", "symbol-sort-key", changesAt(year));
+  map.setLayoutProperty("unit-badge", "symbol-sort-key", ["-", 0, changesAt(year)]);
   map.setLayoutProperty("unit-badge", "icon-size", badgeSize(year));
   if (map.getLayoutProperty("unit-badge", "visibility") !== "none") map.setPaintProperty("unit-dot", "circle-radius", DOT_RADIUS(year));
   map.setLayoutProperty("unit-badge-focus", "icon-image", badgeImage(year));
@@ -180,8 +189,8 @@ export function changedInFilter(year: number, f: Filters): FilterSpecification {
 
 /** dot styling while the heat wash is on: badges step back so the wash reads */
 export function setHeatMode(map: MLMap, on: boolean, year: number) {
-  map.setLayoutProperty("unit-badge", "visibility", on ? "none" : "visible");
-  map.setLayoutProperty("unit-badge-focus", "visibility", on ? "visible" : "none");
+  // badges fade rather than vanish; the style's 450 ms transition carries the cross-fade
+  map.setPaintProperty("unit-badge", "icon-opacity", on ? 0 : BADGE_OPACITY);
   map.setPaintProperty("unit-dot", "circle-opacity", on ? 0.5 : DOT_FADE);
   map.setPaintProperty("unit-dot", "circle-stroke-opacity", on ? 0.6 : DOT_FADE);
   map.setPaintProperty(

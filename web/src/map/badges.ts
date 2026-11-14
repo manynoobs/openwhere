@@ -1,5 +1,5 @@
 import type { Map as MLMap } from "maplibre-gl";
-import { STEPS, stepOf } from "../ramp";
+import { STEPS, stepOf, zeroFill } from "../ramp";
 
 // Badges are drawn once on a canvas in the system font and registered as map images,
 // so they render like native pins and need no glyph files.
@@ -9,8 +9,9 @@ export type BadgeState = "f" | "h" | "d"; // filled · hollow (none listed now) 
 
 export const badgeName = (label: string, state: BadgeState) => `b-${label}-${state}`;
 
-function draw(label: string, state: BadgeState, pr: number) {
-  const step = STEPS[stepOf(Number(label))];
+function draw(label: string, state: BadgeState, pr: number, dark: boolean) {
+  const base = STEPS[stepOf(Number(label))];
+  const step = label === "0" ? { ...base, fill: zeroFill(dark) } : base;
   const h = 22;
   const w = 22;
   const pad = 3; // room for the soft shadow
@@ -37,14 +38,14 @@ function draw(label: string, state: BadgeState, pr: number) {
   g.beginPath();
   g.arc(cx, cy, r - 0.75, 0, Math.PI * 2);
   g.lineWidth = 1.5;
-  g.strokeStyle = "#FFFFFF";
+  g.strokeStyle = dark && label === "0" ? "rgba(255,255,255,0.35)" : "#FFFFFF";
   g.stroke();
 
   if (state === "h") {
     g.beginPath();
     g.arc(cx, cy, r - 3, 0, Math.PI * 2);
     g.lineWidth = 2.5;
-    g.strokeStyle = step.fill === "#DADDE3" ? "#9EA3AD" : step.fill;
+    g.strokeStyle = label === "0" ? "#9EA3AD" : step.fill;
     g.stroke();
   }
   if (state === "d") {
@@ -68,12 +69,12 @@ function draw(label: string, state: BadgeState, pr: number) {
   return g.getImageData(0, 0, c.width, c.height);
 }
 
-export function registerBadges(map: MLMap) {
+export function registerBadges(map: MLMap, dark: boolean) {
   const pr = Math.max(2, Math.ceil(window.devicePixelRatio || 1));
   for (const label of BADGE_LABELS) {
     for (const state of ["f", "h", "d"] as BadgeState[]) {
       const name = badgeName(label, state);
-      if (!map.hasImage(name)) map.addImage(name, draw(label, state, pr), { pixelRatio: pr });
+      if (!map.hasImage(name)) map.addImage(name, draw(label, state, pr, dark), { pixelRatio: pr });
     }
   }
 }

@@ -4,7 +4,7 @@ import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { basemapStyle } from "./basemap";
 import { registerBadges } from "./badges";
-import { addUnitLayers, changedInFilter, setHeatMode, SRC, updateUnitLayers } from "./layers";
+import { addUnitLayers, changedInFilter, setDarkTheme, setHeatMode, SRC, updateUnitLayers } from "./layers";
 import { heatUrl, unitsUrl } from "../data";
 import type { Filters, UnitProps } from "../types";
 
@@ -66,7 +66,8 @@ export function MapView(p: Props) {
     if (import.meta.env.DEV) (window as unknown as { __map: MLMap }).__map = map;
 
     map.on("load", async () => {
-      registerBadges(map);
+      setDarkTheme(dark);
+      registerBadges(map, dark);
       const data = await fetch(unitsUrl).then((r) => r.json());
       map.addSource(SRC, { type: "geojson", data, promoteId: "id" });
       const hm = latest.current.heatMeta;
@@ -125,8 +126,8 @@ export function MapView(p: Props) {
 
     function syncFocus() {
       if (!map.getLayer("unit-badge-focus")) return;
-      const ids = [...latest.current.focusIds];
-      if (hovered.current != null) ids.push(hovered.current);
+      const ids: number[] = [];
+      if (latest.current.heat && hovered.current != null) ids.push(hovered.current);
       if (selected.current != null) ids.push(selected.current);
       map.setFilter("unit-badge-focus", ["in", ["get", "id"], ["literal", ids]]);
     }

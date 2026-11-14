@@ -9,9 +9,10 @@
   --glass-solid: #fcfcfd;
   --fill: rgba(118, 118, 128, 0.12);
   --fill-2: rgba(118, 118, 128, 0.2);
-  --accent: #0a74e0;
+  /* the change ramp is the only colour on screen; controls use ink */
+  --accent: #1d1d1f;
   --accent-ink: #ffffff;
-  --focus: rgba(10, 116, 224, 0.45);
+  --focus: rgba(29, 29, 31, 0.35);
   --shadow: 0 6px 28px rgba(15, 20, 30, 0.14), 0 1px 3px rgba(15, 20, 30, 0.08);
   --radius: 14px;
   --radius-sm: 9px;
@@ -31,8 +32,9 @@
     --glass-solid: #242529;
     --fill: rgba(118, 118, 128, 0.24);
     --fill-2: rgba(118, 118, 128, 0.34);
-    --accent: #3d9bff;
-    --focus: rgba(61, 155, 255, 0.5);
+    --accent: #f2f2f5;
+    --accent-ink: #1d1d1f;
+    --focus: rgba(242, 242, 245, 0.45);
     --shadow: 0 6px 28px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
     --map-bg: #1e1f22;
     color-scheme: dark;
@@ -51,7 +53,7 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
-::selection { background: rgba(10, 116, 224, 0.22); }
+::selection { background: rgba(255, 197, 61, 0.35); }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
@@ -60,7 +62,8 @@ button { cursor: pointer; }
 #map { position: absolute; inset: 0; }
 .maplibregl-ctrl-attrib { font-size: 10.5px; background: transparent !important; }
 .maplibregl-ctrl-attrib a { color: var(--ink-3); }
-.maplibregl-ctrl-bottom-right { right: 4px; bottom: 2px; }
+.maplibregl-ctrl-bottom-right { right: 4px; bottom: 2px; transition: right 320ms var(--ease); }
+.panel-open .maplibregl-ctrl-bottom-right { right: calc(min(400px, 100vw - 24px) + 24px); }
 
 /* floating glass surfaces, Apple Maps style */
 .glass {
@@ -145,11 +148,11 @@ button { cursor: pointer; }
 .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
 .switch span { position: absolute; inset: 0; border-radius: 12px; background: var(--fill-2); transition: background 200ms var(--ease); }
 .switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 220ms var(--ease); }
-.switch input:checked + span { background: #34c759; }
+.switch input:checked + span { background: var(--ink); }
 .switch input:checked + span::after { transform: translateX(15px); }
 .switch input:focus-visible + span { outline: 3px solid var(--focus); }
 .pfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 0.5px solid var(--line); font-size: 12.5px; color: var(--ink-3); }
-.linkbtn { border: 0; background: transparent; color: var(--accent); font-weight: 500; padding: 2px 0; }
+.linkbtn { border: 0; background: transparent; color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); padding: 2px 0; }
 .linkbtn:disabled { color: var(--ink-3); cursor: default; }
 
 /* ---------- bottom: legend and year bar ---------- */
@@ -162,10 +165,12 @@ button { cursor: pointer; }
 .legend .key { display: flex; gap: 14px; margin-top: 8px; font-size: 11.5px; color: var(--ink-3); flex-wrap: wrap; }
 .legend .key span { display: inline-flex; align-items: center; gap: 5px; }
 .swatch-hollow, .swatch-dash { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
-.swatch-hollow { box-shadow: inset 0 0 0 2px #ff8a3d; background: #fff; }
+.swatch-hollow { box-shadow: inset 0 0 0 2px var(--ink-2); background: #fff; }
+.zero-key { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); margin-right: 2px; }
+.zero-key i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1.5px #fff, 0 1px 2px rgba(0,0,0,0.2); }
 .swatch-dash { border: 1.3px dashed var(--ink-2); }
 .gradient { height: 10px; border-radius: 5px; width: 230px; }
-.gticks { display: flex; justify-content: space-between; width: 230px; font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+.gticks { display: flex; justify-content: space-between; width: 230px; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
 
 .yearbar {
   position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); z-index: 2;
@@ -173,10 +178,10 @@ button { cursor: pointer; }
   transition: transform 320ms var(--ease);
 }
 .panel-open .yearbar { left: 356px; width: calc(100vw - 356px - min(400px, 100vw - 24px) - 36px); transform: none; }
-.play { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.play { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
 .yr-label { font-weight: 600; font-size: 17px; width: 44px; text-align: right; flex: none; }
 .slider { flex: 1; position: relative; padding-top: 2px; }
-.slider input { width: 100%; margin: 0; accent-color: var(--accent); height: 22px; }
+.slider input { width: 100%; margin: 0; accent-color: var(--ink-2); height: 22px; }
 .ticks { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-3); padding: 0 4px; }
 .ticks span { width: 0; display: flex; justify-content: center; }
 
@@ -207,7 +212,7 @@ button { cursor: pointer; }
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .tag { font-size: 12px; padding: 4px 8px; border-radius: 6px; background: var(--fill); color: var(--ink-2); font-weight: 500; }
 .actions { display: flex; gap: 8px; margin-top: 16px; }
-.btn { height: 36px; padding: 0 16px; border-radius: 10px; border: 0; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; background: var(--fill); color: var(--accent); }
+.btn { height: 36px; padding: 0 16px; border-radius: 10px; border: 0; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; background: var(--fill); color: var(--ink); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .panel-body { overflow: auto; padding: 8px 16px 20px; flex: 1; overscroll-behavior: contain; }
@@ -225,7 +230,7 @@ button { cursor: pointer; }
 .t-meta { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
 .t-note { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; padding-left: 10px; position: relative; }
 .t-note::before { content: ""; position: absolute; left: 0; top: 7px; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-3); }
-.t-now { display: inline-block; font-size: 11px; font-weight: 600; color: #1a7f37; background: rgba(52, 199, 89, 0.16); padding: 1px 6px; border-radius: 5px; margin-left: 6px; vertical-align: 1px; }
+.t-now { display: inline-block; font-size: 11px; font-weight: 600; color: var(--ink-2); background: var(--fill); padding: 1px 6px; border-radius: 5px; margin-left: 6px; vertical-align: 1px; }
 .timeline > li.marker { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); padding: 0 !important; border: 0 !important; }
 .timeline > li.marker::after { content: ""; flex: 1; height: 0.5px; background: var(--line); }
 .marker .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
@@ -233,7 +238,7 @@ button { cursor: pointer; }
 .timeline > li.marker.gap .dot { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
 
 details.records { margin-top: 20px; border-top: 0.5px solid var(--line); padding-top: 10px; }
-details.records summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--accent); list-style: none; }
+details.records summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--ink); list-style: none; }
 details.records summary::-webkit-details-marker { display: none; }
 details.records summary { display: inline-flex; align-items: center; gap: 4px; }
 details.records summary svg { transition: transform 200ms var(--ease); }
@@ -259,7 +264,7 @@ details.records[open] summary svg { transform: rotate(90deg); }
 .axis .years { display: grid; grid-template-columns: repeat(11, 1fr); font-size: 11px; color: var(--ink-3); }
 .crow { display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 10px 0; border-top: 0.5px solid var(--line); align-items: center; }
 .crow .who { display: flex; gap: 8px; align-items: center; min-width: 0; }
-.crow .who b { display: block; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crow .who b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-weight: 600; font-size: 13px; overflow: hidden; }
 .crow .who small { color: var(--ink-3); font-size: 12px; }
 .track { position: relative; height: 30px; background: repeating-linear-gradient(90deg, var(--line) 0 0.5px, transparent 0.5px calc(100% / 11)); border-radius: 4px; }
 .bar { position: absolute; top: 5px; height: 20px; border-radius: 5px; background: var(--fill-2); font-size: 11px; line-height: 20px; padding: 0 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ink); box-shadow: inset 0 0 0 0.5px var(--line-strong); }
@@ -294,14 +299,16 @@ details.records[open] summary svg { transform: rotate(90deg); }
   /* phone: mode switch and buttons sit in a row under the search card */
   .topright { top: calc(132px + env(safe-area-inset-top, 0px)); left: 12px; right: 12px; }
   .topright .segmented { flex: 1; }
-  .topright .segmented button { flex: 1; }
+  .topright .segmented button { flex: 1; white-space: nowrap; padding: 6px 8px; }
   .panel-open .topright { right: 12px; }
   .popover { right: 0; width: min(300px, calc(100vw - 24px)); }
   .about { right: 0; top: 46px; }
   .legend { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   .legend .key { display: none; }
   .yearbar { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
-  .panel-open .yearbar { transform: translateX(-50%); }
+  .panel-open .yearbar { left: 50%; width: min(560px, calc(100vw - 24px)); transform: translateX(-50%); }
+  .maplibregl-ctrl-bottom-right { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .panel-open .maplibregl-ctrl-bottom-right { right: 4px; }
   .comparebtn { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   .panel-open .comparebtn { right: 12px; }
   .panel { top: auto; left: 12px; right: 12px; width: auto; height: 62vh; transform: translateY(calc(100% + 24px)); }

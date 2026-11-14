@@ -123,8 +123,11 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
         {monthYear(meta.first_file)} to {monthYear(meta.latest_file)}.
       </p>
       <p>
-        A <b>store change</b> is counted when a shop with a different sign is listed after the previous one stopped being
-        listed. A provisional licence followed by a full licence under the same sign is one shop, not two.
+        A <b>store change</b> is a shop with a different sign listed at an address after the previous one stopped being listed.
+      </p>
+      <p>
+        <b>Change heat</b> shows store changes per street-level shop, smoothed over about 100 m. Streets with fewer than five
+        shops nearby are left blank.
       </p>
       <dl className="num">
         <dt>Monthly files read (English and Chinese)</dt>
@@ -135,12 +138,9 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
         <dd>{meta.units.toLocaleString()}</dd>
         <dt>Street-level shopfronts placed</dt>
         <dd>{coverage != null ? `${meta.street_units_mapped?.toLocaleString()} of ${meta.street_units_total?.toLocaleString()} (${coverage}%)` : "–"}</dd>
-        <dt>Gap shown as “no licence observed” from</dt>
-        <dd>{meta.gap_threshold_months ?? 6} months</dd>
       </dl>
       <p className="fine">
-        Reconstructed from FEHD licence lists. Not a record of ownership, tenancy or business performance. A licence missing from
-        the list for a few months is usually a renewal; 99.8% of such licences reappear within six months.
+        From FEHD licence lists. Not a record of ownership, tenancy or business performance.
       </p>
     </div>
   );

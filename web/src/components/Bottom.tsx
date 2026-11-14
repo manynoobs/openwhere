@@ -9,15 +9,11 @@ export function Legend({ heat, stops, year }: { heat: boolean; stops: [number, s
     const grad = `linear-gradient(90deg, ${stops.map(([v, c]) => `${c} ${((v - lo) / (hi - lo)) * 100}%`).join(", ")})`;
     return (
       <div className="legend glass" aria-live="polite">
-        <div className="cap">Store changes per street-level shop, 2016–{year}</div>
+        <div className="cap">How often shops change here, 2016–{year}</div>
         <div className="gradient" style={{ background: grad }} />
-        <div className="gticks num">
-          <span>{lo.toFixed(1)} or less</span>
-          <span>{((lo + hi) / 2).toFixed(1)}</span>
-          <span>{hi.toFixed(1)}+</span>
-        </div>
-        <div className="key">
-          <span>Smoothed over about 100 m · blank where fewer than 5 shops</span>
+        <div className="gticks">
+          <span>Fewer changes</span>
+          <span>More changes</span>
         </div>
       </div>
     );
@@ -26,14 +22,20 @@ export function Legend({ heat, stops, year }: { heat: boolean; stops: [number, s
     <div className="legend glass" aria-live="polite">
       <div className="cap">Store changes since 2016</div>
       <div className="row">
-        {STEPS.map((s) => (
-          <span key={s.label} className="chip num" style={{ background: s.fill, color: s.ink }}>
-            {s.label}
-          </span>
-        ))}
+        {STEPS.map((s) =>
+          s.label === "0" ? (
+            <span key="0" className="zero-key" title="No store change">
+              <i style={{ background: s.fill }} />0
+            </span>
+          ) : (
+            <span key={s.label} className="chip num" style={{ background: s.fill, color: s.ink }}>
+              {s.label}
+            </span>
+          ),
+        )}
       </div>
       <div className="key">
-        <span><i className="swatch-hollow" />No licence listed now</span>
+        <span><i className="swatch-hollow" />Hollow: no licence listed now</span>
         <span><i className="swatch-dash" />Shared address</span>
       </div>
     </div>

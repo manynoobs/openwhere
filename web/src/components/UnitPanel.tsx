@@ -115,8 +115,6 @@ const END_LABEL: Record<string, (h: SignHistory) => string> = {
   not_observed_before_recorded_expiry: (h) =>
     `Stopped being listed ${h.end?.months_early ?? ""} months before its licence’s recorded expiry`,
   not_observed_after_recorded_expiry: () => "Not listed after its licence’s recorded expiry",
-  no_successor_identified: () => "Provisional licence; no full licence found after it",
-  possible_successor_signs_differ: () => "Provisional licence; the next licence here is under a different sign, so we do not link them",
 };
 
 function History({ u }: { u: UnitDetail }) {
@@ -137,7 +135,6 @@ function History({ u }: { u: UnitDetail }) {
                 <li className="marker num">
                   <span className="dot" style={{ background: STEPS[stepOf(u.changes.indexOf(change) + 1)].fill }} />
                   Store change {u.changes.indexOf(change) + 1} of {u.changes.length} · {monthYear(change.first_seen)}
-                  {change.possible_link ? " · signs differ, may be linked" : ""}
                 </li>
               )}
               {gap && (
@@ -183,7 +180,7 @@ function History({ u }: { u: UnitDetail }) {
         </div>
         <p className="fine">
           Source: FEHD restaurant licence lists (English and Chinese), monthly archived files {monthYear(u.first_file)} –{" "}
-          {monthYear(u.latest_file)}. A link between licence numbers is made only by a stated rule. Not a record of ownership,
+          {monthYear(u.latest_file)}. Not a record of ownership,
           tenancy or business performance.
         </p>
       </details>
@@ -196,7 +193,6 @@ function HistoryRow({ h }: { h: SignHistory }) {
   const main = names[names.length - 1] ?? [];
   const ended = !h.listed_in_latest_snapshot;
   const renamed = names.length > 1 && h.licences.length >= 1;
-  const linked = h.links.filter((l) => l.status === "inferred").length;
   const types = h.lic_types.map((t) => TYPE_LABEL[t] ?? t).join(" · ");
   return (
     <li>
@@ -216,16 +212,8 @@ function HistoryRow({ h }: { h: SignHistory }) {
         </div>
         {renamed && (
           <div className="t-note">
-            Sign changed under the same licence: {names.slice(0, -1).map((n) => n[0]).join(" → ")} → {main[0]}
+            Sign changed: {names.slice(0, -1).map((n) => n[0]).join(" → ")} → {main[0]}
           </div>
-        )}
-        {linked > 0 && (
-          <div className="t-note">
-            {linked === 1 ? "A provisional and a full licence" : `${linked + 1} licences`} under this sign, counted as one shop
-          </div>
-        )}
-        {h.links.some((l) => l.rule === "prov_then_full_no_sign") && (
-          <div className="t-note">First licence had no sign recorded; linked to the next one at this address</div>
         )}
         {h.end && END_LABEL[h.end.label] && <div className="t-note">{END_LABEL[h.end.label](h)}</div>}
         {h.signs.every((s) => isPlaceholder(s.en) && isPlaceholder(s.tc)) && (
