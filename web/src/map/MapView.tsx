@@ -56,7 +56,7 @@ export function MapView(p: Props) {
         [113.98, 22.2],
         [114.32, 22.42],
       ],
-      attributionControl: { compact: false },
+      attributionControl: { compact: window.innerWidth < 720 },
       dragRotate: false,
       pitchWithRotate: false,
       fadeDuration: 150,
