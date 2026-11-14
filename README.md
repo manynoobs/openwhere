@@ -2,20 +2,20 @@
 
 A map of every shopfront in Yau Tsim (Tsim Sha Tsui, Jordan and Yau Ma Tei) that has held a restaurant licence since 2016, showing how many times each one changed hands.
 
-Each shopfront on the map is a badge with one number: **store changes since 2016**. Grey means the same sign has been listed the whole time. Teal, amber, orange and red mean one, two, three, and four or more different signs took over. Switch on **Change heat** and the streets themselves take on a continuous colour, so you can see at a glance where shops turn over often and where they stay.
+Each shopfront on the map is a pin with one number: **store changes since 2016**. Green means the same sign has been listed the whole time; lime, yellow, orange and red mean one, two, three, and four or more different signs took over. Switch on **Change heat** and the streets themselves take on a continuous colour, so you can see at a glance where shops turn over often and where they stay.
 
-![Map of Yau Tsim with number badges](docs/desktop.png)
+![Map of Yau Tsim with numbered pins](docs/desktop.png)
 
 It is meant as a reference for anyone in the food business choosing a site, from a single noodle shop to a chain's site-selection team. It reports what the public licence lists show and nothing more. It does not predict whether a business will do well, and it never says why a shop left.
 
 ## What you can do with it
 
-- **Scan a district.** Badges show the count for every unit. Zoom out and they become coloured dots.
+- **Scan a district.** Pins show the count for every unit, and the tip marks the shopfront. Zoom out and they become coloured dots.
 - **See the trend.** *Change heat* (off by default) shades the streets by store changes per shop. It is smoothed over about 100 m and left blank wherever fewer than five shops are close by.
 - **Play ten years.** The year bar replays 2016 to 2026. Units whose count rises that year pulse once.
-- **Open a unit.** Click a badge, or search in English or Chinese (`砵蘭街100`, `Hau Fook`, a shop name). A side panel shows every sign at that address, the years each was listed, its licence type, and the licence records behind it.
+- **Open a unit.** Click a pin, or search in English or Chinese (`砵蘭街100`, `Hau Fook`, a shop name). A side panel shows every sign at that address, the years each was listed, its licence type, and the licence records behind it.
 - **Filter.** Street level or all floors, licence type, outside seating, previously licensed with none listed now, and minimum number of changes.
-- **Compare and print.** Pin up to three units to see them on one time axis, then print a sheet that cites its source for every row.
+- **Compare and print.** Pin up to three units to see their signs side by side on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Then print a sheet that cites its source for every row.
 
 ![History panel for G/F, 100 Portland Street](docs/panel.png)
 
@@ -113,7 +113,7 @@ data/             snapshots.csv (manifest of files read); raw files and caches a
 web/              Vite + React + TypeScript + MapLibre GL app
   public/data/    exported Yau Tsim data
   public/tiles/   Hong Kong basemap (Protomaps PMTiles extract)
-  src/map/        map layers, badges, basemap style
+  src/map/        map layers, pins, basemap style
   src/components/ search, filters, panel, compare, legend, year bar
 docs/             screenshots
 PRODUCT.md        product brief

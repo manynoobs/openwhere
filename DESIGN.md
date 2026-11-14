@@ -2,14 +2,14 @@
 name: Shopfront Past Lives
 description: Ten years of Hong Kong restaurant licence records on one calm map, one readable change count per shopfront.
 colors:
-  change-0: "#DADDE3"
-  change-0-ink: "#2B2F36"
-  change-0-dark: "#5E626B"
-  change-1: "#5CC6BA"
-  change-1-ink: "#063A34"
-  change-2: "#FFC53D"
-  change-2-ink: "#4A3200"
-  change-3: "#FF8A3D"
+  change-0: "#3FBF6F"
+  change-0-ink: "#06331A"
+  change-0-dark: "#2E8C55"
+  change-1: "#B4D335"
+  change-1-ink: "#2C3804"
+  change-2: "#FFCE3A"
+  change-2-ink: "#4A3500"
+  change-3: "#FF8A3A"
   change-3-ink: "#3F1500"
   change-4: "#D92D20"
   change-4-ink: "#FFFFFF"
@@ -171,7 +171,7 @@ components:
 
 **Creative North Star: "Apple Maps, Played Straight"**
 
-The map is the screen. A soft, warm-grey basemap fills the viewport edge to edge, and every interface element floats above it as a translucent glass card in the system face, the way a native map app does it. Nothing is invented for its own sake: the world is the category standard for map apps, chosen by the user over rolled directions, with Apple Maps as the craft bar. Its distinctiveness comes from one thing only: a five-step change ramp (grey, teal, amber, orange, red) that is the sole saturated colour anywhere on screen, carried identically by the map badges, the dots, the chips, the legend and the heat wash.
+The map is the screen. A soft, warm-grey basemap fills the viewport edge to edge, and every interface element floats above it as a translucent glass card in the system face, the way a native map app does it. Nothing is invented for its own sake: the world is the category standard for map apps, chosen by the user over rolled directions, with Apple Maps as the craft bar. Its distinctiveness comes from one thing only: a five-step change ramp (green, lime, yellow, orange, red) that is the sole saturated colour on the interface, carried by the map pins, the dots, the legend and the compare sheet. The heat wash keeps its own calmer ramp.
 
 Density is map-app density: compact controls in the corners, a 14px body, one floating panel that slides in beside the live map rather than replacing it. Chrome is neutral ink on frosted white (or frosted graphite in dark mode); controls never borrow the ramp, so colour always means change frequency and nothing else. Motion is smooth and physical, a single long-tail ease used everywhere, with the map itself doing the largest moves (fly-to, heat cross-fade).
 
@@ -181,7 +181,7 @@ The build diverges from the direction contract in two small, deliberate places: 
 - Full-bleed vector basemap (Protomaps extract of OpenStreetMap, served offline from a local PMTiles file), tuned pale so the ramp is the only saturated thing on screen.
 - Floating glass surfaces: frosted, hairline-bordered, one soft two-layer shadow, 14px corners.
 - System type only (SF Pro / PingFang HK); Chinese and English set side by side.
-- One five-step change ramp shared by canvas badges, map dots, chips, legend and the generated heat images.
+- One five-step change ramp shared by canvas pins, map dots, pin marks in the interface and the legend; the heat images use a separate grey-to-red ramp.
 - Digits always carry the count; colour is never the only cue.
 - Light and dark schemes follow the operating system.
 
@@ -191,13 +191,13 @@ A quiet, warm-neutral map and graphite-on-glass chrome, with one five-step ramp 
 
 ### Primary
 The change ramp. Steps are 0, 1, 2, 3 and 4+ store changes since 2016; each fill has its own ink so the digit on it stays readable.
-- **Calm Grey** (change-0): units with no store change. Drawn as a smaller, digitless dot so changed units read first. On the dark basemap it swaps to **Receding Slate** (change-0-dark), because a light grey would become the brightest thing on screen.
-- **Lagoon Teal** (change-1) with deep teal ink: one change.
-- **Signal Amber** (change-2) with brown ink: two changes.
+- **Steady Green** (change-0): units with no store change. Drawn smaller so changed units read first, digit kept. On the dark basemap it deepens to **Night Green** (change-0-dark).
+- **Lime** (change-1) with deep olive ink: one change.
+- **Signal Yellow** (change-2) with brown ink: two changes.
 - **Tangerine** (change-3) with dark rust ink: three changes.
 - **Alarm Red** (change-4) with white ink: four or more changes.
 
-The same five hexes are written by the heat pipeline into the data's metadata as colour stops, so the wash images and the legend gradient always agree with the badges.
+The heat wash is deliberately separate: pipeline/heat.py writes its own grey, teal, amber, orange, red stops into the data's metadata, and the heat legend gradient reads them from there.
 
 ### Secondary
 The basemap ground, a Protomaps "light" flavour retuned toward Apple Maps.
@@ -220,7 +220,7 @@ The basemap ground, a Protomaps "light" flavour retuned toward Apple Maps.
 ### Named Rules
 **The One Colour Rule.** The change ramp is the only saturated colour on screen. Chrome is ink on glass; the basemap is pale. If a new control needs emphasis, it gets ink, weight or position, never a hue.
 
-**The Shared Ramp Rule.** Badges, dots, chips, the legend and the heat wash read from one ramp definition (and the pipeline's identical stop list). A step's colour never changes meaning between surfaces.
+**The Shared Ramp Rule.** Pins, dots, pin marks and the legend read from one ramp definition. A step's colour never changes meaning between surfaces. The heat wash has its own stop list, written by the pipeline into meta.json.
 
 **The Digit Rule.** Every coloured count also shows its number. Colour supports the digit; it never replaces it.
 
@@ -297,17 +297,17 @@ Quiet and native; ink carries emphasis.
 - **Filter variant:** a Tint Fill track (9px) inside popovers with equal-width 13px options.
 
 ### Change Chip (signature)
-The change count as it appears on the map, reused in the legend, search results, compare rows and the panel.
-- **Style:** a 22px pill, ramp fill with its matching ink, 12px semibold tabular digits, a faint inner white ring.
-- **Hollow:** white centre with a 2px ring in the step colour.
-- **Large:** 44px in the panel figure at 22px type.
+The pin mark: the map pin drawn as inline SVG, reused in the legend, search results, hover card, compare rows and the panel header, so a count looks the same wherever it appears.
+- **Style:** white outer pin with a soft drop shadow, ramp-filled inner pin, bold digit in the step's ink.
+- **Hollow:** white inner pin with a 2px ring in the step colour (no licence listed now).
+- **Sizes:** 20px in search, 22px in the legend and hover card, 26px in compare, 40px in the panel header.
 
 ### Map Badges (signature)
 Drawn on canvas in the system font at 2× or higher and registered as map images, so they render like native pins without glyph files.
-- 22px circle, ramp fill, 1.5px white keyline, small soft shadow, bold digit (12.5px, 10.5px for two digits). Zero is a digitless grey dot.
+- Apple Maps–style pin, chosen by the user from four rendered concepts (disc, pin, ring, tile): 24px head with a 7px tail whose tip sits on the shopfront (icon-anchor bottom), white outer pin, ramp-filled inner pin with a slight top-to-bottom tonal shift, soft shadow, bold 13px digit. Zero keeps its digit and is drawn smaller.
 - Below zoom 15.7 units are coloured dots (no-change dots smaller); badges fade in over half a zoom level above it and dots stay underneath.
 - Badges never overlap: the unit with more changes places first, so a hidden neighbour still shows as its dot.
-- Hover shows a soft ink halo; selection lifts the badge to 1.3× above all others.
+- Hover shows a soft ink halo at the tip; selection lifts the pin to 1.3× above all others.
 - When a year step raises a unit's count, one ring pulses out from it (1.1s, ease-out cubic).
 
 ### Heat Wash (signature)
@@ -333,7 +333,7 @@ A bottom sheet rising over 300ms, holding up to three pinned units on one 2016�
 ## Do's and Don'ts
 
 ### Do:
-- **Do** take every hue that means "change" from the five-step ramp, and keep the heat pipeline's stop colours identical to it.
+- **Do** take every hue that means "change" on pins and controls from the five-step ramp; the heat wash keeps its own stops from meta.json.
 - **Do** show the digit with every coloured count, in tabular figures.
 - **Do** float new chrome as a glass card: Frosted Glass, 22px blur at 180% saturation, 0.5px hairline, Float shadow, 14px radius.
 - **Do** emphasise controls with Graphite Ink (or near-white in dark mode), weight and placement.
