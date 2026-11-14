@@ -235,6 +235,7 @@ export default function App() {
           result={siteResult}
           grid={grid}
           counts={cuisineCounts}
+          priceBands={meta?.price_bands ?? []}
           onChange={setSite}
           onClose={() => setSiteOpen(false)}
           onOpen={(u) => {
@@ -273,6 +274,7 @@ export default function App() {
         props={selected}
         pinned={selected ? pinned.includes(selected.id) : false}
         canPin={pinned.length < 3}
+        priceBands={meta?.price_bands ?? []}
         onPin={togglePin}
         onClose={() => setSelected(null)}
         onCheck={(u) => {
@@ -282,7 +284,7 @@ export default function App() {
         }}
       />
 
-      {hover && !placeHover && <Tooltip hover={hover} heat={heat} grid={grid} year={year} />}
+      {hover && !placeHover && <Tooltip hover={hover} heat={heat} grid={grid} year={year} priceBands={meta?.price_bands ?? []} />}
       {placeHover && (
         <div className="tooltip glass" style={{ left: placeHover.x, top: placeHover.y }}>
           <div>
@@ -296,7 +298,19 @@ export default function App() {
   );
 }
 
-function Tooltip({ hover, heat, grid, year }: { hover: NonNullable<Hover>; heat: boolean; grid: HeatGrid | null; year: number }) {
+function Tooltip({
+  hover,
+  heat,
+  grid,
+  year,
+  priceBands,
+}: {
+  hover: NonNullable<Hover>;
+  heat: boolean;
+  grid: HeatGrid | null;
+  year: number;
+  priceBands: string[];
+}) {
   const p = hover.props;
   if (p) {
     const n = Number(p.c[year - YEARS[0]]);
@@ -307,6 +321,7 @@ function Tooltip({ hover, heat, grid, year }: { hover: NonNullable<Hover>; heat:
           <b>{p.s || "Sign not recorded"}</b>
           <div className="muted num">
             {n === 1 ? "1 store change" : `${n} store changes`} {year < LAST ? `by end of ${year}` : "since 2016"}
+            {p.l[p.l.length - 1] === "1" && priceBands[p.pr] ? ` · ${priceBands[p.pr]}` : ""}
           </div>
         </div>
       </div>

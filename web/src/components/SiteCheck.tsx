@@ -36,10 +36,19 @@ interface Props {
   result: SiteResult | null;
   grid: HeatGrid | null;
   counts: Record<string, number>;
+  priceBands: string[];
   onChange: (s: SiteState) => void;
   onOpen: (u: UnitProps) => void;
   onClose: () => void;
 }
+
+const PLACE_WORD: Partial<Record<PlaceKind, [string, string]>> & Record<"hotel" | "school" | "mall" | "landmark" | "transit", [string, string]> = {
+  hotel: ["hotel", "hotels"],
+  school: ["school", "schools"],
+  mall: ["mall", "malls"],
+  landmark: ["landmark", "landmarks"],
+  transit: ["station", "stations"],
+};
 
 const metres = (m: number) => (m < 1000 ? `${Math.round(m / 5) * 5} m` : `${(m / 1000).toFixed(1)} km`);
 
@@ -51,7 +60,7 @@ function PlaceIcon({ k }: { k: PlaceKind }) {
   );
 }
 
-export function SiteCheck({ site, result, grid, counts, onChange, onOpen, onClose }: Props) {
+export function SiteCheck({ site, result, grid, counts, priceBands, onChange, onOpen, onClose }: Props) {
   const label = site.cuisine ? CUISINE_LABEL[site.cuisine] : "";
   const life = grid && site.lon != null && site.lat != null ? heatAt(grid, site.lon, site.lat) : null;
   return (
@@ -113,17 +122,22 @@ export function SiteCheck({ site, result, grid, counts, onChange, onOpen, onClos
 
           {(site.cuisine ? result.comp : result.inside).length > 0 && (
             <ul className="site-list">
-              {(site.cuisine ? result.comp : result.inside).slice(0, 6).map((u) => (
+              {(site.cuisine ? result.comp : result.inside).slice(0, 4).map((u) => (
                 <li key={u.id}>
                   <button onClick={() => onOpen(u)}>
                     <PinMark n={u.chg} size={18} />
-                    <span className="site-name">{u.s || "Sign not recorded"}</span>
+                    <span className="site-name">
+                      {u.s || "Sign not recorded"}
+                      <small>{u.pr >= 0 ? priceBands[u.pr] : "No price data"}</small>
+                    </span>
                     <span className="site-dist num">{metres(u.dist)}</span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
+
+          <Prices shops={site.cuisine ? result.comp : result.inside} bands={priceBands} cuisine={label} />
 
           <dl className="site-stats num">
             {site.cuisine && (
@@ -160,20 +174,52 @@ export function SiteCheck({ site, result, grid, counts, onChange, onOpen, onClos
           </dl>
 
           <div className="site-places">
-            {(["hotel", "school", "mall", "landmark", "transit"] as PlaceKind[]).map((k) => (
+            {(["hotel", "school", "mall", "landmark", "transit"] as const).map((k) => (
               <span key={k} title={k}>
                 <PlaceIcon k={k} />
                 <b className="num">{result.places[k]}</b>
-                {k === "hotel" ? "hotels" : k === "school" ? "schools" : k === "mall" ? "malls" : k === "landmark" ? "landmarks" : "stations"}
+                {PLACE_WORD[k][result.places[k] === 1 ? 0 : 1]}
               </span>
             ))}
           </div>
 
           <p className="fine">
-            Cuisine is guessed from each shop’s name. Distances are straight-line. Places from OpenStreetMap.
+            Price and cuisine from OpenRice where a listing matched; otherwise cuisine is guessed from the shop’s name. Distances
+            are straight-line. Places from OpenStreetMap.
           </p>
         </div>
       )}
     </section>
+  );
+}
+
+/** What nearby shops charge per person (OpenRice), as one bar per price band. */
+function Prices({ shops, bands, cuisine }: { shops: UnitProps[]; bands: string[]; cuisine: string }) {
+  if (!shops.length || !bands.length) return null;
+  const counts = bands.map((_, i) => shops.filter((u) => u.pr === i).length);
+  const known = counts.reduce((a, b) => a + b, 0);
+  const max = Math.max(1, ...counts);
+  return (
+    <div className="site-prices">
+      <h3>What {cuisine ? `${cuisine} shops` : "they"} charge per person</h3>
+      {known === 0 ? (
+        <p className="fine">No price data for these shops.</p>
+      ) : (
+        <ul>
+          {bands.map((b, i) => (
+            <li key={b} className={counts[i] ? "" : "zero"}>
+              <span className="pl num">{b}</span>
+              <span className="pb">
+                <i style={{ width: `${(counts[i] / max) * 100}%` }} />
+              </span>
+              <span className="pc num">{counts[i]}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="fine num">
+        {known} of {shops.length} have a price on OpenRice{shops.length - known ? `; ${shops.length - known} no data` : ""}.
+      </p>
+    </div>
   );
 }

@@ -72,6 +72,9 @@ const shots = {
     await p.mouse.click(box.x + box.width * 0.58, box.y + box.height * 0.5);
     await settle(p, 1500);
     await p.screenshot({ path: `${out}/site.png` });
+    await p.evaluate(() => document.querySelector(".sitecard").scrollTo(0, 9999));
+    await p.waitForTimeout(300);
+    await p.screenshot({ path: `${out}/site-prices.png` });
   },
   async filters() {
     const p = await page({ width: 1440, height: 900 }, "light");

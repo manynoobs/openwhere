@@ -18,7 +18,8 @@ export interface UnitProps {
   seat: 0 | 1; // outside seating ever recorded
   sl: 0 | 1; // street level (ground floor)
   d: string; // FEHD district code
-  cu: string; // cuisine guessed from the current sign; "" when nothing is listed now
+  cu: string; // cuisine group for shops listed now (OpenRice where matched, else from the sign); "" otherwise
+  pr: number; // OpenRice price band index into meta.price_bands; -1 = no data
   mtr: number; // straight-line metres to the nearest MTR exit
   mtrx: string; // that exit, e.g. "Yau Ma Tei Exit A1"
   lon?: number;
@@ -26,7 +27,7 @@ export interface UnitProps {
 }
 
 export const CUISINES: [key: string, label: string][] = [
-  ["cha_chaan_teng", "Cha chaan teng & café"],
+  ["cha_chaan_teng", "Hong Kong style & cha chaan teng"],
   ["noodles", "Noodles & congee"],
   ["chinese", "Chinese"],
   ["japanese", "Japanese"],
@@ -92,6 +93,7 @@ export interface UnitDetail {
   outside_seating_ever: boolean;
   unlisted_gaps: { from: string; to: string; months: number }[];
   sign_histories: SignHistory[];
+  openrice: { price: string | null; cuisines: string[] } | null;
   first_file: string;
   latest_file: string;
 }
@@ -115,6 +117,8 @@ export interface Meta {
     new_histories: number;
   };
   generated: string;
+  price_bands: string[];
+  openrice_matched: number;
 }
 
 export type SearchRow = [id: number, en: string, tc: string, signs: string, chg: number, lon: number, lat: number];
