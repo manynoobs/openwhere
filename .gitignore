@@ -4,12 +4,15 @@ data/*.duckdb
 data/*.duckdb.wal
 data/*.sqlite
 data/*.log
+data/histories.jsonl
 .venv/
 __pycache__/
 *.pyc
 node_modules/
 web/dist/
-web/public/tiles/*.pmtiles
 bin/
 .DS_Store
 .impeccable/config.local.json
+playwright-report/
+web/scripts/_*.mjs
+.claude/

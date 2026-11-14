@@ -1,4 +1,4 @@
-"""Link licences at each unit into sign histories, count store changes, generate questions.
+"""Link licences at each unit into sign histories and count store changes.
 
     python pipeline/histories.py            # writes data/histories.jsonl
 
@@ -11,9 +11,15 @@ Only the named rules below create a link. With no rule firing, records stay sepa
 
 A sign change under one licence number stays in the same sign history (verified).
 
-Store changes = the number of times a sign history with a different sign took over the unit
-after the first file. Placeholder-only links add no change, because the records hold no
-different sign.
+Store changes = the number of successions: a sign history that starts after the first file,
+once an earlier history at the unit has stopped being listed, under a different real sign.
+A history that starts while every earlier one is still listed is an additional shop at the
+address, not a change. Placeholder-only links add no change, because the records hold no
+different sign. Units where two or more histories are listed at once for SHARED_MONTHS or
+more are flagged `shared`: several shops are filed under this address.
+
+Months with no licence observed are reported only from GAP_MONTHS up: ingest.py measured that
+99.8% of licences missing from a monthly file are listed again within six months.
 """
 import json
 import re
@@ -32,8 +38,9 @@ GENERIC = re.compile(
     r"\b(RESTAURANTS?|REST\.?|CAFE|CAFÉ|COFFEE|SHOP|CO\.?|LTD\.?|LIMITED|COMPANY|KITCHEN|"
     r"FOOD|HK|HONG KONG|THE|AND|&|BRANCH|STORE|EXPRESS)\b|"
     r"(餐廳|茶餐廳|冰室|小館|酒家|酒樓|飯店|食堂|美食|小食|有限公司|公司|分店|店|館|屋)", re.I)
-TYPE_NAME = {"RL": "General restaurant", "RR": "Light refreshment", "MR": "Marine restaurant"}
-ENDORSE = {"#A": "Outside seating"}
+GAP_MONTHS = 6
+SHARED_MONTHS = 6
+OVERLAP_OK = 3  # a new sign may appear up to 3 months before the old one drops off the list
 
 
 def day(snap):
@@ -183,6 +190,7 @@ def histories_for(lics, first_snap, latest_snap):
                                  "rule": best[1][0], "status": "unresolved"} if best else None})
         hists.append(h)
 
+    possible = {t["possible_link"]["from"] for t in transitions if t["possible_link"]}
     out = []
     for i, h in enumerate(hists):
         L = h["licences"]
@@ -199,7 +207,9 @@ def histories_for(lics, first_snap, latest_snap):
         if not listed_now:
             exp = last["expdate_last"]
             not_seen = day(last["first_not_seen"]) if last["first_not_seen"] else None
-            if last["prefix"] in PROV and L[-1] is last:
+            if last["prefix"] in PROV and L[-1] is last and last["licno"] in possible:
+                end = {"label": "possible_successor_signs_differ", "status": "unresolved"}
+            elif last["prefix"] in PROV and L[-1] is last:
                 end = {"label": "no_successor_identified", "status": "unresolved"}
             elif exp and not_seen and months(not_seen, date.fromisoformat(exp)) > 2:
                 end = {"label": "not_observed_before_recorded_expiry", "status": "verified",
@@ -228,45 +238,44 @@ def histories_for(lics, first_snap, latest_snap):
     return out, transitions
 
 
-def questions(unit, hs, gaps):
-    q = []
-    types = {t for h in hs for t in h["lic_types"]}
-    if types == {"RR"}:
-        q.append({"rule": "only_light_refreshment",
-                  "text": "Only light refreshment licences appear here since 2016. Ask whether the "
-                          "premises can meet general restaurant requirements before planning a full kitchen."})
-    seat = [h for h in hs if "#A" in h["endorsements"]]
-    if seat and "#A" not in hs[-1]["_info_last"]:
-        q.append({"rule": "outside_seating_lapsed",
-                  "text": f"Outside seating was recorded here {seat[0]['first_seen'][:4]}–{seat[-1]['last_seen'][:4]}. "
-                          "Ask whether it can be approved again."})
-    for g in gaps:
-        if g["months"] >= 12:
-            q.append({"rule": "long_unlisted_gap",
-                      "text": f"No restaurant licence was observed here from {fmt(g['from'])} to {fmt(g['to'])}. "
-                              "Ask the landlord how the unit was used."})
+def succession_changes(hs, trans, latest):
+    possible = {t["to_index"]: t["possible_link"] for t in trans}
+    succeeded, changes = set(), []
+    latest_day = day(latest)
+    for i, h in enumerate(hs):
+        if h["listed_before_2016"]:
+            continue
+        start = date.fromisoformat(h["first_seen"])
+        best = None
+        for j in range(i):
+            p = hs[j]
+            if j in succeeded or p["listed_in_latest_snapshot"]:
+                continue
+            end = date.fromisoformat(p["last_seen"])
+            if end >= latest_day or months(start, end) > OVERLAP_OK:
+                continue
+            if best is None or end > date.fromisoformat(hs[best]["last_seen"]):
+                best = j
+        if best is None:
+            continue
+        p = hs[best]
+        succeeded.add(best)
+        if h["_real"] and not same_sign(p["_real"] or {"?"}, h["_real"]):
+            changes.append({"year": start.year, "to": display_sign(h), "from": display_sign(p),
+                            "first_seen": h["first_seen"], "possible_link": possible.get(i)})
+    return changes
+
+
+def concurrent_months(hs):
+    """Months in which two or more sign histories were listed at once."""
+    count = defaultdict(int)
     for h in hs:
-        if h["_prov_count"] >= 2:
-            name = display_sign(h)
-            q.append({"rule": "repeated_provisional",
-                      "text": f"Under the sign {name}, {h['_prov_count']} provisional-pattern licence numbers "
-                              "were recorded. Ask the agent or FEHD about the licensing history of the premises."})
-        if h["end"] and h["end"]["label"] == "not_observed_before_recorded_expiry":
-            q.append({"rule": "not_observed_before_expiry",
-                      "text": f"The licence under {display_sign(h)} stopped appearing "
-                              f"{h['end']['months_early']} months before its recorded expiry. "
-                              "Ask why the previous business ended."})
-    addr_changes = [l for h in hs for l in h["licences"] if len(l["addresses"]) > 1]
-    if addr_changes:
-        yr = addr_changes[0]["addresses"][1]["first_seen"][:4]
-        q.append({"rule": "address_text_changed",
-                  "text": f"The licensed address description changed in {yr}. "
-                          "Confirm the exact unit and extent you are being offered."})
-    if unit["resolution"] != "resolved":
-        q.append({"rule": "not_resolved",
-                  "text": "The records cannot separate this unit from its neighbours. "
-                          "Ask the landlord for past licence numbers."})
-    return q
+        a, b = date.fromisoformat(h["first_seen"]), date.fromisoformat(h["last_seen"])
+        y, m = a.year, a.month
+        while (y, m) <= (b.year, b.month):
+            count[(y, m)] += 1
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return sum(1 for v in count.values() if v >= 2)
 
 
 def display_sign(h):
@@ -295,24 +304,15 @@ def main():
         for uid, lics in per_unit.items():
             u = units[uid]
             hs, trans = histories_for(lics, first_snap, latest)
-            # store changes: a later history whose real sign differs from the one before
-            changes = []
-            for t in trans:
-                h = hs[t["to_index"]]
-                prev = hs[t["to_index"] - 1]
-                if h["listed_before_2016"]:
-                    continue
-                if h["_real"] and not same_sign(prev["_real"] or {"?"}, h["_real"]):
-                    changes.append({"year": int(h["first_seen"][:4]), "to": display_sign(h),
-                                    "from": display_sign(prev), "first_seen": h["first_seen"],
-                                    "possible_link": t["possible_link"]})
+            changes = succession_changes(hs, trans, latest)
+            shared = concurrent_months(hs) >= SHARED_MONTHS
             # months with no licence observed at the unit
             spans = sorted((a, b, nxt[b]) for l in lics for a, b in l["src"])
             gaps, cover_end = [], None
             for a, b, nb in spans:
                 if cover_end and cover_end[1] and cover_end[1] < a:
                     m = months(day(cover_end[1]), day(a))
-                    if m >= 2:
+                    if m >= GAP_MONTHS:
                         gaps.append({"from": iso(cover_end[1]), "to": iso(a), "months": round(m)})
                 if not cover_end or b > cover_end[0]:
                     cover_end = (b, nb)
@@ -324,6 +324,7 @@ def main():
                 "street_level": "G" in json.loads(u["floors"]),
                 "address_en": lics[0]["addresses"][-1]["en"], "address_tc": lics[0]["addresses"][-1]["tc"],
                 "store_changes": len(changes),
+                "shared": shared,
                 "changes": changes,
                 "change_years": [c["year"] for c in changes],
                 "listed_now": listed_now,
@@ -334,7 +335,6 @@ def main():
                 "outside_seating_ever": any("#A" in h["endorsements"] for h in hs),
                 "unlisted_gaps": gaps,
                 "sign_histories": [{k: v for k, v in h.items() if not k.startswith("_")} for h in hs],
-                "questions": questions(u, hs, gaps),
                 "first_file": iso(first_snap), "latest_file": iso(latest),
             }
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")

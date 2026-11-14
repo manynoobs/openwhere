@@ -118,7 +118,7 @@ def street_level(floors):
 # ---------------------------------------------------------------- geocoding
 
 def cache():
-    con = sqlite3.connect(CACHE, check_same_thread=False)
+    con = sqlite3.connect(CACHE, check_same_thread=False, timeout=60)
     con.execute("CREATE TABLE IF NOT EXISTS als (q TEXT PRIMARY KEY, body TEXT, t REAL)")
     return con
 
@@ -225,7 +225,14 @@ def cmd_geocode(args):
     con.close()
     db = cache()
     have = {q for (q,) in db.execute("SELECT q FROM als")}
-    qs = sorted({query_for(*t) for t in todo} - have - {""})
+    bodies = dict(db.execute("SELECT q, body FROM als"))
+    wanted = set()
+    for street_no, street, dist, address in todo:
+        q = query_for(street_no, street, dist, address)
+        wanted.add(q)
+        if street and q in bodies and not accept(bodies[q], street, street_no):
+            wanted.add(query_for(None, None, dist, address))
+    qs = sorted(wanted - have - {""})
     print(f"{len(qs)} lookups to make ({len(have)} cached)", flush=True)
 
     def one(q):
@@ -262,6 +269,8 @@ def cmd_build(_):
     for address, dist, floors, shops, street_no, street, portion in addrs:
         body = bodies.get(query_for(street_no, street, dist, address))
         hit = accept(body, street, street_no) if street else accept_text(body)
+        if street and not hit:
+            hit = accept_text(bodies.get(query_for(None, None, dist, address)))
         bld[address] = hit
     # group per building+floor set to decide shop-level resolution
     groups = {}
