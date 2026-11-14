@@ -333,8 +333,8 @@ A map pin (where) whose head holds a shop awning (open): ink pin, white shopfron
 - **Switch:** 38 × 23px track in Tint Fill Strong, white thumb; on is ink, the thumb travels over 220ms.
 - **Year slider:** the native range input in Slate Ink, with tabular year ticks every second year beneath.
 
-### Unit Panel
-The 400px glass panel slides in from the right over 340ms as the map flies to the unit (900ms) and the badge lifts, as one motion. Head: address headline, Chinese address in Slate Ink, the large chip with "N store changes since 2016", fact tags and actions. Body: the sign timeline (74px year column, sign names Chinese first then English), store-change markers as small ramp-coloured dots on a hairline, and a collapsible records table in 12px text.
+### Shop Card
+The 400px glass panel slides in from the right as the map flies to the shop and its pin lifts, as one motion. Built for low density, in this order: the shop listed now as a 21px headline, its cuisine (OpenRice tags, or the name-based guess marked as such), the address in English and Chinese in Mist Ink; then a hairline and a two-column fact list (12px Mist Ink labels over 16px semibold values): price per person (OpenRice band or "No data"), store changes with a 16px pin mark, how long this shop has been here, nearest MTR exit with the exit name small beneath, and a full-width kitchen line from the licence type. Actions: Check this spot (ink) and Pin to compare. Body: past shops as one line each (years column, sign name, English name small beneath, an occasional "after N months with no licence"), and the licence records, notes and source behind a disclosure.
 
 ### Compare Sheet
 A bottom sheet rising over 320ms, up to 1120px wide, holding up to three pinned units as lanes on one 2016–2026 axis: a 248px identity column (pin mark, street line, floor and area), a 14px track with separated rounded bands per sign (the current one in ink), ramp-coloured dots at each store change, dashed gaps with no licence, sign names on two staggered lines under the track, and one line of facts. Empty slots show a dashed pin with an invitation to pin another.

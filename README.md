@@ -16,6 +16,7 @@ It is a reference for anyone in the food business, from a single noodle shop to 
 - **See how long shops last.** *Shop lifespan* colours the streets by the share of new shops still listed three years after they opened. Green means shops last and red means they don't. Paler colour means the estimate rests on fewer shops.
 - **Check a site.** *Site check* lets you click any spot, choose your cuisine and drag the radius (50 to 500 m). You get:
   - same-cuisine competitors listed now, nearest first, highlighted on the map;
+  - **what they charge per person**, as a bar per OpenRice price band;
   - all restaurants nearby;
   - the local 3-year survival rate;
   - units that held a licence before but have none now;
@@ -23,7 +24,13 @@ It is a reference for anyone in the food business, from a single noodle shop to 
   - the nearest MTR exit;
   - the hotels, schools, malls, landmarks and stations in range.
 - **See what draws people.** *Places* shows MTR exits, stations, hotels, schools and universities, malls and markets, landmarks and venues, and hospitals. It can be switched off.
-- **Open a unit.** Click a pin, or search in English or Chinese (`砵蘭街100`, `Hau Fook`, a shop name). The panel shows every sign at that address with its years and licence type, the cuisine, the nearest MTR exit, and the licence records behind it.
+- **Open a shop.** Click a pin, or search in English or Chinese (`砵蘭街100`, `Hau Fook`, a shop name). The card leads with what a future tenant needs:
+  - the shop listed now, with its cuisine and **price per person** from OpenRice ("No data" where there's no match);
+  - store changes since 2016, and how long the current shop has been there;
+  - the nearest MTR exit;
+  - whether a full kitchen is on record.
+
+  Below that, every past shop at the address is one line, and the licence records are one tap away.
 - **Play ten years.** The year bar replays 2016 to 2026, and units whose count rises that year pulse.
 - **Compare and print.** Pin up to three units to see their signs on one 2016–2026 axis, with each store change marked and the gaps with no licence dashed. Then print a sheet that cites its source for every row.
 
@@ -87,6 +94,19 @@ The licence lists carry no cuisine, so it is guessed from each current shop's si
 
 That gives 1,385 of the 1,587 shops listed now (87%) a cuisine. The other 202 stay "unclear from the name" rather than being guessed. A spot check of 45 rule labels found 41 right; the patterns behind the misses were then added. The app always says the cuisine was guessed from the name.
 
+### Price and cuisine from OpenRice
+
+A teammate collected 4,414 OpenRice listings (name, address, coordinates, price range, cuisines); 2,531 of them are in Tsim Sha Tsui, Jordan and Yau Ma Tei. `pipeline/openrice.py` attaches a listing to one of our current shops only when they clearly describe the same place:
+- the names match closely and the points are within 150 m; or
+- the street number and street agree and the names are similar; or
+- the names are fairly close and the points are within 60 m.
+
+Each listing and each shop is used once, best match first.
+
+Every match with a weaker name score was read by hand, and 12 were rejected. In the end, **963 of the 1,562 named shops listed now (62%) have an OpenRice price and cuisine**; a random sample of 35 strong matches was all correct. Shops without a match say "No data". OpenRice's cuisine replaces the guess from the name, except for dish types OpenRice doesn't record (hot pot, bar, café, noodles, fast food).
+
+OpenRice's terms restrict copying, so the raw listings stay out of this repository (`data/openrice/` is ignored). Only the matched price band and cuisine labels reach the app, credited to OpenRice.
+
 ### Places and MTR exits
 
 Places and MTR exits come from OpenStreetMap via the Overpass API. Tutoring centres tagged as schools are dropped. Distances are straight-line, not walking routes: the median shop is 149 m from its nearest MTR exit.
@@ -101,7 +121,8 @@ Places and MTR exits come from OpenStreetMap via the Overpass API. Tutoring cent
 | Street-level shopfronts placed on the map | 1,121 of 1,195 (94%) |
 | Street-level: no change / 1 / 2 / 3 / 4 or more | 832 / 212 / 56 / 15 / 6 |
 | New street-level shops since 2016 still listed after 3 years | 75% |
-| Current shops with a cuisine label | 1,385 of 1,587 (87%) |
+| Current shops with a cuisine label | 1,460 of 1,587 (92%), from OpenRice or the name |
+| Current shops with an OpenRice price per person | 963 of 1,562 named shops (62%) |
 | Places on the map | 160 MTR exits, 138 hotels, 161 schools, 95 malls and markets, 69 landmarks, 60 stations, 7 hospitals |
 
 Yau Tsim was picked from the 19 FEHD districts by running the same counting over all of them. It has:
@@ -125,6 +146,7 @@ python units.py geocode --dist 61      # Address Lookup Service, cached
 python units.py build                  # addresses -> units
 python histories.py                    # link rules, store changes
 python cuisine.py                      # cuisine guessed from current signs
+python openrice.py                     # match OpenRice listings (needs data/openrice/openrice.md)
 python export.py                       # web/public/data
 python facilities.py                   # OpenStreetMap places, MTR exit distance
 python heat.py                         # shop lifespan surface
@@ -137,6 +159,7 @@ python heat.py                         # shop lifespan surface
 | Units | `units.py` | Parses floor, shop numbers and street address by rule, then places each building with the government Address Lookup Service. |
 | Histories | `histories.py` | Applies the link rules and counts store changes. |
 | Cuisine | `cuisine.py` | Keyword rules plus hand labels for shops listed now. |
+| OpenRice | `openrice.py` | Matches OpenRice listings to current shops for price and cuisine. |
 | Export | `export.py` | GeoJSON, one history file per unit, a search index. |
 | Places | `facilities.py` | OpenStreetMap places and each shop's distance to the nearest MTR exit. |
 | Lifespan | `heat.py` | Distance-weighted Kaplan–Meier surface, its image and a readout grid. |
@@ -171,7 +194,8 @@ docs/             screenshots and brand files
 - Monthly sampling misses a shop that opened and closed between two monthly files.
 - 74 street-level addresses (6%) could not be placed reliably and are left off the map.
 - Link rules can be wrong. Every link is labelled with the rule that made it, and the panel lists the records behind it.
-- Cuisine is a guess from a name, and one in ten shops can't be guessed at all.
+- Where OpenRice has no match, cuisine is a guess from the name, and 127 current shops can't be guessed at all.
+- OpenRice prices are the listing's own price band, as collected; they may be out of date for some shops.
 - Shop lifespan compares areas within this district only. Its colours come from Yau Tsim's own range.
 - No rent data: there is no reliable public source for the current rent of individual shops.
 
@@ -179,6 +203,7 @@ docs/             screenshots and brand files
 
 - Restaurant licence lists: Food and Environmental Hygiene Department, via the [DATA.GOV.HK historical archive](https://data.gov.hk/en/help/api-spec).
 - Building locations: [Address Lookup Service](https://www.als.gov.hk), Office of the Government Chief Information Officer.
+- Price per person and cuisine for matched shops: [OpenRice](https://www.openrice.com), collected by a teammate.
 - Places, MTR exits and basemap: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), rendered with [Protomaps](https://protomaps.com) and [MapLibre GL JS](https://maplibre.org).
 
 Reconstructed from FEHD licence lists. Not a record of ownership, tenancy or business performance.
