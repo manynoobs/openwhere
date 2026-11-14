@@ -1,5 +1,6 @@
 import type { ExpressionSpecification, FilterSpecification, Map as MLMap } from "maplibre-gl";
 import { STEPS, zeroFill } from "../ramp";
+import { MARKER_ANCHOR } from "./badges";
 import { YEARS, type Filters } from "../types";
 
 export const SRC = "units";
@@ -61,15 +62,16 @@ const isZero = (year: number): ExpressionSpecification => ["==", changesAt(year)
 // shops with no change step back: smaller, so the ones that changed read first
 const DOT_RADIUS = (year: number): ExpressionSpecification => [
   "interpolate", ["linear"], ["zoom"],
-  12, ["case", isZero(year), 1.4, 2.6],
-  14, ["case", isZero(year), 2.2, 4],
-  16, ["case", isZero(year), 3.2, 5.5],
+  12, ["case", isZero(year), 1.6, 2.6],
+  14, ["case", isZero(year), 2.4, 4],
+  15.7, ["case", isZero(year), 3.2, 5],
+  16.4, ["case", isZero(year), 2.4, 3.2],
 ];
 const badgeSize = (year: number): ExpressionSpecification => [
   "interpolate", ["linear"], ["zoom"],
-  BADGE_FROM, ["case", isZero(year), 0.5, 0.78],
-  17, ["case", isZero(year), 0.72, 1],
-  18.5, ["case", isZero(year), 0.85, 1.12],
+  BADGE_FROM, ["case", isZero(year), 0.6, 0.78],
+  17, ["case", isZero(year), 0.8, 1],
+  18.5, ["case", isZero(year), 0.9, 1.12],
 ];
 
 export function addUnitLayers(map: MLMap, year: number, f: Filters) {
@@ -141,6 +143,7 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
       "icon-allow-overlap": false,
       "icon-ignore-placement": false,
       "icon-padding": 0,
+      "icon-anchor": MARKER_ANCHOR,
       "symbol-sort-key": ["-", 0, changesAt(year)],
       "icon-size": badgeSize(year),
     },
@@ -158,6 +161,7 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
       "icon-image": badgeImage(year),
       "icon-allow-overlap": true,
       "icon-ignore-placement": true,
+      "icon-anchor": MARKER_ANCHOR,
       "icon-size": 1.3,
     },
   });

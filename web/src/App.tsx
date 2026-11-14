@@ -6,6 +6,7 @@ import { Legend, YearBar } from "./components/Bottom";
 import { UnitPanel } from "./components/UnitPanel";
 import { CompareSheet, PrintSheet } from "./components/Compare";
 import { Icon } from "./components/Icon";
+import { PinMark } from "./components/PinMark";
 import { heatAt, loadHeatGrid, loadMeta, type HeatGrid } from "./data";
 import { DEFAULT_FILTERS, YEARS, type Filters, type Meta, type UnitProps } from "./types";
 
@@ -98,7 +99,7 @@ export default function App() {
   }
 
   return (
-    <div className={panelOpen ? "panel-open" : ""} style={{ height: "100%" }}>
+    <div className={`${panelOpen ? "panel-open" : ""} ${compareOpen && pinned.length ? "compare-open" : ""}`} style={{ height: "100%" }}>
       {meta && (
         <MapView
           year={year}
@@ -182,9 +183,12 @@ function Tooltip({ hover, heat, grid, year }: { hover: NonNullable<Hover>; heat:
     const n = Number(p.c[year - YEARS[0]]);
     return (
       <div className="tooltip glass" style={{ left: hover.x, top: hover.y }}>
-        <b>{p.s || "Sign not recorded"}</b>
-        <div className="muted num">
-          {n === 1 ? "1 store change" : `${n} store changes`} {year < LAST ? `by end of ${year}` : "since 2016"}
+        <PinMark n={n} size={22} hollow={p.l[year - YEARS[0]] === "2"} />
+        <div>
+          <b>{p.s || "Sign not recorded"}</b>
+          <div className="muted num">
+            {n === 1 ? "1 store change" : `${n} store changes`} {year < LAST ? `by end of ${year}` : "since 2016"}
+          </div>
         </div>
       </div>
     );

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadSearch } from "../data";
 import type { SearchRow } from "../types";
-import { Chip } from "./Chip";
+import { PinMark } from "./PinMark";
 import { Icon } from "./Icon";
 
 const norm = (s: string) => s.toLowerCase().replace(/[\s,.'’()\-/]+/g, "");
@@ -97,7 +97,7 @@ export function Search({ district, onPick }: Props) {
           {results.map((r, i) => (
             <li key={r[0]}>
               <button role="option" aria-selected={i === active} onMouseDown={(e) => e.preventDefault()} onClick={() => pick(r)}>
-                <Chip n={r[4]} />
+                <PinMark n={r[4]} size={20} />
                 <span style={{ minWidth: 0 }}>
                   <div className="r-title">{shortAddress(r[1])}</div>
                   <div className="r-sub">{r[2] || r[3].split(" | ")[0]}</div>

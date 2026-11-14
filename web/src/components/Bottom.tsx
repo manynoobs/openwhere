@@ -1,4 +1,4 @@
-import { STEPS } from "../ramp";
+import { PinMark } from "./PinMark";
 import { YEARS } from "../types";
 import { Icon } from "./Icon";
 
@@ -21,22 +21,13 @@ export function Legend({ heat, stops, year }: { heat: boolean; stops: [number, s
   return (
     <div className="legend glass" aria-live="polite">
       <div className="cap">Store changes since 2016</div>
-      <div className="row">
-        {STEPS.map((s) =>
-          s.label === "0" ? (
-            <span key="0" className="zero-key" title="No store change">
-              <i style={{ background: s.fill }} />0
-            </span>
-          ) : (
-            <span key={s.label} className="chip num" style={{ background: s.fill, color: s.ink }}>
-              {s.label}
-            </span>
-          ),
-        )}
+      <div className="row legend-pins">
+        {[0, 1, 2, 3, 4].map((n) => (
+          <PinMark key={n} n={n} size={22} label={n === 4 ? "4+" : undefined} />
+        ))}
       </div>
       <div className="key">
-        <span><i className="swatch-hollow" />Hollow: no licence listed now</span>
-        <span><i className="swatch-dash" />Shared address</span>
+        <span><PinMark n={2} size={15} hollow label="" />White pin: no licence listed now</span>
       </div>
     </div>
   );

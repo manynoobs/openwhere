@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { isPlaceholder, loadUnit, monthYear, signNames, TYPE_LABEL, yearOf } from "../data";
 import type { SignHistory, UnitDetail, UnitProps } from "../types";
-import { Chip } from "./Chip";
+import { PinMark } from "./PinMark";
 import { STEPS, stepOf } from "../ramp";
 import { Icon } from "./Icon";
 import { shortAddress } from "./Search";
@@ -53,7 +53,7 @@ export function UnitPanel({ id, props, pinned, canPin, onPin, onClose }: Props) 
           </div>
           {props.tc && <div className="addr">{props.tc}</div>}
           <div className="figure">
-            <Chip n={props.chg} className="big" />
+            <PinMark n={props.chg} size={40} hollow={props.l[props.l.length - 1] === "2"} />
             <div className="what">
               {props.chg === 1 ? "1 store change" : `${props.chg} store changes`} since 2016
               <small>{u ? statusLine(u) : " "}</small>
