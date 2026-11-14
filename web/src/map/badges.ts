@@ -5,7 +5,7 @@ import { STEPS, stepOf, zeroFill } from "../ramp";
 // so they render like native pins and need no glyph files.
 const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Text", "Helvetica Neue", "PingFang HK", sans-serif';
 export const BADGE_LABELS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-export type BadgeState = "f" | "h" | "d"; // filled · hollow (none listed now) · building level only
+export type BadgeState = "f" | "h"; // filled · hollow (none listed now)
 
 export const badgeName = (label: string, state: BadgeState) => `b-${label}-${state}`;
 
@@ -41,18 +41,6 @@ function softShadow(g: CanvasRenderingContext2D, blur = 4, y = 1.5, a = 0.26) {
   g.shadowColor = `rgba(16, 20, 30, ${a})`;
   g.shadowBlur = blur;
   g.shadowOffsetY = y;
-}
-
-function dashedRing(g: CanvasRenderingContext2D, x: number, y: number, r: number, color: string) {
-  g.save();
-  g.beginPath();
-  g.arc(x, y, r, 0, Math.PI * 2);
-  g.setLineDash([2.4, 2.2]);
-  g.lineWidth = 1.3;
-  g.strokeStyle = color;
-  g.globalAlpha = 0.6;
-  g.stroke();
-  g.restore();
 }
 
 /** Apple Maps–style pin: the tip marks the shopfront, the head carries the count */
@@ -95,7 +83,6 @@ function pin(label: string, state: BadgeState, s: Step, pr: number) {
     g.fill();
   }
   g.restore();
-  if (state === "d") dashedRing(g, x, y, r - 4.4, s.ink);
   digit(g, label, x, y, 13, state === "h" ? "#1D1F24" : s.ink);
   return g.getImageData(0, 0, c.width, c.height);
 }
@@ -105,7 +92,7 @@ export function registerBadges(map: MLMap, dark: boolean) {
   for (const label of BADGE_LABELS) {
     const base = STEPS[stepOf(Number(label))];
     const step = label === "0" ? { ...base, fill: zeroFill(dark) } : base;
-    for (const state of ["f", "h", "d"] as BadgeState[]) {
+    for (const state of ["f", "h"] as BadgeState[]) {
       const name = badgeName(label, state);
       if (!map.hasImage(name)) map.addImage(name, pin(label, state, step, pr), { pixelRatio: pr });
     }
