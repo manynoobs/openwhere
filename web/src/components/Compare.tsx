@@ -194,7 +194,7 @@ export function PrintSheet({ ids }: { ids: number[] }) {
   if (!units.length) return null;
   return (
     <div className="print-only">
-      <h1>Shopfront Past Lives · 鋪位前世 — comparison</h1>
+      <h1>OpenWhere — comparison</h1>
       {units.map((u) => (
         <section key={u.id}>
           <h2>

@@ -18,7 +18,29 @@ export interface UnitProps {
   seat: 0 | 1; // outside seating ever recorded
   sl: 0 | 1; // street level (ground floor)
   d: string; // FEHD district code
+  cu: string; // cuisine guessed from the current sign; "" when nothing is listed now
+  mtr: number; // straight-line metres to the nearest MTR exit
+  mtrx: string; // that exit, e.g. "Yau Ma Tei Exit A1"
+  lon?: number;
+  lat?: number;
 }
+
+export const CUISINES: [key: string, label: string][] = [
+  ["cha_chaan_teng", "Cha chaan teng & café"],
+  ["noodles", "Noodles & congee"],
+  ["chinese", "Chinese"],
+  ["japanese", "Japanese"],
+  ["korean", "Korean"],
+  ["se_asian", "Southeast Asian"],
+  ["south_asian", "South Asian & Middle Eastern"],
+  ["western", "Western"],
+  ["fast_food", "Fast food & chains"],
+  ["cafe", "Coffee, dessert & bakery"],
+  ["hotpot_bbq", "Hot pot & barbecue"],
+  ["bar", "Bar & nightlife"],
+  ["hotel", "Hotel restaurant & banquet"],
+];
+export const CUISINE_LABEL: Record<string, string> = Object.fromEntries([...CUISINES, ["unknown", "Unclear from the name"]]);
 
 export interface SignSpan {
   en: string | null;
@@ -85,7 +107,13 @@ export interface Meta {
   units_resolved: number;
   districts: string[];
   renewal_lag_months: number;
-  heat: { bounds: [[number, number], [number, number], [number, number], [number, number]]; years: number[] };
+  heat: {
+    bounds: [[number, number], [number, number], [number, number], [number, number]];
+    image: string;
+    stops: [number, string][];
+    horizon_months: number;
+    new_histories: number;
+  };
   generated: string;
 }
 

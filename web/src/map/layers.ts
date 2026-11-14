@@ -56,8 +56,19 @@ const badgeImage = (year: number): ExpressionSpecification => [
 // below BADGE_FROM the map shows coloured dots; badges with digits fade in above it
 const BADGE_FROM = 15.7;
 // dots stay under the badges, so a badge hidden by a busier neighbour still shows as a coloured dot
-const DOT_FADE = 1;
-const BADGE_OPACITY: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], BADGE_FROM, 0, BADGE_FROM + 0.5, 1];
+// during a site check, shops outside the radius fade hard and other shops inside fade a little,
+// so the same-cuisine competitors read first
+const siteFade = (full: number): ExpressionSpecification => [
+  "match",
+  ["coalesce", ["feature-state", "site"], "none"],
+  "out",
+  full * 0.15,
+  "in",
+  full * 0.45,
+  full,
+];
+const DOT_FADE = siteFade(1);
+const BADGE_OPACITY: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], BADGE_FROM, 0, BADGE_FROM + 0.5, siteFade(1)];
 const isZero = (year: number): ExpressionSpecification => ["==", changesAt(year), 0];
 // shops with no change step back: smaller, so the ones that changed read first
 const DOT_RADIUS = (year: number): ExpressionSpecification => [
@@ -151,6 +162,21 @@ export function addUnitLayers(map: MLMap, year: number, f: Filters) {
       "icon-opacity": BADGE_OPACITY,
     },
   });
+  // site check: same-cuisine competitors always show their pin, above everything but the selection
+  map.addLayer({
+    id: "unit-badge-comp",
+    type: "symbol",
+    source: SRC,
+    filter: ["in", ["get", "id"], ["literal", []]],
+    layout: {
+      "icon-image": badgeImage(year),
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+      "icon-anchor": MARKER_ANCHOR,
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 14, 0.8, 17, 1],
+      "symbol-sort-key": ["-", 0, changesAt(year)],
+    },
+  });
   // the selected unit's badge lifts above the rest; in heat mode the hovered one shows too
   map.addLayer({
     id: "unit-badge-focus",
@@ -183,6 +209,7 @@ export function updateUnitLayers(map: MLMap, year: number, f: Filters) {
   map.setLayoutProperty("unit-badge", "icon-size", badgeSize(year));
   if (map.getLayoutProperty("unit-badge", "visibility") !== "none") map.setPaintProperty("unit-dot", "circle-radius", DOT_RADIUS(year));
   map.setLayoutProperty("unit-badge-focus", "icon-image", badgeImage(year));
+  map.setLayoutProperty("unit-badge-comp", "icon-image", badgeImage(year));
 }
 
 /** units whose cumulative count rose during `year` */
@@ -195,8 +222,8 @@ export function changedInFilter(year: number, f: Filters): FilterSpecification {
 export function setHeatMode(map: MLMap, on: boolean, year: number) {
   // badges fade rather than vanish; the style's 450 ms transition carries the cross-fade
   map.setPaintProperty("unit-badge", "icon-opacity", on ? 0 : BADGE_OPACITY);
-  map.setPaintProperty("unit-dot", "circle-opacity", on ? 0.5 : DOT_FADE);
-  map.setPaintProperty("unit-dot", "circle-stroke-opacity", on ? 0.6 : DOT_FADE);
+  map.setPaintProperty("unit-dot", "circle-opacity", on ? siteFade(0.5) : DOT_FADE);
+  map.setPaintProperty("unit-dot", "circle-stroke-opacity", on ? siteFade(0.6) : DOT_FADE);
   map.setPaintProperty(
     "unit-dot",
     "circle-radius",

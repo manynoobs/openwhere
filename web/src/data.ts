@@ -1,6 +1,7 @@
 import type { Meta, SearchRow, UnitDetail } from "./types";
 
 const url = (p: string) => new URL(`data/${p}`, document.baseURI).href;
+export const dataUrl = url;
 
 async function json<T>(p: string): Promise<T> {
   const r = await fetch(url(p));
@@ -9,7 +10,7 @@ async function json<T>(p: string): Promise<T> {
 }
 
 export const unitsUrl = url("units.geojson");
-export const heatUrl = (year: number) => url(`heat/${year}.png`);
+export const heatUrl = (image: string) => url(image);
 export const loadMeta = () => json<Meta & { heat: Meta["heat"] & { stops: [number, string][] } }>("meta.json");
 
 const details = new Map<number, Promise<UnitDetail>>();
@@ -27,22 +28,23 @@ export interface HeatGrid {
   cell: number;
   w: number;
   h: number;
-  years: Record<string, { v: (number | null)[]; n: number[] }>;
+  v: (number | null)[]; // share of new shops still listed after three years
+  median: (number | null)[]; // years until half stopped being listed, where reached
+  n: number[]; // shops the estimate rests on
 }
 let heatGrid: Promise<HeatGrid> | null = null;
 export const loadHeatGrid = () => (heatGrid ??= json<HeatGrid>("heat/grid.json"));
 
-/** value and shops nearby at a lon/lat, from the 100 m readout grid */
-export function heatAt(g: HeatGrid, year: number, lon: number, lat: number) {
+/** how long shops last around a lon/lat, from the readout grid */
+export function heatAt(g: HeatGrid, lon: number, lat: number) {
   const R = 6378137;
   const x = (R * lon * Math.PI) / 180;
   const y = R * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
   const col = Math.floor((x - g.x0) / g.cell);
   const row = Math.floor((g.y1 - y) / g.cell);
   if (col < 0 || row < 0 || col >= g.w || row >= g.h) return null;
-  const yr = g.years[String(year)];
   const i = row * g.w + col;
-  return { v: yr.v[i], n: yr.n[i] };
+  return { v: g.v[i], median: g.median[i], n: g.n[i] };
 }
 
 // --- formatting -------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { isPlaceholder, loadUnit, monthYear, signNames, TYPE_LABEL, yearOf } from "../data";
-import type { SignHistory, UnitDetail, UnitProps } from "../types";
+import { CUISINE_LABEL, type SignHistory, type UnitDetail, type UnitProps } from "../types";
 import { PinMark } from "./PinMark";
 import { STEPS, stepOf } from "../ramp";
 import { Icon } from "./Icon";
@@ -13,9 +13,10 @@ interface Props {
   canPin: boolean;
   onPin: () => void;
   onClose: () => void;
+  onCheck: (u: UnitProps) => void;
 }
 
-export function UnitPanel({ id, props, pinned, canPin, onPin, onClose }: Props) {
+export function UnitPanel({ id, props, pinned, canPin, onPin, onClose, onCheck }: Props) {
   const [unit, setUnit] = useState<UnitDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,10 +61,31 @@ export function UnitPanel({ id, props, pinned, canPin, onPin, onClose }: Props) 
             </div>
           </div>
           {u && <Tags u={u} />}
+          <dl className="unit-facts">
+            {props.cu && (
+              <div>
+                <dt>Cuisine</dt>
+                <dd>
+                  {CUISINE_LABEL[props.cu]}
+                  {props.cu !== "unknown" && <small> · guessed from the name</small>}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>Nearest MTR exit</dt>
+              <dd className="num">
+                {props.mtr} m <small>· {props.mtrx}</small>
+              </dd>
+            </div>
+          </dl>
           <div className="actions">
             <button className={`btn ${pinned ? "" : "primary"}`} onClick={onPin} disabled={!pinned && !canPin}>
               <Icon name="pin" size={16} />
               {pinned ? "Pinned to compare" : canPin ? "Pin to compare" : "Compare holds 3"}
+            </button>
+            <button className="btn" onClick={() => onCheck(props)}>
+              <Icon name="target" size={16} />
+              Check this spot
             </button>
           </div>
         </div>

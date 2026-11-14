@@ -9,18 +9,21 @@ export function Legend({ heat, stops, year }: { heat: boolean; stops: [number, s
     const grad = `linear-gradient(90deg, ${stops.map(([v, c]) => `${c} ${((v - lo) / (hi - lo)) * 100}%`).join(", ")})`;
     return (
       <div className="legend glass" aria-live="polite">
-        <div className="cap">How often shops change here, 2016–{year}</div>
+        <div className="cap">How long new shops last here</div>
         <div className="gradient" style={{ background: grad }} />
-        <div className="gticks">
-          <span>Fewer changes</span>
-          <span>More changes</span>
+        <div className="gticks num">
+          <span>{Math.round(lo * 100)}% last 3 years</span>
+          <span>{Math.round(hi * 100)}%</span>
+        </div>
+        <div className="key">
+          <span>Paler colour = fewer shops to go on</span>
         </div>
       </div>
     );
   }
   return (
     <div className="legend glass" aria-live="polite">
-      <div className="cap">Store changes since 2016</div>
+      <div className="cap">Store changes {year < YEARS[YEARS.length - 1] ? `2016–${year}` : "since 2016"}</div>
       <div className="row legend-pins">
         {[0, 1, 2, 3, 4].map((n) => (
           <PinMark key={n} n={n} size={22} label={n === 4 ? "4+" : undefined} />

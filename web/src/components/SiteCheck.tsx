@@ -1,0 +1,179 @@
+import { CUISINES, CUISINE_LABEL, type UnitProps } from "../types";
+import type { HeatGrid } from "../data";
+import { heatAt } from "../data";
+import { PLACE_PATH, type PlaceKind } from "../map/places";
+import { Icon } from "./Icon";
+import { PinMark } from "./PinMark";
+
+export interface Place {
+  k: PlaceKind;
+  en: string;
+  tc: string;
+  st?: string;
+  lon: number;
+  lat: number;
+}
+
+export interface SiteState {
+  lon: number | null;
+  lat: number | null;
+  radius: number;
+  cuisine: string; // "" = any cuisine
+}
+
+export interface SiteResult {
+  inside: (UnitProps & { dist: number })[]; // units listed now within the radius, nearest first
+  comp: (UnitProps & { dist: number })[]; // same cuisine, within the radius
+  prev: number; // previously licensed, none listed now
+  general: number;
+  light: number;
+  places: Record<PlaceKind, number>;
+  mtr: (Place & { dist: number }) | null;
+}
+
+interface Props {
+  site: SiteState;
+  result: SiteResult | null;
+  grid: HeatGrid | null;
+  counts: Record<string, number>;
+  onChange: (s: SiteState) => void;
+  onOpen: (u: UnitProps) => void;
+  onClose: () => void;
+}
+
+const metres = (m: number) => (m < 1000 ? `${Math.round(m / 5) * 5} m` : `${(m / 1000).toFixed(1)} km`);
+
+function PlaceIcon({ k }: { k: PlaceKind }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={PLACE_PATH[k]} />
+    </svg>
+  );
+}
+
+export function SiteCheck({ site, result, grid, counts, onChange, onOpen, onClose }: Props) {
+  const label = site.cuisine ? CUISINE_LABEL[site.cuisine] : "";
+  const life = grid && site.lon != null && site.lat != null ? heatAt(grid, site.lon, site.lat) : null;
+  return (
+    <section className="sitecard glass" aria-label="Site check">
+      <header className="site-head">
+        <h2>Site check</h2>
+        <button className="close" aria-label="Close site check" onClick={onClose}>
+          <Icon name="close" size={16} />
+        </button>
+      </header>
+
+      <div className="site-controls">
+        <label className="site-field">
+          <span>Your cuisine</span>
+          <select value={site.cuisine} onChange={(e) => onChange({ ...site, cuisine: e.target.value })}>
+            <option value="">Any cuisine</option>
+            {CUISINES.map(([k, l]) => (
+              <option key={k} value={k}>
+                {l} ({counts[k] ?? 0})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="site-field">
+          <span>
+            Radius <b className="num">{site.radius} m</b>
+          </span>
+          <input
+            type="range"
+            min={50}
+            max={500}
+            step={25}
+            value={site.radius}
+            onChange={(e) => onChange({ ...site, radius: Number(e.target.value) })}
+            aria-label="Radius in metres"
+          />
+        </label>
+      </div>
+
+      {site.lon == null || !result ? (
+        <p className="site-hint">
+          <Icon name="target" size={18} />
+          Click a spot on the map to check it
+        </p>
+      ) : (
+        <div className="site-body">
+          <div className="site-lead">
+            <span className="site-big num">{site.cuisine ? result.comp.length : result.inside.length}</span>
+            <span>
+              {site.cuisine ? (
+                <>
+                  <b>{label}</b> {result.comp.length === 1 ? "shop" : "shops"} listed now within {site.radius} m
+                </>
+              ) : (
+                <>restaurants listed now within {site.radius} m</>
+              )}
+            </span>
+          </div>
+
+          {(site.cuisine ? result.comp : result.inside).length > 0 && (
+            <ul className="site-list">
+              {(site.cuisine ? result.comp : result.inside).slice(0, 6).map((u) => (
+                <li key={u.id}>
+                  <button onClick={() => onOpen(u)}>
+                    <PinMark n={u.chg} size={18} />
+                    <span className="site-name">{u.s || "Sign not recorded"}</span>
+                    <span className="site-dist num">{metres(u.dist)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <dl className="site-stats num">
+            {site.cuisine && (
+              <div>
+                <dt>All restaurants listed now</dt>
+                <dd>{result.inside.length}</dd>
+              </div>
+            )}
+            <div>
+              <dt>New shops here lasting 3 years</dt>
+              <dd>
+                {life && life.v != null ? `${Math.round(life.v * 100)}%` : "Too few shops"}
+                {life && life.v != null && <small> of about {life.n}</small>}
+              </dd>
+            </div>
+            <div>
+              <dt>Licensed before, none listed now</dt>
+              <dd>{result.prev}</dd>
+            </div>
+            <div>
+              <dt>Licences listed now</dt>
+              <dd>
+                {result.general} general · {result.light} light refreshment
+              </dd>
+            </div>
+            {result.mtr && (
+              <div>
+                <dt>Nearest MTR exit</dt>
+                <dd>
+                  {metres(result.mtr.dist)} <small>{[result.mtr.st, result.mtr.en].filter(Boolean).join(" ")}</small>
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          <div className="site-places">
+            {(["hotel", "school", "mall", "landmark", "transit"] as PlaceKind[]).map((k) => (
+              <span key={k} title={k}>
+                <PlaceIcon k={k} />
+                <b className="num">{result.places[k]}</b>
+                {k === "hotel" ? "hotels" : k === "school" ? "schools" : k === "mall" ? "malls" : k === "landmark" ? "landmarks" : "stations"}
+              </span>
+            ))}
+          </div>
+
+          <p className="fine">
+            Cuisine is guessed from each shop’s name. Distances are straight-line. Places from OpenStreetMap.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}

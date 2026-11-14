@@ -10,9 +10,13 @@ interface Props {
   setFilters: (f: Filters) => void;
   shown: number;
   meta: Meta | null;
+  places: boolean;
+  setPlaces: (on: boolean) => void;
+  siteOpen: boolean;
+  setSiteOpen: (on: boolean) => void;
 }
 
-export function Controls({ heat, setHeat, filters, setFilters, shown, meta }: Props) {
+export function Controls({ heat, setHeat, filters, setFilters, shown, meta, places, setPlaces, siteOpen, setSiteOpen }: Props) {
   const [open, setOpen] = useState<"filters" | "about" | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const active =
@@ -38,8 +42,16 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta }: Pr
     <div className="topright" ref={box}>
       <div className="segmented glass" role="group" aria-label="Map mode">
         <button aria-pressed={!heat} onClick={() => setHeat(false)}>Shops</button>
-        <button aria-pressed={heat} onClick={() => setHeat(true)}>Change heat</button>
+        <button aria-pressed={heat} onClick={() => setHeat(true)}>Shop lifespan</button>
       </div>
+      <button className={`iconbtn glass ${siteOpen ? "on" : ""}`} aria-pressed={siteOpen} onClick={() => setSiteOpen(!siteOpen)}>
+        <Icon name="target" />
+        Site check
+      </button>
+      <button className={`iconbtn glass ${places ? "on" : ""}`} aria-pressed={places} onClick={() => setPlaces(!places)} title="Show hotels, schools, malls, landmarks and MTR exits">
+        <Icon name="places" />
+        Places
+      </button>
       <div style={{ position: "relative" }}>
         <button className="iconbtn glass" aria-expanded={open === "filters"} onClick={() => setOpen(open === "filters" ? null : "filters")}>
           <Icon name="filter" />
@@ -126,8 +138,13 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
         A <b>store change</b> is a shop with a different sign listed at an address after the previous one stopped being listed.
       </p>
       <p>
-        <b>Change heat</b> shows store changes per street-level shop, smoothed over about 100 m. Streets with fewer than five
-        shops nearby are left blank.
+        <b>Shop lifespan</b> shows the share of shops that opened here since 2016 and were still listed three years later,
+        counting shops that are still open as lasting at least that long. Green means shops last; red means they don’t. The
+        colour fades where it rests on few shops.
+      </p>
+      <p>
+        <b>Cuisine</b> is guessed from each current shop’s name, and is left as unclear when the name doesn’t say. <b>Places</b>{" "}
+        and MTR exits come from OpenStreetMap; distances are straight-line.
       </p>
       <dl className="num">
         <dt>Monthly files read (English and Chinese)</dt>

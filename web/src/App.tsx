@@ -7,7 +7,11 @@ import { UnitPanel } from "./components/UnitPanel";
 import { CompareSheet, PrintSheet } from "./components/Compare";
 import { Icon } from "./components/Icon";
 import { PinMark } from "./components/PinMark";
-import { heatAt, loadHeatGrid, loadMeta, type HeatGrid } from "./data";
+import { LogoMark } from "./components/Logo";
+import { dataUrl, heatAt, loadHeatGrid, loadMeta, type HeatGrid } from "./data";
+import { SiteCheck, type Place, type SiteResult, type SiteState } from "./components/SiteCheck";
+import { metres } from "./map/geo";
+import { PLACE_KINDS, PLACE_LABEL, type PlaceKind } from "./map/places";
 import { DEFAULT_FILTERS, YEARS, type Filters, type Meta, type UnitProps } from "./types";
 
 type FullMeta = Meta & { heat: Meta["heat"] & { stops: [number, string][] }; district?: string };
@@ -30,13 +34,75 @@ export default function App() {
   const [hover, setHover] = useState<Hover>(null);
   const [grid, setGrid] = useState<HeatGrid | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+  const [placesOn, setPlacesOn] = useState(false);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [siteOpen, setSiteOpen] = useState(false);
+  const [site, setSite] = useState<SiteState>({ lon: null, lat: null, radius: 200, cuisine: "" });
+  const [placeHover, setPlaceHover] = useState<{ x: number; y: number; name: string; kind: string } | null>(null);
 
   useEffect(() => {
     loadMeta().then(setMeta).catch((e: Error) => setFailed(e.message));
   }, []);
   useEffect(() => {
-    if (heat && !grid) loadHeatGrid().then(setGrid);
-  }, [heat, grid]);
+    if ((heat || siteOpen) && !grid) loadHeatGrid().then(setGrid);
+  }, [heat, siteOpen, grid]);
+  useEffect(() => {
+    fetch(dataUrl("facilities.geojson"))
+      .then((r) => r.json())
+      .then((g) =>
+        setPlaces(
+          g.features.map((f: { properties: Omit<Place, "lon" | "lat">; geometry: { coordinates: [number, number] } }) => ({
+            ...f.properties,
+            lon: f.geometry.coordinates[0],
+            lat: f.geometry.coordinates[1],
+          })),
+        ),
+      );
+  }, []);
+
+  // cuisine counts across the district, for the site check menu
+  const cuisineCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const u of all) if (u.cu) c[u.cu] = (c[u.cu] ?? 0) + 1;
+    return c;
+  }, [all]);
+
+  const siteResult = useMemo<SiteResult | null>(() => {
+    if (!siteOpen || site.lon == null || site.lat == null) return null;
+    const { lon, lat, radius } = site;
+    const near = all
+      .map((u) => ({ ...u, dist: metres(lon, lat, u.lon!, u.lat!) }))
+      .filter((u) => u.dist <= radius)
+      .sort((a, b) => a.dist - b.dist);
+    const now = near.filter((u) => u.l[u.l.length - 1] === "1");
+    const counts = Object.fromEntries(PLACE_KINDS.map((k) => [k, 0])) as Record<PlaceKind, number>;
+    let mtr: SiteResult["mtr"] = null;
+    for (const p of places) {
+      const d = metres(lon, lat, p.lon, p.lat);
+      if (d <= radius) counts[p.k] += 1;
+      if (p.k === "mtr" && (!mtr || d < mtr.dist)) mtr = { ...p, dist: d };
+    }
+    return {
+      inside: now,
+      comp: site.cuisine ? now.filter((u) => u.cu === site.cuisine) : [],
+      prev: near.filter((u) => u.l[u.l.length - 1] === "2").length,
+      general: now.filter((u) => u.t === "RL").length,
+      light: now.filter((u) => u.t === "RR").length,
+      places: counts,
+      mtr,
+    };
+  }, [siteOpen, site, all, places]);
+
+  const siteForMap = useMemo(() => {
+    if (!siteResult || site.lon == null || site.lat == null) return null;
+    return {
+      lon: site.lon,
+      lat: site.lat,
+      radius: site.radius,
+      comp: new Set(siteResult.comp.map((u) => u.id)),
+      inside: new Set(siteResult.inside.map((u) => u.id)),
+    };
+  }, [siteResult, site]);
 
   // play: step a year at a time from 2016, pulse each step, stop at the latest year
   const timer = useRef<number>();
@@ -99,7 +165,10 @@ export default function App() {
   }
 
   return (
-    <div className={`${panelOpen ? "panel-open" : ""} ${compareOpen && pinned.length ? "compare-open" : ""}`} style={{ height: "100%" }}>
+    <div
+      className={`${panelOpen ? "panel-open" : ""} ${compareOpen && pinned.length ? "compare-open" : ""} ${siteOpen ? "site-open" : ""}`}
+      style={{ height: "100%" }}
+    >
       {meta && (
         <MapView
           year={year}
@@ -114,13 +183,21 @@ export default function App() {
           onSelect={select}
           onHover={setHover}
           onReady={setAll}
+          places={placesOn}
+          site={siteForMap}
+          siteMode={siteOpen}
+          onSitePick={(lon, lat, props) => setSite((s) => ({ ...s, lon, lat, cuisine: s.cuisine || (props?.cu && props.cu !== "unknown" ? props.cu : "") }))}
+          onPlaceHover={setPlaceHover}
         />
       )}
 
       <div className="topleft glass">
         <div className="brand">
           <h1>
-            Shopfront Past Lives <span className="tc">鋪位前世</span>
+            <LogoMark size={20} />
+            <span>
+              <b>Open</b>Where
+            </span>
           </h1>
           <span className="where">{meta?.district ?? "Yau Tsim"} · 2016–2026</span>
         </div>
@@ -137,7 +214,36 @@ export default function App() {
         />
       </div>
 
-      <Controls heat={heat} setHeat={setHeat} filters={filters} setFilters={setFilters} shown={shown} meta={meta} />
+      <Controls
+        heat={heat}
+        setHeat={setHeat}
+        filters={filters}
+        setFilters={setFilters}
+        shown={shown}
+        meta={meta}
+        places={placesOn}
+        setPlaces={setPlacesOn}
+        siteOpen={siteOpen}
+        setSiteOpen={(on) => {
+          setSiteOpen(on);
+          if (on) setSelected(null);
+        }}
+      />
+      {siteOpen && (
+        <SiteCheck
+          site={site}
+          result={siteResult}
+          grid={grid}
+          counts={cuisineCounts}
+          onChange={setSite}
+          onClose={() => setSiteOpen(false)}
+          onOpen={(u) => {
+            setSiteOpen(false);
+            setSelected(u);
+            if (u.lon != null && u.lat != null) setFly({ lon: u.lon, lat: u.lat, key: Date.now() });
+          }}
+        />
+      )}
       <Legend heat={heat} stops={meta?.heat.stops ?? null} year={year} />
       <YearBar year={year} setYear={setYear} playing={playing} setPlaying={setPlaying} />
 
@@ -169,9 +275,22 @@ export default function App() {
         canPin={pinned.length < 3}
         onPin={togglePin}
         onClose={() => setSelected(null)}
+        onCheck={(u) => {
+          setSite((s) => ({ ...s, lon: u.lon ?? null, lat: u.lat ?? null, cuisine: u.cu && u.cu !== "unknown" ? u.cu : s.cuisine }));
+          setSelected(null);
+          setSiteOpen(true);
+        }}
       />
 
-      {hover && <Tooltip hover={hover} heat={heat} grid={grid} year={year} />}
+      {hover && !placeHover && <Tooltip hover={hover} heat={heat} grid={grid} year={year} />}
+      {placeHover && (
+        <div className="tooltip glass" style={{ left: placeHover.x, top: placeHover.y }}>
+          <div>
+            <b>{placeHover.name || PLACE_LABEL[placeHover.kind as PlaceKind]}</b>
+            <div className="muted">{PLACE_LABEL[placeHover.kind as PlaceKind]}</div>
+          </div>
+        </div>
+      )}
       <PrintSheet ids={pinned} />
     </div>
   );
@@ -194,12 +313,17 @@ function Tooltip({ hover, heat, grid, year }: { hover: NonNullable<Hover>; heat:
     );
   }
   if (heat && grid) {
-    const h = heatAt(grid, year, hover.lngLat[0], hover.lngLat[1]);
+    const h = heatAt(grid, hover.lngLat[0], hover.lngLat[1]);
     if (!h || h.v == null) return null;
     return (
       <div className="tooltip glass num" style={{ left: hover.x, top: hover.y }}>
-        <b>≈{h.v.toFixed(2)} changes per shop</b>
-        <div className="muted">about {h.n} street-level shops nearby</div>
+        <div>
+          <b>{Math.round(h.v * 100)}% of new shops here last 3 years</b>
+          <div className="muted">
+            {h.median != null ? `Half are gone within ${h.median.toFixed(1)} years` : "More than half are still listed"} · based on about{" "}
+            {h.n} shops
+          </div>
+        </div>
       </div>
     );
   }

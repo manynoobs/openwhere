@@ -6,6 +6,8 @@ import { basemapStyle } from "./basemap";
 import { registerBadges } from "./badges";
 import { addUnitLayers, changedInFilter, setDarkTheme, setHeatMode, SRC, updateUnitLayers } from "./layers";
 import { heatUrl, unitsUrl } from "../data";
+import { addPlaces, showPlaces } from "./places";
+import { circlePolygon } from "./geo";
 import type { Filters, UnitProps } from "../types";
 
 maplibregl.addProtocol("pmtiles", new Protocol().tile);
@@ -20,7 +22,7 @@ interface Props {
   year: number;
   heat: boolean;
   filters: Filters;
-  heatMeta: { bounds: [number, number][]; years: number[] } | null;
+  heatMeta: { bounds: [number, number][]; image: string } | null;
   selectedId: number | null;
   focusIds: number[];
   fly: FlyTarget | null;
@@ -29,6 +31,12 @@ interface Props {
   onSelect: (id: number | null, props?: UnitProps, at?: [number, number]) => void;
   onHover: (h: { x: number; y: number; props?: UnitProps; lngLat: [number, number] } | null) => void;
   onReady: (features: UnitProps[]) => void;
+  places: boolean;
+  /** a site check in progress: where, how far, and which units are competitors or inside */
+  site: { lon: number; lat: number; radius: number; comp: Set<number>; inside: Set<number> } | null;
+  siteMode: boolean;
+  onSitePick: (lon: number, lat: number, props?: UnitProps) => void;
+  onPlaceHover: (h: { x: number; y: number; name: string; kind: string } | null) => void;
 }
 
 const HOME: [number, number] = [114.1705, 22.3082]; // Jordan / Yau Ma Tei, around Portland Street
@@ -40,6 +48,7 @@ export function MapView(p: Props) {
   const latest = useRef(p);
   latest.current = p;
   const hovered = useRef<number | null>(null);
+  const allIds = useRef<number[]>([]);
   const selected = useRef<number | null>(null);
 
   // create the map once
@@ -70,11 +79,28 @@ export function MapView(p: Props) {
       registerBadges(map, dark);
       const data = await fetch(unitsUrl).then((r) => r.json());
       map.addSource(SRC, { type: "geojson", data, promoteId: "id" });
+      allIds.current = data.features.map((f: { properties: { id: number } }) => f.properties.id);
       const hm = latest.current.heatMeta;
       if (hm) addHeat(map, hm);
+      addPlaces(map, dark);
+      map.addSource("site", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "site-fill", type: "fill", source: "site", filter: ["==", ["geometry-type"], "Polygon"],
+        paint: { "fill-color": dark ? "#f2f2f5" : "#1d1d1f", "fill-opacity": 0.06 } });
+      map.addLayer({ id: "site-line", type: "line", source: "site", filter: ["==", ["geometry-type"], "Polygon"],
+        paint: { "line-color": dark ? "#f2f2f5" : "#1d1d1f", "line-width": 1.5, "line-dasharray": [2, 2], "line-opacity": 0.7 } });
       addUnitLayers(map, latest.current.year, latest.current.filters);
+      map.addLayer({ id: "site-centre", type: "circle", source: "site", filter: ["==", ["geometry-type"], "Point"],
+        paint: { "circle-radius": 7, "circle-color": dark ? "#f2f2f5" : "#1d1d1f", "circle-stroke-color": "#fff", "circle-stroke-width": 3 } });
+      // the compact credits control opens itself on load; start it closed
+      map.getContainer().querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
       ready.current = true;
-      latest.current.onReady(data.features.map((f: { properties: UnitProps }) => f.properties));
+      latest.current.onReady(
+        data.features.map((f: { properties: UnitProps; geometry: { coordinates: [number, number] } }) => ({
+          ...f.properties,
+          lon: f.geometry.coordinates[0],
+          lat: f.geometry.coordinates[1],
+        })),
+      );
       sync();
     });
 
@@ -82,7 +108,9 @@ export function MapView(p: Props) {
       if (id != null) map.setFeatureState({ source: SRC, id }, { [key]: on });
     };
     const pick = (pt: maplibregl.PointLike): MapGeoJSONFeature | undefined => {
-      const layers = latest.current.heat ? ["unit-dot", "unit-badge-focus"] : ["unit-badge", "unit-dot"];
+      const layers = latest.current.heat
+        ? ["unit-badge-comp", "unit-dot", "unit-badge-focus"]
+        : ["unit-badge-comp", "unit-badge", "unit-dot"];
       const b: [maplibregl.PointLike, maplibregl.PointLike] = [
         [(pt as maplibregl.Point).x - 8, (pt as maplibregl.Point).y - 8],
         [(pt as maplibregl.Point).x + 8, (pt as maplibregl.Point).y + 8],
@@ -94,6 +122,10 @@ export function MapView(p: Props) {
     map.on("mousemove", (e) => {
       if (!ready.current) return;
       const f = pick(e.point);
+      if (!f && map.getLayer("places") && map.getLayoutProperty("places", "visibility") === "visible") {
+        const pl = map.queryRenderedFeatures(e.point, { layers: ["places"] })[0];
+        latest.current.onPlaceHover(pl ? { x: e.point.x, y: e.point.y, name: pl.properties.en || pl.properties.tc, kind: pl.properties.k } : null);
+      } else latest.current.onPlaceHover(null);
       const id = (f?.id as number | undefined) ?? null;
       if (id !== hovered.current) {
         setState(hovered.current, "hover", false);
@@ -118,6 +150,10 @@ export function MapView(p: Props) {
     map.on("click", (e) => {
       if (!ready.current) return;
       const f = pick(e.point);
+      if (latest.current.siteMode) {
+        latest.current.onSitePick(e.lngLat.lng, e.lngLat.lat, f?.properties as UnitProps | undefined);
+        return;
+      }
       if (f) {
         const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number];
         latest.current.onSelect(f.id as number, f.properties as UnitProps, coords);
@@ -137,7 +173,9 @@ export function MapView(p: Props) {
       const s = latest.current;
       updateUnitLayers(map, s.year, s.filters);
       setHeatMode(map, s.heat, s.year);
-      showHeat(map, s.heat ? s.year : null, s.heatMeta?.years ?? []);
+      showPlaces(map, s.places);
+      map.getCanvas().style.cursor = s.siteMode ? "crosshair" : "";
+      showHeat(map, s.heat);
       if (selected.current !== s.selectedId) {
         setState(selected.current, "selected", false);
         setState(s.selectedId, "selected", true);
@@ -165,7 +203,36 @@ export function MapView(p: Props) {
     };
     run();
     return () => window.clearTimeout(timer);
-  }, [p.year, p.heat, p.filters, p.selectedId, p.focusIds]);
+  }, [p.year, p.heat, p.filters, p.selectedId, p.focusIds, p.places, p.siteMode]);
+
+  // site check: circle, centre, and a state on every unit inside or outside it
+  const siteIds = useRef<number[]>([]);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready.current) return;
+    const src = map.getSource("site") as maplibregl.GeoJSONSource | undefined;
+    for (const id of siteIds.current) map.removeFeatureState({ source: SRC, id }, "site");
+    siteIds.current = [];
+    if (!p.site) {
+      src?.setData({ type: "FeatureCollection", features: [] });
+      map.setFilter("unit-badge-comp", ["in", ["get", "id"], ["literal", []]]);
+      return;
+    }
+    const { lon, lat, radius, comp, inside } = p.site;
+    src?.setData({
+      type: "FeatureCollection",
+      features: [
+        { type: "Feature", properties: {}, geometry: circlePolygon(lon, lat, radius) },
+        { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [lon, lat] } },
+      ],
+    });
+    map.setFilter("unit-badge-comp", ["in", ["get", "id"], ["literal", [...comp]]]);
+    const ids = allIds.current;
+    for (const id of ids) {
+      map.setFeatureState({ source: SRC, id }, { site: comp.has(id) ? "comp" : inside.has(id) ? "in" : "out" });
+    }
+    siteIds.current = ids;
+  }, [p.site]);
 
   // fly to a searched or selected unit, keeping it clear of the side panel
   useEffect(() => {
@@ -202,34 +269,31 @@ export function MapView(p: Props) {
   return <div id="map" ref={el} role="application" aria-label="Map of licensed shopfronts" />;
 }
 
-function addHeat(map: MLMap, hm: { bounds: [number, number][]; years: number[] }) {
+function addHeat(map: MLMap, hm: { bounds: [number, number][]; image: string }) {
   const coords = hm.bounds as [[number, number], [number, number], [number, number], [number, number]];
   // the wash sits under the basemap's labels so street names stay readable
   const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
-  for (const y of hm.years) {
-    map.addSource(`heat-${y}`, { type: "image", url: heatUrl(y), coordinates: coords });
-    map.addLayer({
-      id: `heat-${y}`,
+  map.addSource("heat", { type: "image", url: heatUrl(hm.image), coordinates: coords });
+  map.addLayer(
+    {
+      id: "heat",
       type: "raster",
-      source: `heat-${y}`,
+      source: "heat",
       paint: { "raster-opacity": 0, "raster-fade-duration": 0, "raster-resampling": "linear" },
       layout: { visibility: "none" },
-    }, firstLabel);
-  }
+    },
+    firstLabel,
+  );
 }
 
-function showHeat(map: MLMap, year: number | null, years: number[]) {
-  for (const y of years) {
-    const id = `heat-${y}`;
-    if (!map.getLayer(id)) continue;
-    const on = y === year;
-    if (on) map.setLayoutProperty(id, "visibility", "visible");
-    map.setPaintProperty(id, "raster-opacity", on ? 1 : 0);
-    if (!on) {
-      // hide after the fade so hidden layers cost nothing
-      window.setTimeout(() => {
-        if (map.getLayer(id) && map.getPaintProperty(id, "raster-opacity") === 0) map.setLayoutProperty(id, "visibility", "none");
-      }, 500);
-    }
+function showHeat(map: MLMap, on: boolean) {
+  if (!map.getLayer("heat")) return;
+  if (on) map.setLayoutProperty("heat", "visibility", "visible");
+  map.setPaintProperty("heat", "raster-opacity", on ? 1 : 0);
+  if (!on) {
+    // hide after the fade so the hidden layer costs nothing
+    window.setTimeout(() => {
+      if (map.getLayer("heat") && map.getPaintProperty("heat", "raster-opacity") === 0) map.setLayoutProperty("heat", "visibility", "none");
+    }, 500);
   }
 }

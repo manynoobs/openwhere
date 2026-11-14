@@ -55,11 +55,23 @@ const shots = {
     // software WebGL at 2x skips frames during paint transitions; 1x renders them
     const p = await page({ width: 1440, height: 900 }, "light", 1);
     await p.evaluate(() => void window.__map.jumpTo({ zoom: 15.2, center: [114.1715, 22.3035] }));
-    await p.click("text=Change heat");
+    await p.click("text=Shop lifespan");
     await settle(p);
     await p.mouse.move(700, 450);
     await settle(p, 600);
     await p.screenshot({ path: `${out}/heat.png` });
+  },
+  async site() {
+    const p = await page({ width: 1440, height: 900 }, "light", 1);
+    await p.click("text=Places");
+    await p.click("text=Site check");
+    await p.selectOption(".site-field select", "japanese");
+    await p.evaluate(() => void window.__map.jumpTo({ zoom: 16.4, center: [114.1722, 22.2985] }));
+    await settle(p, 800);
+    const box = await p.locator("#map").boundingBox();
+    await p.mouse.click(box.x + box.width * 0.58, box.y + box.height * 0.5);
+    await settle(p, 1500);
+    await p.screenshot({ path: `${out}/site.png` });
   },
   async filters() {
     const p = await page({ width: 1440, height: 900 }, "light");
