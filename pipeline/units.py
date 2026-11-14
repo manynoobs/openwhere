@@ -250,12 +250,19 @@ def cmd_geocode(args):
     db.commit()
 
 
+GOLDEN = math.pi * (3 - math.sqrt(5))
+
+
 def fan(lat, lon, i, n):
-    """Spread n units in one building on a small ring (about 6 m) so each can be clicked."""
+    """Spread n units in one building so each can be clicked.
+
+    A sunflower packing: evenly spaced points filling a small disc from the centre outward
+    (about 4.5 m apart). A ring was used before, and big malls drew circles on the map.
+    """
     if n <= 1:
         return lat, lon
-    r = 0.000055 * (1 + (n > 8))
-    ang = 2 * math.pi * i / n
+    r = 0.00004 * math.sqrt(i + 0.5)
+    ang = i * GOLDEN
     return lat + r * math.sin(ang), lon + r * math.cos(ang) / math.cos(math.radians(lat))
 
 
@@ -320,6 +327,9 @@ def cmd_build(_):
     for i, u in enumerate(unit_rows):
         if u[5] is not None:
             by_b.setdefault(u[1], []).append(i)
+    # street-level units take the middle of the building's cluster, upper floors the outside
+    for idxs in by_b.values():
+        idxs.sort(key=lambda i: ("G" not in json.loads(unit_rows[i][2]), i))
     final = []
     for i, u in enumerate(unit_rows):
         lat, lon = u[5], u[6]
