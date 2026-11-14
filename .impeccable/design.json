@@ -1,0 +1,600 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-14T00:00:00Z",
+  "title": "Design System: Shopfront Past Lives",
+  "extensions": {
+    "colorMeta": {
+      "change-0": {
+        "role": "primary",
+        "displayName": "Calm Grey",
+        "canonical": "#DADDE3",
+        "oklch": "oklch(89.7% 0.009 265)",
+        "tonalRamp": [
+          "#111213",
+          "#27292c",
+          "#46484b",
+          "#66696e",
+          "#8a8c91",
+          "#afb1b5",
+          "#cfd1d4",
+          "#edeef1"
+        ],
+        "purpose": "0 store changes; digitless dot on the light map"
+      },
+      "change-0-ink": {
+        "role": "primary",
+        "displayName": "Calm Grey Ink",
+        "canonical": "#2B2F36"
+      },
+      "change-0-dark": {
+        "role": "primary",
+        "displayName": "Receding Slate",
+        "canonical": "#5E626B",
+        "oklch": "oklch(49.6% 0.015 267)",
+        "tonalRamp": [
+          "#101215",
+          "#27292e",
+          "#45484e",
+          "#656972",
+          "#888c94",
+          "#aeb1b8",
+          "#ced1d7",
+          "#eceef3"
+        ],
+        "purpose": "0 step on the dark basemap"
+      },
+      "change-1": {
+        "role": "primary",
+        "displayName": "Lagoon Teal",
+        "canonical": "#5CC6BA",
+        "oklch": "oklch(76.1% 0.100 185)",
+        "tonalRamp": [
+          "#001814",
+          "#00322d",
+          "#00554d",
+          "#007a70",
+          "#449d93",
+          "#7dc0b7",
+          "#a9ddd6",
+          "#d0f8f2"
+        ],
+        "purpose": "1 store change"
+      },
+      "change-1-ink": {
+        "role": "primary",
+        "displayName": "Deep Teal Ink",
+        "canonical": "#063A34"
+      },
+      "change-2": {
+        "role": "primary",
+        "displayName": "Signal Amber",
+        "canonical": "#FFC53D",
+        "oklch": "oklch(85.4% 0.157 84)",
+        "tonalRamp": [
+          "#200c00",
+          "#3e2200",
+          "#663f00",
+          "#915e00",
+          "#b38300",
+          "#d2ab5a",
+          "#eccd8f",
+          "#ffecbd"
+        ],
+        "purpose": "2 store changes"
+      },
+      "change-2-ink": {
+        "role": "primary",
+        "displayName": "Amber Ink",
+        "canonical": "#4A3200"
+      },
+      "change-3": {
+        "role": "primary",
+        "displayName": "Tangerine",
+        "canonical": "#FF8A3D",
+        "oklch": "oklch(75.0% 0.167 51)",
+        "tonalRamp": [
+          "#290200",
+          "#4d1200",
+          "#7b2a00",
+          "#ad4400",
+          "#d06e2d",
+          "#ec9b6b",
+          "#ffc09b",
+          "#ffe2c5"
+        ],
+        "purpose": "3 store changes"
+      },
+      "change-3-ink": {
+        "role": "primary",
+        "displayName": "Rust Ink",
+        "canonical": "#3F1500"
+      },
+      "change-4": {
+        "role": "primary",
+        "displayName": "Alarm Red",
+        "canonical": "#D92D20",
+        "oklch": "oklch(60.6% 0.212 29)",
+        "tonalRamp": [
+          "#310000",
+          "#580000",
+          "#8c0000",
+          "#c31711",
+          "#e65445",
+          "#ff8a7a",
+          "#ffb4a5",
+          "#ffd9cd"
+        ],
+        "purpose": "4 or more store changes"
+      },
+      "change-4-ink": {
+        "role": "primary",
+        "displayName": "White Ink",
+        "canonical": "#FFFFFF"
+      },
+      "map-ground": {
+        "role": "secondary",
+        "displayName": "Warm Paper Ground",
+        "canonical": "#f2f0eb",
+        "oklch": "oklch(95.5% 0.007 89)",
+        "tonalRamp": [
+          "#121110",
+          "#2a2927",
+          "#494844",
+          "#6a6965",
+          "#8e8c88",
+          "#b2b1ae",
+          "#d2d1ce",
+          "#efeeec"
+        ]
+      },
+      "map-building": {
+        "role": "secondary",
+        "displayName": "Stone Building",
+        "canonical": "#E6E2DA"
+      },
+      "map-park": {
+        "role": "secondary",
+        "displayName": "Pale Park",
+        "canonical": "#DCEBD3",
+        "oklch": "oklch(92.2% 0.036 134)",
+        "tonalRamp": [
+          "#0f130c",
+          "#252b20",
+          "#424b3c",
+          "#616d59",
+          "#85917d",
+          "#abb5a5",
+          "#ccd4c7",
+          "#eaf1e7"
+        ]
+      },
+      "map-water": {
+        "role": "secondary",
+        "displayName": "Pale Harbour",
+        "canonical": "#B9D9EE",
+        "oklch": "oklch(86.9% 0.045 237)",
+        "tonalRamp": [
+          "#08131a",
+          "#1c2b35",
+          "#364b58",
+          "#516d7f",
+          "#7690a1",
+          "#9fb5c3",
+          "#c3d4df",
+          "#e3f1fa"
+        ]
+      },
+      "map-road": {
+        "role": "secondary",
+        "displayName": "White Road",
+        "canonical": "#FFFFFF"
+      },
+      "map-highway": {
+        "role": "secondary",
+        "displayName": "Soft Butter Highway",
+        "canonical": "#FFE7A8"
+      },
+      "map-ground-dark": {
+        "role": "secondary",
+        "displayName": "Night Ground",
+        "canonical": "#1E1F22"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Graphite Ink",
+        "canonical": "#1d1d1f",
+        "oklch": "oklch(23.2% 0.004 286)",
+        "tonalRamp": [
+          "#111112",
+          "#29292a",
+          "#474749",
+          "#69696b",
+          "#8c8c8e",
+          "#b1b1b3",
+          "#d1d1d2",
+          "#eeeeef"
+        ],
+        "dark": "#f2f2f5"
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#4b4b52",
+        "oklch": "oklch(41.5% 0.012 286)",
+        "tonalRamp": [
+          "#111114",
+          "#28282c",
+          "#47474c",
+          "#68686f",
+          "#8b8b92",
+          "#b0b0b6",
+          "#d0d0d5",
+          "#eeeef2"
+        ],
+        "dark": "#c4c4cc"
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Mist Ink",
+        "canonical": "#75757d",
+        "oklch": "oklch(56.5% 0.012 286)",
+        "tonalRamp": [
+          "#111114",
+          "#28282c",
+          "#47474d",
+          "#686870",
+          "#8b8b92",
+          "#b0b0b6",
+          "#d0d0d5",
+          "#eeeef2"
+        ],
+        "dark": "#9a9aa3"
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Frosted Glass",
+        "canonical": "rgba(252, 252, 253, 0.84)",
+        "dark": "rgba(36, 37, 41, 0.82)"
+      },
+      "glass-solid": {
+        "role": "neutral",
+        "displayName": "Glass Solid",
+        "canonical": "#fcfcfd",
+        "oklch": "oklch(99.1% 0.001 286)",
+        "tonalRamp": [
+          "#111112",
+          "#292929",
+          "#474748",
+          "#69696a",
+          "#8c8c8d",
+          "#b1b1b1",
+          "#d1d1d1",
+          "#eeeeef"
+        ],
+        "dark": "#242529"
+      },
+      "fill": {
+        "role": "neutral",
+        "displayName": "Tint Fill",
+        "canonical": "rgba(118, 118, 128, 0.12)",
+        "dark": "rgba(118, 118, 128, 0.24)"
+      },
+      "fill-2": {
+        "role": "neutral",
+        "displayName": "Tint Fill Strong",
+        "canonical": "rgba(118, 118, 128, 0.2)",
+        "dark": "rgba(118, 118, 128, 0.34)"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(60, 60, 67, 0.14)",
+        "dark": "rgba(235, 235, 245, 0.12)"
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "rgba(60, 60, 67, 0.24)",
+        "dark": "rgba(235, 235, 245, 0.22)"
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "#f2f2f5"
+      },
+      "glass-dark": {
+        "role": "neutral",
+        "displayName": "Frosted Graphite",
+        "canonical": "rgba(36, 37, 41, 0.82)"
+      }
+    },
+    "typographyMeta": {
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Large change chip at the top of the unit panel."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Unit panel address title."
+      },
+      "year": {
+        "displayName": "Year",
+        "purpose": "Current year in the year bar."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "App name, sheet and popover titles (15-16px)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default interface text."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Addresses, filter options, toggles, About copy."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Secondary lines, timeline years, tooltips; usually Mist Ink."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Digits in change chips."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Year ticks and map attribution."
+      },
+      "map-labels": {
+        "displayName": "Map Labels",
+        "purpose": "Basemap labels use bundled Noto Sans glyph PBFs (Regular, Medium, Italic) so the map renders offline."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 6px 28px rgba(15, 20, 30, 0.14), 0 1px 3px rgba(15, 20, 30, 0.08)",
+        "dark": "0 6px 28px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3)",
+        "purpose": "Every floating glass surface."
+      },
+      {
+        "name": "raised-segment",
+        "value": "0 1px 4px rgba(0, 0, 0, 0.14)",
+        "purpose": "Selected option in a segmented control (3px blur in filter segments)."
+      },
+      {
+        "name": "switch-knob",
+        "value": "0 1px 3px rgba(0, 0, 0, 0.25)",
+        "purpose": "Toggle thumb."
+      },
+      {
+        "name": "badge",
+        "value": "canvas shadow rgba(20, 20, 30, 0.28), blur 3px, offset-y 1px",
+        "purpose": "Map badges only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "The one easing curve for all interface motion."
+      },
+      {
+        "name": "state",
+        "value": "200ms",
+        "purpose": "Segment, switch track and disclosure chevron transitions."
+      },
+      {
+        "name": "pop",
+        "value": "220ms",
+        "purpose": "Popover and About open: scale from 0.96 and 4px up; switch thumb travel."
+      },
+      {
+        "name": "rise",
+        "value": "300ms",
+        "purpose": "Compare sheet rises 16px."
+      },
+      {
+        "name": "reflow",
+        "value": "320ms",
+        "purpose": "Corner controls and year bar yield to the open panel."
+      },
+      {
+        "name": "panel",
+        "value": "340ms",
+        "purpose": "Unit panel slides in from the right (bottom sheet on phone)."
+      },
+      {
+        "name": "map-paint",
+        "value": "450ms",
+        "purpose": "MapLibre style transition: heat cross-fade and badge settle."
+      },
+      {
+        "name": "fly-to",
+        "value": "900ms",
+        "purpose": "Map flies to a selected or searched unit, padded 420px clear of the panel."
+      },
+      {
+        "name": "pulse",
+        "value": "1100ms ease-out cubic",
+        "purpose": "One ring pulse on units whose count rose in the year just stepped to."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "1ms",
+        "purpose": "All animations and transitions collapse under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "720px",
+        "purpose": "Controls drop under search; unit panel becomes a 62vh bottom sheet."
+      }
+    ],
+    "backdrop": {
+      "glass": "blur(22px) saturate(180%)",
+      "border": "0.5px solid var(--line)"
+    },
+    "focusRing": {
+      "value": "3px solid var(--focus), offset 1px",
+      "light": "rgba(29, 29, 31, 0.35)",
+      "dark": "rgba(242, 242, 245, 0.45)"
+    },
+    "provenance": {
+      "heatImages": "web/public/data/heat/<year>.png are generated by pipeline/heat.py from FEHD restaurant licence lists (DATA.GOV.HK, 2016-2026) geocoded with the Address Lookup Service; colour stops (the change ramp) and bounds are written to meta.json.",
+      "basemap": "web/public/tiles/hk.pmtiles is a Protomaps extract of OpenStreetMap data (© OpenStreetMap contributors, ODbL), styled with @protomaps/basemaps flavours retuned in web/src/map/basemap.ts; attribution shown on the map.",
+      "glyphs": "web/public/fonts holds Noto Sans glyph PBFs for basemap labels.",
+      "otherRasters": "None. Icons are authored inline SVG; badges are drawn on canvas at runtime."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink button for the one primary action in a panel, such as pinning a unit.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 17v-4.2\"/><path d=\"M6.2 12.8h7.6l-1.3-3.1V4.5h-5v5.2z\"/></svg>Pin to compare</button>",
+      "css": ".ds-btn-primary { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; height: 36px; padding: 0 16px; border-radius: 10px; border: 0; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; background: #1d1d1f; color: #fff; cursor: pointer; transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { opacity: 0.88; } .ds-btn-primary:focus-visible { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; } .ds-btn-primary:active { opacity: 0.8; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tint-fill button for secondary actions.",
+      "html": "<button class=\"ds-btn-secondary\">Print</button>",
+      "css": ".ds-btn-secondary { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; height: 36px; padding: 0 16px; border-radius: 10px; border: 0; font-size: 14px; font-weight: 600; background: rgba(118,118,128,0.12); color: #1d1d1f; cursor: pointer; transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-secondary:hover { background: rgba(118,118,128,0.2); } .ds-btn-secondary:focus-visible { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; }"
+    },
+    {
+      "name": "Glass Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "Floating 40px glass button with icon, label and an ink count bubble.",
+      "html": "<button class=\"ds-iconbtn\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3.5 5.5h13M6 10h8M8.5 14.5h3\"/></svg>Filters<span class=\"ds-count\">2</span></button>",
+      "css": ".ds-iconbtn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 14px; font-weight: 500; color: #1d1d1f; cursor: pointer; } .ds-iconbtn:hover { background: rgba(252,252,253,0.95); } .ds-iconbtn:focus-visible { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; } .ds-count { background: #1d1d1f; color: #fff; border-radius: 9px; font-size: 11.5px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 5px; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented",
+      "description": "Mode switch between Shops and Change heat.",
+      "html": "<div class=\"ds-seg\" role=\"group\"><button aria-pressed=\"true\">Shops</button><button aria-pressed=\"false\">Change heat</button></div>",
+      "css": ".ds-seg { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); display: inline-flex; padding: 3px; gap: 2px; border-radius: 11px; } .ds-seg button { font: inherit; font-size: 14px; border: 0; background: transparent; padding: 6px 16px; border-radius: 8px; font-weight: 500; color: #4b4b52; cursor: pointer; transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-seg button:hover { color: #1d1d1f; } .ds-seg button[aria-pressed=\"true\"] { background: #fcfcfd; color: #1d1d1f; box-shadow: 0 1px 4px rgba(0,0,0,0.14); } .ds-seg button:focus-visible { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; }"
+    },
+    {
+      "name": "Search Card",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Top-left glass card with title line and tint-fill search field.",
+      "html": "<div class=\"ds-searchcard\"><div class=\"ds-brand\"><b>Shopfront Past Lives 鋪位前世</b><span>Yau Tsim · 2016–2026</span></div><label class=\"ds-field\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8.5\" cy=\"8.5\" r=\"5.5\"/><path d=\"M12.7 12.7 17 17\"/></svg><input placeholder=\"Search Yau Tsim by address or shop name\"></label></div>",
+      "css": ".ds-searchcard { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); width: 372px; color: #1d1d1f; } .ds-brand { padding: 12px 16px 8px; display: flex; align-items: baseline; gap: 8px; font-size: 15px; letter-spacing: -0.01em; } .ds-brand b { font-weight: 600; } .ds-brand span { margin-left: auto; color: #75757d; font-size: 12.5px; letter-spacing: 0; } .ds-field { display: flex; align-items: center; gap: 8px; height: 40px; margin: 0 12px 12px; padding: 0 12px; border-radius: 10px; background: rgba(118,118,128,0.12); color: #75757d; } .ds-field:focus-within { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; } .ds-field input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font: inherit; font-size: 15px; color: #1d1d1f; } .ds-field input::placeholder { color: #75757d; }"
+    },
+    {
+      "name": "Change Chips",
+      "kind": "chip",
+      "refersTo": "change-chip-1",
+      "description": "The five ramp steps as chips, plus a hollow variant; same colours and digits as the map badges.",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-zero\"><i></i>0</span><span class=\"ds-chip\" style=\"background:#5CC6BA;color:#063A34\">1</span><span class=\"ds-chip\" style=\"background:#FFC53D;color:#4A3200\">2</span><span class=\"ds-chip\" style=\"background:#FF8A3D;color:#3F1500\">3</span><span class=\"ds-chip\" style=\"background:#D92D20;color:#FFFFFF\">4+</span><span class=\"ds-chip ds-hollow\" style=\"color:#FF8A3D\"><span style=\"color:#1d1f24\">3</span></span></div>",
+      "css": ".ds-chips { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; display: flex; gap: 6px; align-items: center; } .ds-chip { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-weight: 600; font-size: 12px; line-height: 1; font-variant-numeric: tabular-nums; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); } .ds-hollow { background: #fff; box-shadow: inset 0 0 0 2px currentColor; } .ds-zero { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #75757d; } .ds-zero i { width: 11px; height: 11px; border-radius: 50%; background: #DADDE3; box-shadow: 0 0 0 1.5px #fff, 0 1px 2px rgba(0,0,0,0.2); }"
+    },
+    {
+      "name": "Legend",
+      "kind": "card",
+      "refersTo": "glass-panel",
+      "description": "Bottom-left glass legend for the change ramp and marker forms.",
+      "html": "<div class=\"ds-legend\"><div class=\"ds-cap\">Store changes since 2016</div><div class=\"ds-row\"><span class=\"ds-c\" style=\"background:#5CC6BA;color:#063A34\">1</span><span class=\"ds-c\" style=\"background:#FFC53D;color:#4A3200\">2</span><span class=\"ds-c\" style=\"background:#FF8A3D;color:#3F1500\">3</span><span class=\"ds-c\" style=\"background:#D92D20;color:#fff\">4+</span></div><div class=\"ds-gradient\"></div><div class=\"ds-gticks\"><span>Fewer changes</span><span>More changes</span></div></div>",
+      "css": ".ds-legend { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); padding: 12px; width: 260px; color: #1d1d1f; } .ds-cap { font-size: 12px; color: #4b4b52; font-weight: 500; margin-bottom: 8px; } .ds-row { display: flex; gap: 6px; } .ds-c { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-weight: 600; font-size: 12px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); } .ds-gradient { margin-top: 12px; height: 10px; border-radius: 5px; width: 230px; background: linear-gradient(90deg, #DADDE3 0%, #5CC6BA 25%, #FFC53D 55%, #FF8A3D 80%, #D92D20 100%); } .ds-gticks { display: flex; justify-content: space-between; width: 230px; font-size: 12px; color: #75757d; margin-top: 4px; }"
+    },
+    {
+      "name": "Year Bar",
+      "kind": "custom",
+      "refersTo": "play-button",
+      "description": "Bottom-centre glass bar: ink play button, tabular year, slider with two-year ticks.",
+      "html": "<div class=\"ds-yearbar\"><button class=\"ds-play\" aria-label=\"Play\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M7 4.8v10.4L15.6 10z\" fill=\"currentColor\"/></svg></button><div class=\"ds-yr\">2026</div><input type=\"range\" min=\"2016\" max=\"2026\" value=\"2026\"></div>",
+      "css": ".ds-yearbar { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; width: 480px; color: #1d1d1f; } .ds-play { width: 36px; height: 36px; border-radius: 50%; border: 0; background: #1d1d1f; color: #fff; display: grid; place-items: center; flex: none; cursor: pointer; transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-play:hover { transform: scale(1.05); } .ds-play:focus-visible { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; } .ds-yr { font-weight: 600; font-size: 17px; width: 44px; text-align: right; font-variant-numeric: tabular-nums; } .ds-yearbar input { flex: 1; accent-color: #4b4b52; }"
+    },
+    {
+      "name": "Unit Panel Head",
+      "kind": "card",
+      "refersTo": "unit-panel",
+      "description": "Top of the 400px right panel: address headline, large change chip, tag and primary action.",
+      "html": "<div class=\"ds-panel\"><div class=\"ds-h\">G/F, 100 Portland Street, Yau Ma Tei</div><div class=\"ds-addr\">九龍油麻地砵蘭街100號地舖</div><div class=\"ds-fig\"><span class=\"ds-big\">3</span><div><b>3 store changes since 2016</b><small>喜洋洋魚湯飯專門店 listed since Apr 2026</small></div></div><span class=\"ds-tag\">General restaurant licence recorded</span></div>",
+      "css": ".ds-panel { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; background: rgba(252,252,253,0.84); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); border: 0.5px solid rgba(60,60,67,0.14); border-radius: 14px; box-shadow: 0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08); width: 400px; padding: 16px; color: #1d1d1f; font-size: 14px; line-height: 1.4; } .ds-h { font-size: 19px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; } .ds-addr { color: #4b4b52; margin-top: 4px; font-size: 13px; } .ds-fig { display: flex; align-items: center; gap: 12px; margin-top: 16px; } .ds-big { display: grid; place-items: center; min-width: 44px; height: 44px; border-radius: 22px; font-size: 22px; font-weight: 600; background: #FF8A3D; color: #3F1500; font-variant-numeric: tabular-nums; } .ds-fig b { font-size: 16px; font-weight: 600; } .ds-fig small { display: block; font-size: 12.5px; color: #75757d; margin-top: 2px; } .ds-tag { display: inline-block; margin-top: 12px; font-size: 12px; padding: 4px 8px; border-radius: 6px; background: rgba(118,118,128,0.12); color: #4b4b52; font-weight: 500; }"
+    },
+    {
+      "name": "Switch",
+      "kind": "input",
+      "refersTo": "switch",
+      "description": "Filter toggle: tint track, white thumb, ink when on.",
+      "html": "<label class=\"ds-toggle\">Street-level units only<span class=\"ds-switch\"><input type=\"checkbox\" checked><span></span></span></label>",
+      "css": ".ds-toggle { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang HK', sans-serif; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 272px; padding: 8px 0; font-size: 13.5px; color: #1d1d1f; cursor: pointer; } .ds-switch { position: relative; width: 38px; height: 23px; flex: none; } .ds-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; } .ds-switch span { position: absolute; inset: 0; border-radius: 12px; background: rgba(118,118,128,0.2); transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch input:checked + span { background: #1d1d1f; } .ds-switch input:checked + span::after { transform: translateX(15px); } .ds-switch input:focus-visible + span { outline: 3px solid rgba(29,29,31,0.35); outline-offset: 1px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Apple Maps, Played Straight",
+    "overview": "The map is the screen. A soft, warm-grey basemap fills the viewport edge to edge, and every interface element floats above it as a translucent glass card in the system face, the way a native map app does it. Nothing is invented for its own sake: the world is the category standard for map apps, chosen by the user over rolled directions, with Apple Maps as the craft bar. Its distinctiveness comes from one thing only: a five-step change ramp (grey, teal, amber, orange, red) that is the sole saturated colour anywhere on screen, carried identically by the map badges, the dots, the chips, the legend and the heat wash.\n\nDensity is map-app density: compact controls in the corners, a 14px body, one floating panel that slides in beside the live map rather than replacing it. Chrome is neutral ink on frosted white (or frosted graphite in dark mode); controls never borrow the ramp, so colour always means change frequency and nothing else. Motion is smooth and physical, a single long-tail ease used everywhere, with the map itself doing the largest moves (fly-to, heat cross-fade).\n\nThe build diverges from the direction contract in two small, deliberate places: the glass is 84% opaque rather than about 80%, and the top-left search is a 372px card holding the title line and a search field rather than a bare 380px pill. The build is the record.",
+    "keyCharacteristics": [
+      "Full-bleed vector basemap (Protomaps extract of OpenStreetMap, served offline from a local PMTiles file), tuned pale so the ramp is the only saturated thing on screen.",
+      "Floating glass surfaces: frosted, hairline-bordered, one soft two-layer shadow, 14px corners.",
+      "System type only (SF Pro / PingFang HK); Chinese and English set side by side.",
+      "One five-step change ramp shared by canvas badges, map dots, chips, legend and the generated heat images.",
+      "Digits always carry the count; colour is never the only cue.",
+      "Light and dark schemes follow the operating system."
+    ],
+    "rules": [
+      {
+        "name": "The One Colour Rule",
+        "body": "The change ramp is the only saturated colour on screen. Chrome is ink on glass; the basemap is pale. If a new control needs emphasis, it gets ink, weight or position, never a hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shared Ramp Rule",
+        "body": "Badges, dots, chips, the legend and the heat wash read from one ramp definition (and the pipeline's identical stop list). A step's colour never changes meaning between surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Digit Rule",
+        "body": "Every coloured count also shows its number. Colour supports the digit; it never replaces it.",
+        "section": "colors"
+      },
+      {
+        "name": "The System Face Rule",
+        "body": "All interface text is the platform's own UI face. No webfonts, no display face, no letter-spaced uppercase in the chrome.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Count Rule",
+        "body": "Every number that can change (counts, years, chips) uses tabular figures so it does not jitter while the year plays.",
+        "section": "typography"
+      },
+      {
+        "name": "The Map Stays Live Rule",
+        "body": "Nothing covers the map edge to edge except the compare sheet the user explicitly opens. Detail opens beside the map, and the controls move out of its way rather than under it.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Float Rule",
+        "body": "There is one elevation for chrome. Popovers, panels, tooltips, sheets and buttons all use Float; nothing stacks a second, heavier shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every hue that means \"change\" from the five-step ramp, and keep the heat pipeline's stop colours identical to it.",
+      "Do show the digit with every coloured count, in tabular figures.",
+      "Do float new chrome as a glass card: Frosted Glass, 22px blur at 180% saturation, 0.5px hairline, Float shadow, 14px radius.",
+      "Do emphasise controls with Graphite Ink (or near-white in dark mode), weight and placement.",
+      "Do move with the one ease (`cubic-bezier(0.22, 1, 0.36, 1)`): 200ms for state, 220ms for popovers, 300–340ms for sheets and panels, 450ms for map paint cross-fades, 900ms for fly-to; collapse to 1ms under reduced motion.",
+      "Do keep the basemap pale and low-chroma so the ramp stays the loudest thing on screen; swap the zero step to Receding Slate on the dark map.",
+      "Do set Chinese and English side by side, Chinese first for sign names.",
+      "Do keep map labels above the heat wash."
+    ],
+    "donts": [
+      "Don't colour buttons, toggles, links or selection states with a ramp step or any other hue.",
+      "Don't add a second typeface, a display face, or uppercase tracked labels to the interface chrome.",
+      "Don't wrap the map in sidebars of charts or KPI tiles; detail opens beside the live map.",
+      "Don't stack shadows or give one floating surface more elevation than another.",
+      "Don't use glyph or emoji icons; extend the authored 20px SVG set at 1.6px stroke.",
+      "Don't let badges overlap; resolve collisions by placing the higher count first."
+    ]
+  }
+}

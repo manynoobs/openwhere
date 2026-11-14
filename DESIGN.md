@@ -1,0 +1,351 @@
+---
+name: Shopfront Past Lives
+description: Ten years of Hong Kong restaurant licence records on one calm map, one readable change count per shopfront.
+colors:
+  change-0: "#DADDE3"
+  change-0-ink: "#2B2F36"
+  change-0-dark: "#5E626B"
+  change-1: "#5CC6BA"
+  change-1-ink: "#063A34"
+  change-2: "#FFC53D"
+  change-2-ink: "#4A3200"
+  change-3: "#FF8A3D"
+  change-3-ink: "#3F1500"
+  change-4: "#D92D20"
+  change-4-ink: "#FFFFFF"
+  map-ground: "#F2F0EB"
+  map-building: "#E6E2DA"
+  map-park: "#DCEBD3"
+  map-water: "#B9D9EE"
+  map-road: "#FFFFFF"
+  map-highway: "#FFE7A8"
+  map-ground-dark: "#1E1F22"
+  ink: "#1d1d1f"
+  ink-2: "#4b4b52"
+  ink-3: "#75757d"
+  glass: "rgba(252, 252, 253, 0.84)"
+  glass-solid: "#fcfcfd"
+  fill: "rgba(118, 118, 128, 0.12)"
+  fill-2: "rgba(118, 118, 128, 0.2)"
+  line: "rgba(60, 60, 67, 0.14)"
+  line-strong: "rgba(60, 60, 67, 0.24)"
+  ink-dark: "#f2f2f5"
+  glass-dark: "rgba(36, 37, 41, 0.82)"
+typography:
+  headline:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", \"Noto Sans HK\", \"Microsoft JhengHei\", sans-serif"
+    fontSize: "19px"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.015em"
+  figure:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "22px"
+    fontWeight: 600
+    lineHeight: 1
+    fontFeature: "tnum"
+  year:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "17px"
+    fontWeight: 600
+    fontFeature: "tnum"
+  title:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "15px"
+    fontWeight: 600
+    letterSpacing: "-0.01em"
+  body:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", \"Noto Sans HK\", \"Microsoft JhengHei\", sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.4
+  body-small:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.4
+  caption:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "12.5px"
+    fontWeight: 450
+    lineHeight: 1.4
+  label:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "12px"
+    fontWeight: 600
+    lineHeight: 1
+    fontFeature: "tnum"
+  micro:
+    fontFamily: "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Helvetica Neue\", \"PingFang HK\", sans-serif"
+    fontSize: "10.5px"
+    fontWeight: 400
+rounded:
+  tag: "6px"
+  inner: "8px"
+  sm: "9px"
+  control: "10px"
+  segmented: "11px"
+  panel: "14px"
+  full: "999px"
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "24px"
+components:
+  glass-panel:
+    backgroundColor: "{colors.glass}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+  button-primary:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.glass-solid}"
+    rounded: "{rounded.control}"
+    padding: "0 16px"
+    height: "36px"
+  button-secondary:
+    backgroundColor: "{colors.fill}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "0 16px"
+    height: "36px"
+  icon-button:
+    backgroundColor: "{colors.glass}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+    padding: "0 12px"
+    height: "40px"
+  play-button:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.glass-solid}"
+    rounded: "{rounded.full}"
+    size: "36px"
+  segmented:
+    backgroundColor: "{colors.glass}"
+    rounded: "{rounded.segmented}"
+    padding: "3px"
+  segmented-option:
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.inner}"
+    padding: "6px 16px"
+  segmented-option-active:
+    backgroundColor: "{colors.glass-solid}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.inner}"
+  search-field:
+    backgroundColor: "{colors.fill}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "0 12px"
+    height: "40px"
+  change-chip-1:
+    backgroundColor: "{colors.change-1}"
+    textColor: "{colors.change-1-ink}"
+    typography: "{typography.label}"
+    rounded: "{rounded.full}"
+    height: "22px"
+    padding: "0 6px"
+  change-chip-4:
+    backgroundColor: "{colors.change-4}"
+    textColor: "{colors.change-4-ink}"
+    typography: "{typography.label}"
+    rounded: "{rounded.full}"
+    height: "22px"
+    padding: "0 6px"
+  tag:
+    backgroundColor: "{colors.fill}"
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.tag}"
+    padding: "4px 8px"
+  unit-panel:
+    backgroundColor: "{colors.glass}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+    width: "400px"
+---
+
+# Design System: Shopfront Past Lives
+
+## Overview
+
+**Creative North Star: "Apple Maps, Played Straight"**
+
+The map is the screen. A soft, warm-grey basemap fills the viewport edge to edge, and every interface element floats above it as a translucent glass card in the system face, the way a native map app does it. Nothing is invented for its own sake: the world is the category standard for map apps, chosen by the user over rolled directions, with Apple Maps as the craft bar. Its distinctiveness comes from one thing only: a five-step change ramp (grey, teal, amber, orange, red) that is the sole saturated colour anywhere on screen, carried identically by the map badges, the dots, the chips, the legend and the heat wash.
+
+Density is map-app density: compact controls in the corners, a 14px body, one floating panel that slides in beside the live map rather than replacing it. Chrome is neutral ink on frosted white (or frosted graphite in dark mode); controls never borrow the ramp, so colour always means change frequency and nothing else. Motion is smooth and physical, a single long-tail ease used everywhere, with the map itself doing the largest moves (fly-to, heat cross-fade).
+
+The build diverges from the direction contract in two small, deliberate places: the glass is 84% opaque rather than about 80%, and the top-left search is a 372px card holding the title line and a search field rather than a bare 380px pill. The build is the record.
+
+**Key Characteristics:**
+- Full-bleed vector basemap (Protomaps extract of OpenStreetMap, served offline from a local PMTiles file), tuned pale so the ramp is the only saturated thing on screen.
+- Floating glass surfaces: frosted, hairline-bordered, one soft two-layer shadow, 14px corners.
+- System type only (SF Pro / PingFang HK); Chinese and English set side by side.
+- One five-step change ramp shared by canvas badges, map dots, chips, legend and the generated heat images.
+- Digits always carry the count; colour is never the only cue.
+- Light and dark schemes follow the operating system.
+
+## Colors
+
+A quiet, warm-neutral map and graphite-on-glass chrome, with one five-step ramp holding all of the saturation.
+
+### Primary
+The change ramp. Steps are 0, 1, 2, 3 and 4+ store changes since 2016; each fill has its own ink so the digit on it stays readable.
+- **Calm Grey** (change-0): units with no store change. Drawn as a smaller, digitless dot so changed units read first. On the dark basemap it swaps to **Receding Slate** (change-0-dark), because a light grey would become the brightest thing on screen.
+- **Lagoon Teal** (change-1) with deep teal ink: one change.
+- **Signal Amber** (change-2) with brown ink: two changes.
+- **Tangerine** (change-3) with dark rust ink: three changes.
+- **Alarm Red** (change-4) with white ink: four or more changes.
+
+The same five hexes are written by the heat pipeline into the data's metadata as colour stops, so the wash images and the legend gradient always agree with the badges.
+
+### Secondary
+The basemap ground, a Protomaps "light" flavour retuned toward Apple Maps.
+- **Warm Paper Ground** (map-ground): land and app background; also the page colour behind the map before tiles load.
+- **Stone Building** (map-building): building footprints, a half-step darker than the ground.
+- **Pale Park** (map-park): parks and woods, desaturated green.
+- **Pale Harbour** (map-water): water, light and low-chroma.
+- **White Road** (map-road) on warm grey casings; **Soft Butter Highway** (map-highway) is the only warm accent in the basemap and stays pale.
+- **Night Ground** (map-ground-dark): the dark basemap, near-black graphite with blue-black water.
+
+### Neutral
+- **Graphite Ink** (ink): primary text, the primary button, the play button, the active switch track. It is also the system's "accent": controls use ink, not colour.
+- **Slate Ink** (ink-2): secondary text, inactive segment labels, addresses, English sign names under Chinese.
+- **Mist Ink** (ink-3): tertiary text, placeholders, ticks, section headings in the panel, attribution links.
+- **Frosted Glass** (glass) over **Glass Solid** (glass-solid): every floating surface; the solid value is the selected segment and the clear-button glyph.
+- **Tint Fill / Tint Fill Strong** (fill, fill-2): search field, secondary buttons, tags, row hover, inactive switch track, compare bars.
+- **Hairline / Hairline Strong** (line, line-strong): 0.5px borders and dividers on glass.
+- **Dark scheme**: ink inverts to near-white (ink-dark) and glass to frosted graphite (glass-dark); every other neutral has a matching dark value in the stylesheet.
+
+### Named Rules
+**The One Colour Rule.** The change ramp is the only saturated colour on screen. Chrome is ink on glass; the basemap is pale. If a new control needs emphasis, it gets ink, weight or position, never a hue.
+
+**The Shared Ramp Rule.** Badges, dots, chips, the legend and the heat wash read from one ramp definition (and the pipeline's identical stop list). A step's colour never changes meaning between surfaces.
+
+**The Digit Rule.** Every coloured count also shows its number. Colour supports the digit; it never replaces it.
+
+## Typography
+
+**Display Font:** none; the system has no display face.
+**Body Font:** system UI stack (-apple-system / SF Pro Text, Helvetica Neue, PingFang HK, Noto Sans HK, Microsoft JhengHei)
+**Map Label Font:** Noto Sans glyph sets bundled with the basemap (Regular, Medium, Italic), because map labels need offline glyph files.
+
+**Character:** Native and unadorned. Hierarchy comes from size steps of 1 to 4px and from weight (400, 450, 500, 600), never from a second family, uppercase, or tracking.
+
+### Hierarchy
+- **Figure** (600, 22px, tabular): the large change chip at the top of the unit panel; the single biggest number in the interface.
+- **Headline** (600, 19px, 1.25, slightly tightened): the unit panel's address title.
+- **Year** (600, 17px, tabular): the current year in the year bar.
+- **Title** (600, 15–16px): app name in the top-left card, compare sheet title, popover titles; the search input sits at 15px regular.
+- **Body** (400, 14px, 1.4): default text; sign names in the history step to 14.5px semibold.
+- **Body Small** (400–500, 13–13.5px): addresses, filter options, toggles, About copy.
+- **Caption** (450, 12.5px): secondary lines, timeline years, result subtitles, tooltips; usually Mist Ink.
+- **Label** (600, 12px, line-height 1, tabular): the digits in change chips; 11–11.5px for count bubbles and the "Listed now" tag.
+- **Micro** (400, 10.5px): year ticks and map attribution.
+
+### Named Rules
+**The System Face Rule.** All interface text is the platform's own UI face. No webfonts, no display face, no letter-spaced uppercase in the chrome.
+
+**The Tabular Count Rule.** Every number that can change (counts, years, chips) uses tabular figures so it does not jitter while the year plays.
+
+## Layout
+
+One full-bleed map with floating corners, on a 12px outer gutter (plus safe-area insets). Top-left: the title and search card (372px). Top-right: the Shops | Change heat segmented control, the Filters button and the About button, 8px apart. Bottom-left: the compact legend (up to 332px). Bottom-centre: the year bar (up to 560px). Bottom-right: the Compare button. The unit panel docks to the right edge, 400px wide and full height minus gutters.
+
+When the panel opens, the map stays live and everything on the right yields: top-right controls, the Compare button and the attribution slide left by the panel width plus 24px, and the year bar re-centres into the remaining space. Fly-to pads the map by 420px on the right so the selected unit lands clear of the panel.
+
+Spacing runs on 4 / 8 / 12 / 16 / 24px. Panels pad at 16px, popovers at 16px, cards at 12px; gaps inside controls are 8px.
+
+At 720px and below (phone), the top-right controls drop into a full-width row under the search card, the legend key line hides, the year bar sits at the bottom edge, and the unit panel becomes a bottom sheet 62% of the viewport tall. The compare sheet always rises from the bottom, spanning the width between gutters.
+
+**The Map Stays Live Rule.** Nothing covers the map edge to edge except the compare sheet the user explicitly opens. Detail opens beside the map, and the controls move out of its way rather than under it.
+
+## Elevation & Depth
+
+Depth is one floating layer over the map, made by translucency, blur and a single soft shadow, Apple Maps style. Every floating card uses the same frosted treatment (22px backdrop blur with 180% saturation, 0.5px hairline border) and the same two-layer ambient shadow, deeper in dark mode. Inside a card, depth is tonal: tint fills and a raised white segment, not further shadows. On the map, badges carry their own small soft shadow and a 1.5px white keyline so they separate from the basemap and from each other.
+
+### Shadow Vocabulary
+- **Float** (`0 6px 28px rgba(15,20,30,0.14), 0 1px 3px rgba(15,20,30,0.08)`; dark `0 6px 28px rgba(0,0,0,0.45), 0 1px 3px rgba(0,0,0,0.3)`): every glass surface.
+- **Raised segment** (`0 1px 4px rgba(0,0,0,0.14)`; 3px blur variant in filter segments): the selected option in a segmented control.
+- **Switch knob** (`0 1px 3px rgba(0,0,0,0.25)`): the white thumb of a toggle.
+- **Badge** (canvas shadow, `rgba(20,20,30,0.28)`, 3px blur, 1px down): map badges only.
+
+### Named Rules
+**The One Float Rule.** There is one elevation for chrome. Popovers, panels, tooltips, sheets and buttons all use Float; nothing stacks a second, heavier shadow.
+
+## Shapes
+
+Soft, continuous rounding throughout, scaled to the element: 14px for floating cards and the panel, 10–11px for fields, buttons and the segmented track, 8–9px for nested options and rows, 6px for tags, and full circles for badges, chips, the play button, the close button and switch thumbs. Borders are 0.5px hairlines; strokes inside the map are white keylines. Icons are a small authored SVG set on a 20px grid with 1.6px round-capped strokes, drawn to sit beside SF Symbols weight.
+
+Unit markers have three forms, used consistently across map, chip and legend: **filled** (listed now), **hollow** (white centre with a ramp-coloured ring: no licence listed now), and **dashed inner ring** (shared address, located only to building level).
+
+## Components
+
+### Buttons
+Quiet and native; ink carries emphasis.
+- **Shape:** gently rounded (10px), 36px tall.
+- **Primary:** Graphite Ink fill with white text, semibold, 16px side padding ("Pin to compare").
+- **Secondary:** Tint Fill with ink text.
+- **Icon button:** a 40px glass card (14px radius), icon plus label at weight 500, or 40px square for icon only; a small ink count bubble shows active filters.
+- **Play:** a 36px ink circle with a white play or pause glyph.
+- **Close:** a 30px Tint Fill circle with a Slate Ink cross.
+- **Disabled:** 50% opacity. **Focus:** a 3px soft ink outline (35% ink in light, 45% in dark) offset by 1px, everywhere.
+
+### Segmented Control
+- **Style:** glass track (11px radius, 3px inset); options are text at weight 500 in Slate Ink.
+- **Active:** Glass Solid pill (8px radius) with the raised-segment shadow and full ink; background, colour and shadow ease over 200ms.
+- **Filter variant:** a Tint Fill track (9px) inside popovers with equal-width 13px options.
+
+### Change Chip (signature)
+The change count as it appears on the map, reused in the legend, search results, compare rows and the panel.
+- **Style:** a 22px pill, ramp fill with its matching ink, 12px semibold tabular digits, a faint inner white ring.
+- **Hollow:** white centre with a 2px ring in the step colour.
+- **Large:** 44px in the panel figure at 22px type.
+
+### Map Badges (signature)
+Drawn on canvas in the system font at 2× or higher and registered as map images, so they render like native pins without glyph files.
+- 22px circle, ramp fill, 1.5px white keyline, small soft shadow, bold digit (12.5px, 10.5px for two digits). Zero is a digitless grey dot.
+- Below zoom 15.7 units are coloured dots (no-change dots smaller); badges fade in over half a zoom level above it and dots stay underneath.
+- Badges never overlap: the unit with more changes places first, so a hidden neighbour still shows as its dot.
+- Hover shows a soft ink halo; selection lifts the badge to 1.3× above all others.
+- When a year step raises a unit's count, one ring pulses out from it (1.1s, ease-out cubic).
+
+### Heat Wash (signature)
+A per-year RGBA image generated by the data pipeline from the licence records, coloured with the change ramp, transparent where few shops stand and more opaque as the change rate rises. It sits under the basemap labels so street names stay readable. Switching to Change heat cross-fades the wash in over 450ms while badges fade and dots shrink to small, half-opaque points; the legend becomes a 230px gradient bar with "Fewer changes" and "More changes" ends.
+
+### Cards / Containers
+- **Corner Style:** 14px.
+- **Background:** Frosted Glass with blur; Float shadow; 0.5px hairline.
+- **Internal Padding:** 12px (legend, search card) to 16px (panel, popovers, About).
+- **Popovers:** open from their button with a 220ms scale-and-drop (from 96%, 4px up), anchored top right.
+
+### Inputs / Fields
+- **Search:** a 40px Tint Fill field (10px radius) with a Mist Ink magnifier, 15px text and Mist Ink placeholder; an 18px round clear button appears when there is text. Results list below a hairline, rows highlight with Tint Fill on hover or keyboard selection.
+- **Switch:** 38 × 23px track in Tint Fill Strong, white thumb; on is ink, the thumb travels over 220ms.
+- **Year slider:** the native range input in Slate Ink, with tabular year ticks every second year beneath.
+
+### Unit Panel
+The 400px glass panel slides in from the right over 340ms as the map flies to the unit (900ms) and the badge lifts, as one motion. Head: address headline, Chinese address in Slate Ink, the large chip with "N store changes since 2016", fact tags and actions. Body: the sign timeline (74px year column, sign names Chinese first then English), store-change markers as small ramp-coloured dots on a hairline, and a collapsible records table in 12px text.
+
+### Compare Sheet
+A bottom sheet rising over 300ms, holding up to three pinned units on one 2016–2026 axis: a 220px name column (120px on phone) and a track with 0.5px year rules and rounded tinted bars per sign.
+
+## Do's and Don'ts
+
+### Do:
+- **Do** take every hue that means "change" from the five-step ramp, and keep the heat pipeline's stop colours identical to it.
+- **Do** show the digit with every coloured count, in tabular figures.
+- **Do** float new chrome as a glass card: Frosted Glass, 22px blur at 180% saturation, 0.5px hairline, Float shadow, 14px radius.
+- **Do** emphasise controls with Graphite Ink (or near-white in dark mode), weight and placement.
+- **Do** move with the one ease (`cubic-bezier(0.22, 1, 0.36, 1)`): 200ms for state, 220ms for popovers, 300–340ms for sheets and panels, 450ms for map paint cross-fades, 900ms for fly-to; collapse to 1ms under reduced motion.
+- **Do** keep the basemap pale and low-chroma so the ramp stays the loudest thing on screen; swap the zero step to Receding Slate on the dark map.
+- **Do** set Chinese and English side by side, Chinese first for sign names.
+- **Do** keep map labels above the heat wash.
+
+### Don't:
+- **Don't** colour buttons, toggles, links or selection states with a ramp step or any other hue.
+- **Don't** add a second typeface, a display face, or uppercase tracked labels to the interface chrome.
+- **Don't** wrap the map in sidebars of charts or KPI tiles; detail opens beside the live map.
+- **Don't** stack shadows or give one floating surface more elevation than another.
+- **Don't** use glyph or emoji icons; extend the authored 20px SVG set at 1.6px stroke.
+- **Don't** let badges overlap; resolve collisions by placing the higher count first.
