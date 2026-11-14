@@ -109,7 +109,7 @@ def main():
     for i in range(1, len(stops_v)):  # keep strictly increasing after rounding
         stops_v[i] = max(stops_v[i], stops_v[i - 1] + 0.02)
     # the badge colours, so the wash and the badges read as one scale (grey = calm, red = hot)
-    ramp = ["#DADDE3", "#5CC6BA", "#FFC53D", "#FF8A3D", "#E5372B"]
+    ramp = ["#DADDE3", "#5CC6BA", "#FFC53D", "#FF8A3D", "#D92D20"]
     stops = [[v, c] for v, c in zip(stops_v, ramp)]
 
     (OUT / "heat").mkdir(parents=True, exist_ok=True)

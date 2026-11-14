@@ -77,7 +77,7 @@ export function CompareSheet({ ids, onClose, onUnpin, onOpen }: Props) {
                 const b = Math.min(100, pos(h.last_seen) + 100 / 132);
                 return (
                   <span key={i} className="bar" title={`${nameOf(h.signs)} · ${monthYear(h.first_seen)} – ${monthYear(h.last_seen)}`}
-                    style={{ left: `${a}%`, width: `${Math.max(b - a, 0.8)}%`, top: i % 2 ? 5 : 5 }}>
+                    style={{ left: `${a}%`, width: `${Math.max(b - a, 0.8)}%` }}>
                     {nameOf(h.signs)}
                   </span>
                 );

@@ -5,7 +5,7 @@ export const STEPS = [
   { fill: "#5CC6BA", ink: "#063A34", label: "1" },
   { fill: "#FFC53D", ink: "#4A3200", label: "2" },
   { fill: "#FF8A3D", ink: "#3F1500", label: "3" },
-  { fill: "#E5372B", ink: "#FFFFFF", label: "4+" },
+  { fill: "#D92D20", ink: "#FFFFFF", label: "4+" },
 ] as const;
 
 export const stepOf = (n: number) => Math.min(Math.max(n, 0), 4);

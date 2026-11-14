@@ -4,7 +4,7 @@ import { STEPS, stepOf } from "../ramp";
 export function Chip({ n, hollow = false, className = "" }: { n: number; hollow?: boolean; className?: string }) {
   const s = STEPS[stepOf(n)];
   const style = hollow
-    ? { color: stepOf(n) === 0 ? "#8a8f99" : s.fill }
+    ? { color: stepOf(n) === 0 ? "#9EA3AD" : s.fill }
     : { background: s.fill, color: s.ink };
   return (
     <span className={`chip num ${hollow ? "hollow" : ""} ${className}`} style={style}>
