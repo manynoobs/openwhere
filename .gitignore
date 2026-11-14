@@ -1,0 +1,15 @@
+# raw snapshots, caches and local databases are rebuilt by the pipeline
+data/raw/
+data/*.duckdb
+data/*.duckdb.wal
+data/*.sqlite
+data/*.log
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+web/dist/
+web/public/tiles/*.pmtiles
+bin/
+.DS_Store
+.impeccable/config.local.json
