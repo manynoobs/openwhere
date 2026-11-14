@@ -4,7 +4,7 @@ import type { SignHistory, UnitDetail, UnitProps } from "../types";
 import { Chip } from "./Chip";
 import { STEPS, stepOf } from "../ramp";
 import { Icon } from "./Icon";
-import { titleCase } from "./Search";
+import { shortAddress } from "./Search";
 
 interface Props {
   id: number | null;
@@ -41,11 +41,12 @@ export function UnitPanel({ id, props, pinned, canPin, onPin, onClose }: Props) 
   const u = unit && unit.id === id ? unit : null;
 
   return (
-    <aside className={`panel glass ${open ? "open" : ""}`} aria-hidden={!open} aria-label="Shopfront history">
+    <aside className={`panel glass ${open ? "open" : ""}`} aria-hidden={!open} aria-label="Shopfront history"
+      {...(open ? {} : { inert: "" })}>
       {props && (
         <div className="panel-head">
           <div className="top">
-            <h2>{titleCase(props.en)}</h2>
+            <h2>{shortAddress(props.en)}</h2>
             <button className="close" aria-label="Close" onClick={onClose}>
               <Icon name="close" size={16} />
             </button>
@@ -200,8 +201,8 @@ function HistoryRow({ h }: { h: SignHistory }) {
   return (
     <li>
       <div className="t-years num">
-        {h.listed_before_2016 ? "≤2015" : yearOf(h.first_seen)}–{ended ? yearOf(h.last_seen) : "now"}
-        <small>{h.listed_before_2016 ? "before 2016" : monthYear(h.first_seen)}</small>
+        {h.listed_before_2016 ? "2016" : yearOf(h.first_seen)}–{ended ? yearOf(h.last_seen) : "now"}
+        <small>{h.listed_before_2016 ? "listed before 2016" : `from ${monthYear(h.first_seen)}`}</small>
       </div>
       <div>
         <div className={`t-sign ${ended ? "ended" : ""}`}>

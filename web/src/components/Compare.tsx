@@ -3,7 +3,7 @@ import { loadUnit, monthYear, signNames, TYPE_LABEL } from "../data";
 import { YEARS, type UnitDetail } from "../types";
 import { Chip } from "./Chip";
 import { Icon } from "./Icon";
-import { titleCase } from "./Search";
+import { shortAddress } from "./Search";
 
 const T0 = Date.UTC(2016, 0, 1);
 const T1 = Date.UTC(2027, 0, 1);
@@ -64,7 +64,7 @@ export function CompareSheet({ ids, onClose, onUnpin, onOpen }: Props) {
             <div className="who">
               <Chip n={u.store_changes} />
               <button className="linkbtn" style={{ minWidth: 0, textAlign: "left", color: "inherit" }} onClick={() => onOpen(u)}>
-                <b>{titleCase(u.address_en)}</b>
+                <b>{shortAddress(u.address_en)}</b>
                 <small>{u.store_changes === 1 ? "1 store change" : `${u.store_changes} store changes`}</small>
               </button>
               <button className="unpin" aria-label="Unpin" onClick={() => onUnpin(u.id)}>
@@ -100,7 +100,7 @@ export function PrintSheet({ ids }: { ids: number[] }) {
       {units.map((u) => (
         <section key={u.id}>
           <h2>
-            {titleCase(u.address_en)} {u.address_tc ? `· ${u.address_tc}` : ""} — {u.store_changes} store change
+            {shortAddress(u.address_en)} {u.address_tc ? `· ${u.address_tc}` : ""} — {u.store_changes} store change
             {u.store_changes === 1 ? "" : "s"} since 2016
           </h2>
           <table>

@@ -99,7 +99,7 @@ export function Search({ district, onPick }: Props) {
               <button role="option" aria-selected={i === active} onMouseDown={(e) => e.preventDefault()} onClick={() => pick(r)}>
                 <Chip n={r[4]} />
                 <span style={{ minWidth: 0 }}>
-                  <div className="r-title">{titleCase(r[1])}</div>
+                  <div className="r-title">{shortAddress(r[1])}</div>
                   <div className="r-sub">{r[2] || r[3].split(" | ")[0]}</div>
                 </span>
               </button>
@@ -119,4 +119,11 @@ export function titleCase(s: string) {
     .replace(/\b(G|Lg|Ug|M|B)\/f\b/gi, (m) => m.toUpperCase())
     .replace(/\bNo\.\s?/g, "No. ")
     .replace(/\b(\d+[a-z])\b/g, (m) => m.toUpperCase());
+}
+
+/** Address without the region: "G/F, 100 Portland Street, Yau Ma Tei" */
+export function shortAddress(s: string) {
+  return titleCase(s)
+    .replace(/^ground floor\b/i, "G/F")
+    .replace(/,\s*(kowloon|hong kong|new territories)\.?\s*$/i, "");
 }

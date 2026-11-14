@@ -56,11 +56,15 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta }: Pr
               </div>
             </div>
             <div className="fgroup">
-              <h2>Licence type ever recorded</h2>
+              <h2>Licence types recorded</h2>
               <div className="fseg">
                 <button aria-pressed={filters.type === "all"} onClick={() => set({ type: "all" })}>Any</button>
-                <button aria-pressed={filters.type === "RL"} onClick={() => set({ type: "RL" })}>General</button>
-                <button aria-pressed={filters.type === "RR"} onClick={() => set({ type: "RR" })}>Light refreshment only</button>
+                <button aria-pressed={filters.type === "RL"} onClick={() => set({ type: "RL" })} title="A general restaurant licence was recorded at some point">
+                  General
+                </button>
+                <button aria-pressed={filters.type === "RR"} onClick={() => set({ type: "RR" })} title="Only light refreshment licences were ever recorded">
+                  Light only
+                </button>
               </div>
             </div>
             <div className="fgroup">
