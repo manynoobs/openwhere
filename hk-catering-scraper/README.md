@@ -140,6 +140,6 @@ OpenRice's terms restrict copying its content. Keep the collected files for your
 
 - `match.py` reads addresses by rule. A licence at an address it cannot read, or under a name unlike the listing's and with no shop number, stays unjoined.
 - A full monthly history of all four lists is about 1,000 files and roughly 4 GB.
-- The same premises can appear in several lists under different licence numbers; nothing here merges them into one business yet.
+- The same premises can appear in several lists under different licence numbers. Licences joined to one OpenRice listing share its `poi_id`; licences with no listing are not grouped.
 - Permit type `IP` has no name in FEHD's own legend, so its `type` is empty.
 - A shop that opened and closed between two downloaded lists is not seen.
