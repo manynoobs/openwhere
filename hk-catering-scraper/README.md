@@ -105,11 +105,40 @@ python3 openrice_details.py --district "Tsim Sha Tsui" --limit 200
 
 OpenRice puts a security check in front of these pages when they are asked for quickly. The script stops when it meets the check and keeps what it has; run it again later to continue.
 
+## match.py: licences joined to listings
+
+Joins each licence to the OpenRice listing at the same premises. Run `fehd.py latest` and `openrice.py` first.
+
+```bash
+python3 match.py
+```
+
+The result is `out/matches.csv`, one row per joined licence, with `licence_no` and `poi_id` to look up either side. `basis` says how the pair was made:
+
+| Basis | Rule |
+| --- | --- |
+| `name+address` | Same street and street number, and similar names |
+| `name+building` | Same name and a closely matching address, for estates and malls whose licences give no street |
+| `unit` | Same street number, floor and shop number as a listing in operation, whatever the names say |
+
+A `unit` row with a low `name_score` is a licence and a listing at one shop under different names, often a new sign that one source has not caught up with. A row whose `openrice_status` is not `10` is a licence still in force for a listing OpenRice marks as moved or no longer operating.
+
+On 22 Nov 2026:
+
+| Licences | Joined |
+| --- | --- |
+| Restaurant | 12,952 of 17,254 |
+| Liquor | 6,649 of 8,951 |
+| Other food | 5,422 of 16,533 |
+| Permit | 721 of 9,147 |
+
+18,811 of the 28,764 OpenRice listings in operation have at least one licence joined. Most other-food licences and permits belong to supermarkets, convenience stores and kitchens that OpenRice does not list, and most permits are filed without a name.
+
 OpenRice's terms restrict copying its content. Keep the collected files for your own analysis and do not republish them.
 
 ## Limits
 
-- Nothing joins an OpenRice listing to its licence yet; that needs matching on name, address and position.
+- `match.py` reads addresses by rule. A licence at an address it cannot read, or under a name unlike the listing's and with no shop number, stays unjoined.
 - A full monthly history of all four lists is about 1,000 files and roughly 4 GB.
 - The same premises can appear in several lists under different licence numbers; nothing here merges them into one business yet.
 - Permit type `IP` has no name in FEHD's own legend, so its `type` is empty.
