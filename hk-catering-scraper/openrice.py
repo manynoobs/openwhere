@@ -3,6 +3,7 @@
     python openrice.py                      # all districts -> out/openrice_latest.csv
     python openrice.py --district "Wan Chai" Jordan
     python openrice.py --list               # district names and listing counts
+    python openrice.py --rebuild            # write the CSV again from the newest run on disk
 
 The search is walked one district at a time, 100 listings a request, because it stops
 answering at large offsets across the whole city. Each district is saved as it completes in
@@ -13,6 +14,12 @@ CSV is built from them, and a listing filed under two districts is written once.
 Listings that OpenRice marks as closed or moved are included, with their status code and
 the id of the listing they moved to.
 
+`category` is "Beverage shop" for a listing OpenRice tags as a coffee shop, Taiwanese drink
+shop, herbal tea shop, juice shop or tea house whose other tags are only light food
+(bakery, cake, dessert, sandwich, snacks) and whose name does not say restaurant, kitchen
+or a meal; a drink-tagged listing that also serves meals, and everything else, is
+"Restaurant".
+
 Standard library only; Python 3.9 or newer. A full run is about 350 requests and takes
 around an hour.
 """
@@ -21,6 +28,7 @@ import csv
 import gzip
 import json
 import random
+import re
 import sys
 import time
 import urllib.error
@@ -39,9 +47,19 @@ ROWS = 100
 REGIONS = {1999, 2999, 3999, 4999}  # whole-region entries; their districts are walked instead
 PRICE = {1: "Under $50", 2: "$51-100", 3: "$101-200", 4: "$201-400", 5: "$401-800", 6: "Over $800"}
 CATEGORY = {1: "cuisines", 2: "dishes", 3: "kinds"}  # OpenRice categoryTypeId
+DRINKS = {"Coffee Shop", "Taiwanese Drink", "Herbal Tea", "Juice", "Tea House", "Beverages"}
+LIGHT = {"Bakery", "Cake", "Cake Shop", "Dessert", "Sandwich", "Salad", "Ice Cream/yogurt",
+         "Snack Shop & Deli", "Sweets", "Sweet Soup", "Chocolate/Candy Shop", "Herbal Cuisine"}
+# tags that describe the place, not what it serves
+TRAITS = {"Pet Friendly", "Salt & Sugar Reduction Restaurant", "Takeaway", "Food Wise Eateries",
+          "Upper-floor Cafe", "Vegetarian", "Meatless Menu", "Organic Food", "Family Friendly",
+          "Online Shop/ Food Distributor", "Nostalgic", "Certified Halal Food", "No Shark Fin",
+          "Vending Machine", "Theme Restaurant", "Celebrity Shop", "Outdoor", "Food Court",
+          "Cyber Cafe", "Party Food"}
+MEAL_NAME = re.compile(r"restaurant|bistro|kitchen|diner|餐廳|廚房|便當|飯|麵|粉", re.I)
 DAYS = {1: "Sun", 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat"}  # OpenRice dayOfWeek
 
-COLS = ["poi_id", "name_en", "name_tc", "status", "status_remark", "moved_to_id",
+COLS = ["poi_id", "name_en", "name_tc", "category", "status", "status_remark", "moved_to_id",
         "district_id", "district", "address_en", "address_tc", "floor", "unit", "mall",
         "lat", "lon", "price_range_id", "price", "cuisines", "dishes", "kinds",
         "other_categories", "signature_dishes", "phones", "phone_remarks", "website",
@@ -108,8 +126,12 @@ def slim(p, today):
     for c in p.get("categories") or []:
         cats.setdefault(CATEGORY.get(c.get("categoryTypeId"), "other_categories"), []).append(c["name"])
     d = p.get("district") or {}
+    served = set(cats.get("dishes", []) + cats.get("kinds", [])) - TRAITS
     return {
         "poi_id": p["poiId"], "name_en": p.get("name") or "", "name_tc": p.get("nameOtherLang") or "",
+        "category": "Beverage shop" if (
+            served & DRINKS and served <= DRINKS | LIGHT
+            and not MEAL_NAME.search(f"{p.get('name')} {p.get('nameOtherLang')}")) else "Restaurant",
         "status": p.get("status"), "status_remark": p.get("statusRemark") or "",
         "moved_to_id": p.get("moveToId") or "",
         "district_id": d.get("districtId"), "district": d.get("name") or "",
@@ -162,10 +184,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--district", nargs="+", help="district names as OpenRice spells them; default all")
     ap.add_argument("--list", action="store_true", help="print the districts and stop")
+    ap.add_argument("--rebuild", action="store_true", help="no collecting; rebuild the CSV from the newest run")
     ap.add_argument("--pause", type=float, default=2.0, help="seconds between requests")
     args = ap.parse_args()
 
-    todo = districts()
+    todo = [] if args.rebuild else districts()
     if args.list:
         for d in todo:
             print(f"{d['count']:6}  {d['name']}")
@@ -177,8 +200,11 @@ def main():
             raise SystemExit(f"no such district: {', '.join(sorted(unknown))} (see --list)")
         todo = [d for d in todo if d["name"].lower() in wanted]
 
-    today = date.today().isoformat()
-    run = RAW / today.replace("-", "")
+    runs = sorted(p for p in RAW.glob("2*") if p.is_dir())
+    if args.rebuild and not runs:
+        raise SystemExit("nothing collected yet: run without --rebuild first")
+    run = runs[-1] if args.rebuild else RAW / date.today().strftime("%Y%m%d")
+    today = f"{run.name[:4]}-{run.name[4:6]}-{run.name[6:]}"
     run.mkdir(parents=True, exist_ok=True)
     for n, d in enumerate(todo, 1):
         path = run / f"{d['id']}.json.gz"

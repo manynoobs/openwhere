@@ -68,7 +68,7 @@ python3 openrice.py --list
 
 | Group | Columns |
 | --- | --- |
-| Identity | `poi_id`, `name_en`, `name_tc`, `url`, `page` |
+| Identity | `poi_id`, `name_en`, `name_tc`, `category`, `url`, `page` |
 | Status | `status`, `status_remark`, `moved_to_id`, `open_since`, `new_listing`, `virtual` |
 | Place | `district_id`, `district`, `address_en`, `address_tc`, `floor`, `unit`, `mall`, `lat`, `lon` |
 | Food and price | `price_range_id`, `price`, `cuisines`, `dishes`, `kinds`, `other_categories`, `signature_dishes` |
@@ -79,6 +79,8 @@ python3 openrice.py --list
 | Account | `paid_account`, `verified`, `sponsored`, `award_status` |
 | Other | `door_photo`, `collected` |
 
+- `category` is `Beverage shop` or `Restaurant`. A beverage shop is a listing OpenRice tags as a coffee shop, Taiwanese drink shop, herbal tea shop, juice shop or tea house, whose other tags are only light food and whose name does not say restaurant, kitchen or a meal. A café that also serves meals counts as a restaurant.
+- `python3 openrice.py --rebuild` writes the CSV again from the newest run on disk without collecting.
 - `status` is OpenRice's own code. `10` is a listing in operation. `4` is a listing that moved; it always carries `moved_to_id`, the `poi_id` of the new listing. `3` is a listing no longer operating.
 - `price` is the per-person price band. Lists such as `cuisines` and `phones` are separated by `|`.
 - Yes/no columns such as `online_booking` hold `1` or nothing.
