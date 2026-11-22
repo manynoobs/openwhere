@@ -86,6 +86,25 @@ python3 openrice.py --list
 - `virtual` marks a listing with no dining room of its own, such as a delivery-only brand.
 - A listing with a name in one language only has it in `name_en`, whatever the language.
 
+## openrice_details.py: restaurant pages
+
+Adds what OpenRice shows only on a restaurant's own page. Run `openrice.py` first; this reads its CSV.
+
+```bash
+python3 openrice_details.py --open-only
+```
+
+```bash
+python3 openrice_details.py --district "Tsim Sha Tsui" --limit 200
+```
+
+- One page is fetched per listing and saved under `data/openrice_details/`, so a later run only fetches what is missing.
+- The result is `out/openrice_details.csv`, joined to `openrice_latest.csv` on `poi_id`.
+- Columns: `seats`, `description`, `price_min`, `price_max`, `facilities` (outdoor seating, service charge, corkage, Wi-Fi, parking and others), `payments` by name, `score_1` to `score_5` (OpenRice's five rating parts, in its own order), `ok_reviews`, `popular_dishes` with prices, `nearest_exit`, `hours_text`, `hours_note`, `open_late`, `landmark_ids`, `chain_listings`, `menu_photos`, `facebook`, `instagram`, `seats_booked`, `last_booking`.
+- The saved page data also holds the first page of reviews and the menu photo addresses, which are not in the CSV.
+
+OpenRice puts a security check in front of these pages when they are asked for quickly. The script stops when it meets the check and keeps what it has; run it again later to continue.
+
 OpenRice's terms restrict copying its content. Keep the collected files for your own analysis and do not republish them.
 
 ## Limits
