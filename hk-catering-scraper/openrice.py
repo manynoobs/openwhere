@@ -6,8 +6,9 @@
 
 The search is walked one district at a time, 100 listings a request, because it stops
 answering at large offsets across the whole city. Each district is saved as it completes in
-data/openrice/<date>/<district id>.json, so a run that stops can be started again and picks
-up where it left off. A listing filed under two districts is written once.
+data/openrice/<date>/<district id>.json.gz, so a run that stops can be started again and
+picks up where it left off. Those files hold OpenRice's full answer for every listing; the
+CSV is built from them, and a listing filed under two districts is written once.
 
 Listings that OpenRice marks as closed or moved are included, with their status code and
 the id of the listing they moved to.
@@ -17,6 +18,7 @@ around an hour.
 """
 import argparse
 import csv
+import gzip
 import json
 import random
 import sys
@@ -42,8 +44,12 @@ DAYS = {1: "Sun", 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat"}  #
 COLS = ["poi_id", "name_en", "name_tc", "status", "status_remark", "moved_to_id",
         "district_id", "district", "address_en", "address_tc", "floor", "unit", "mall",
         "lat", "lon", "price_range_id", "price", "cuisines", "dishes", "kinds",
-        "other_categories", "phones", "website", "open_since", "hours", "score",
-        "smiles", "cries", "reviews", "bookmarks", "photos", "url", "collected"]
+        "other_categories", "signature_dishes", "phones", "phone_remarks", "website",
+        "open_since", "hours", "score", "smiles", "cries", "reviews", "bookmarks", "photos",
+        "videos", "payment_ids", "online_booking", "booking_url", "booking_menus",
+        "promotions", "coupons", "vouchers", "has_offer", "premium_menu", "queuing",
+        "paid_account", "verified", "sponsored", "new_listing", "virtual", "award_status",
+        "door_photo", "url", "page", "collected"]
 
 
 def search(**params):
@@ -89,6 +95,14 @@ def hours(poi_hours):
     return "; ".join(out)
 
 
+def titles(items, key="title"):
+    return "|".join(" ".join(str(i[key]).split()) for i in items or [] if i.get(key))
+
+
+def flag(v):
+    return 1 if v else ""
+
+
 def slim(p, today):
     cats = {}
     for c in p.get("categories") or []:
@@ -104,21 +118,40 @@ def slim(p, today):
         "lat": p.get("mapLatitude"), "lon": p.get("mapLongitude"),
         "price_range_id": p.get("priceRangeId") or "", "price": PRICE.get(p.get("priceRangeId"), ""),
         **{k: "|".join(cats.get(k, [])) for k in ("cuisines", "dishes", "kinds", "other_categories")},
-        "phones": "|".join(p.get("phones") or []), "website": p.get("website") or "",
+        "signature_dishes": titles(p.get("tags"), "name"),
+        "phones": "|".join(p.get("phones") or []),
+        "phone_remarks": "|".join(r for r in p.get("phoneRemarks") or [] if r),
+        "website": p.get("website") or "",
         "open_since": (p.get("openSince") or "")[:10], "hours": hours(p.get("poiHours")),
         "score": round(p["scoreOverall"], 2) if p.get("scoreOverall") else "",
         "smiles": p.get("scoreSmile"), "cries": p.get("scoreCry"),
         "reviews": p.get("reviewCount"), "bookmarks": p.get("bookmarkedUserCount"),
-        "photos": p.get("photoCount"), "url": p.get("shortenUrl") or "", "collected": today,
+        "photos": p.get("photoCount"), "videos": len(p.get("videos") or []),
+        "payment_ids": "|".join(str(i) for i in p.get("paymentIds") or []),
+        "online_booking": flag(p.get("tableMapPoiId")), "booking_url": p.get("tableMapUrl") or "",
+        "booking_menus": "|".join(f"{' '.join(m['title'].split())} ({m.get('priceTag') or ''})"
+                                  for m in p.get("bookingMenu") or [] if m.get("title")),
+        "promotions": titles(p.get("promotions"), "name"),
+        "coupons": titles(p.get("coupons")), "vouchers": titles(p.get("vouchers")),
+        "has_offer": flag(p.get("withOffer")), "premium_menu": flag(p.get("withPremiumMenu")),
+        "queuing": flag(p.get("isQueuingEnabled")), "paid_account": flag(p.get("isPaidAccount")),
+        "verified": flag(p.get("isVerifiedBadge")), "sponsored": flag(p.get("isSponsored")),
+        "new_listing": flag(p.get("isNewPoi")), "virtual": flag(p.get("isVirtualPoi")),
+        "award_status": p.get("awardStatus") or "",
+        "door_photo": (p.get("doorPhoto") or {}).get("url") or "",
+        "url": p.get("shortenUrl") or "",
+        "page": f"https://www.openrice.com/en/hongkong/r-{p['latestCallName']}-r{p['poiId']}"
+                if p.get("latestCallName") else "",
+        "collected": today,
     }
 
 
-def walk(district, today, pause):
+def walk(district, pause):
     rows, start = [], 0
     while True:
         page = search(districtId=district["id"], rows=ROWS, startAt=start)["paginationResult"]
         got = page.get("results") or []
-        rows += [slim(p, today) for p in got]
+        rows += got
         start += ROWS
         if len(got) < ROWS or start >= page["count"]:
             return rows, page["count"]
@@ -148,21 +181,23 @@ def main():
     run = RAW / today.replace("-", "")
     run.mkdir(parents=True, exist_ok=True)
     for n, d in enumerate(todo, 1):
-        path = run / f"{d['id']}.json"
+        path = run / f"{d['id']}.json.gz"
         if path.exists():
             continue
-        rows, count = walk(d, today, args.pause)
+        rows, count = walk(d, args.pause)
         tmp = path.with_suffix(".part")
-        tmp.write_text(json.dumps(rows, ensure_ascii=False))
+        with gzip.open(tmp, "wt", encoding="utf-8") as f:
+            json.dump(rows, f, ensure_ascii=False)
         tmp.rename(path)
         short = "" if len(rows) == count else f"  (OpenRice counts {count})"
         print(f"{n}/{len(todo)} {d['name']}: {len(rows)}{short}", flush=True)
         time.sleep(args.pause)
 
     listings = {}
-    for path in sorted(run.glob("*.json")):
-        for r in json.loads(path.read_text()):
-            listings.setdefault(r["poi_id"], r)
+    for path in sorted(run.glob("*.json.gz")):
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            for p in json.load(f):
+                listings.setdefault(p["poiId"], slim(p, today))
     OUT.mkdir(exist_ok=True)
     with open(OUT / "openrice_latest.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=COLS)

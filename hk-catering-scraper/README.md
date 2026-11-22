@@ -60,15 +60,30 @@ python3 openrice.py --list
 ```
 
 - A full run is about 350 requests and takes around an hour. Each district is saved as it completes under `data/openrice/<date>/`, so a stopped run resumes when started again on the same day.
+- Those district files hold OpenRice's full answer for every listing, compressed (about 65 MB for a full run). The CSV is built from them, so a column can be added later without collecting again.
 - The result is `out/openrice_latest.csv`, one row per listing. OpenRice files some listings under two overlapping districts (Soho and Central, for example); each is written once.
 - Each run is kept under its own date, so monthly runs build a record of status changes.
 
 ### Columns
 
-`poi_id`, `name_en`, `name_tc`, `status`, `status_remark`, `moved_to_id`, `district_id`, `district`, `address_en`, `address_tc`, `floor`, `unit`, `mall`, `lat`, `lon`, `price_range_id`, `price`, `cuisines`, `dishes`, `kinds`, `other_categories`, `phones`, `website`, `open_since`, `hours`, `score`, `smiles`, `cries`, `reviews`, `bookmarks`, `photos`, `url`, `collected`.
+| Group | Columns |
+| --- | --- |
+| Identity | `poi_id`, `name_en`, `name_tc`, `url`, `page` |
+| Status | `status`, `status_remark`, `moved_to_id`, `open_since`, `new_listing`, `virtual` |
+| Place | `district_id`, `district`, `address_en`, `address_tc`, `floor`, `unit`, `mall`, `lat`, `lon` |
+| Food and price | `price_range_id`, `price`, `cuisines`, `dishes`, `kinds`, `other_categories`, `signature_dishes` |
+| Contact and hours | `phones`, `phone_remarks`, `website`, `hours` |
+| Popularity | `score`, `smiles`, `cries`, `reviews`, `bookmarks`, `photos`, `videos` |
+| Services | `payment_ids`, `online_booking`, `booking_url`, `booking_menus`, `queuing` |
+| Offers | `promotions`, `coupons`, `vouchers`, `has_offer`, `premium_menu` |
+| Account | `paid_account`, `verified`, `sponsored`, `award_status` |
+| Other | `door_photo`, `collected` |
 
 - `status` is OpenRice's own code. `10` is a listing in operation. `4` is a listing that moved; it always carries `moved_to_id`, the `poi_id` of the new listing. `3` is a listing no longer operating.
 - `price` is the per-person price band. Lists such as `cuisines` and `phones` are separated by `|`.
+- Yes/no columns such as `online_booking` hold `1` or nothing.
+- `payment_ids` are OpenRice's own numbers for payment methods; the search results do not name them.
+- `virtual` marks a listing with no dining room of its own, such as a delivery-only brand.
 - A listing with a name in one language only has it in `name_en`, whatever the language.
 
 OpenRice's terms restrict copying its content. Keep the collected files for your own analysis and do not republish them.
