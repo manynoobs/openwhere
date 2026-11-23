@@ -21,7 +21,7 @@ python3 centaline.py geocode
 - `listings` writes `out/centaline_listings.csv`: every retail unit advertised for lease (3,219 on 22 Nov 2026). These are asking rents. Each run is kept under its date, so repeated runs show units coming on and off the market. `--usage Office` or `--usage Industrial` reads those instead.
 - `transactions` writes `out/centaline_transactions.csv`: leases recorded as done, for shops, offices and industrial units, one month at a time. A finished month is not asked for again; the current and previous month are refreshed on every run.
 
-- `geocode` gives the saved leases a map position, looking up each building or address they name with the government's Address Lookup Service, and writes the transactions CSV again. Answers are kept, so a later run only looks up new places.
+- `geocode` gives the saved leases a map position, looking up each building or address they name with the government's Address Lookup Service, and writes the transactions CSV again. Answers are kept, so a later run only looks up new places. The first run looks up about 16,500 places and takes around six hours; on 23 Nov 2026 it placed 165,563 of 188,941 leases (88%).
 
 Listing columns: `id`, `adv_no`, `property_no`, `building_id`, `name_en`, `name_tc`, `zone`, `district`, `street`, `floor`, `usage`, `size_sqft`, `rent`, `rent_per_sqft`, `rent_inclusive`, `sale_price`, `sale_price_per_sqft`, `suited_to`, `labels`, `mtr_station`, `walk`, `built`, `air_con`, `sole_agent`, `lat`, `lon`, `published`, `rent_published`, `collected`.
 
