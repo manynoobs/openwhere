@@ -39,5 +39,7 @@ Centaline's terms restrict copying its content. Keep the collected files for you
 
 ## Limits
 
+- Neither file names a tenant. A listing is a unit on the market on the day of the run, not a shop in operation. A transaction says what a unit in a building let for on a date, not which business took it, so the rent a named shop pays is not in either file.
 - Asking rents are what landlords advertise, not what tenants pay.
 - Transactions cover the leases Centaline hears of, mostly through market news, not every lease in Hong Kong.
+- Few transactions say which unit: 2,375 of the 39,598 retail leases give a shop number. The rest give the building and a floor band, and 16,895 of them are marked as street-level shops.
