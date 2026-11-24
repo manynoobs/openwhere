@@ -122,6 +122,71 @@ A full run is 17 requests and takes about two minutes. Each list is written to `
 
 The data is © the Government of the Hong Kong SAR and may be kept and republished, commercially or not, with the source acknowledged.
 
+## drugoffice.py: shops licensed to sell medicines
+
+Reads the two retail registers the Drug Office of the Department of Health keeps for the Pharmacy and Poisons Board, and gives each shop its position. Five requests; it needs Python 3.9 or newer and nothing else.
+
+```bash
+python3 drugoffice.py
+```
+
+The result is `out/drugoffice.csv`, one row per licensed shop. On 24 Nov 2026:
+
+| Licence | What it covers | Shops |
+| --- | --- | --- |
+| Authorized Seller of Poisons | Registered pharmacies and dispensaries, which have a pharmacist | 642 |
+| Listed Seller of Poisons | Medicine shops and other retailers of over-the-counter medicines: drugstore and cosmetics chains, supermarkets, convenience stores | 3,912 |
+
+### Columns
+
+`licence_no`, `licence_type`, `name_en`, `name_tc`, `operator`, `address_en`, `district`, `phone`, `lat`, `lon`, `list_date`, `collected`.
+
+- The register writes a name as "SHOP O/B COMPANY"; `name_en` is the shop and `operator` the company running it.
+- `name_tc`, `district` and `phone` come from the Drug Office's open-data file of licensed drug dealers, joined on the address. About half the shops have no Chinese name registered.
+- `lat` and `lon` (WGS84) come from the Department of Health's point data on portal.csdi.gov.hk, joined on the address: 4,534 of the 4,554 shops have a position.
+- `district` is the Drug Office's own area name, such as MONG KOK or SHATIN.
+- `list_date` is the date the register says it was last updated.
+
+Large chains hold many of the licences: 7-Eleven (1,091), Circle K (386), Mannings (314), Japan Home Centre (296), Watsons (166), Sa Sa (78). The list therefore covers pharmacy and cosmetics retail and much of the convenience and variety trade.
+
+The open-data files may be reused with the source acknowledged. The register pages that give the licence numbers are marked all rights reserved.
+
+## orphf.py: private clinics and day procedure centres
+
+Walks the Department of Health's Private Healthcare Facilities Register, which lists the premises licensed or exempted under the Private Healthcare Facilities Ordinance. It needs nothing beyond Python.
+
+```bash
+python3 orphf.py
+```
+
+```bash
+python3 orphf.py --type DPC C
+```
+
+| `--type` | Kind | On the register, 24 Nov 2026 |
+| --- | --- | --- |
+| `PH` | Private Hospital | 14 |
+| `DPC` | Day Procedure Centre | 271 |
+| `C` | Clinic | 523 |
+| `NH` | Scheduled Nursing Home | 9 |
+| `SPC` | Small Practice Clinic | 3,072 |
+
+- The register answers 15 facilities a request. A run of the first four kinds is about 115 requests and takes around five minutes.
+- Small practice clinics are registered under the name of the doctor or dentist who runs them, so they are collected only when asked for with `--type SPC`: another 410 requests and 20 minutes.
+- Every answer is saved under `data/orphf/<date>/`, so a stopped run resumes when started again on the same day. The CSV is built from every answer saved that day.
+- The result is `out/orphf.csv`, one row per facility. The closing lines show how many of each kind were collected against the register's own count.
+- The register fails on any 15 that include a record it cannot show. The script steps around such a record, which then counts as missing: one day procedure centre on 24 Nov 2026.
+
+### Columns
+
+`phf_no`, `type`, `name_en`, `name_tc`, `address_en`, `address_tc`, `district`, `phone`, `collected`.
+
+- `district` is the part of the address before the region: one of the 18 districts on some rows, a neighbourhood such as Tsim Sha Tsui on others.
+- The register does not say which premises do medical beauty; they can be picked out by name (skin, laser, aesthetic, plastic).
+- E-mail addresses on the register are not kept.
+
+The register may be reproduced for non-commercial use with the Department of Health acknowledged; commercial use needs its written permission.
+
 ## Limits
 
 - OpenStreetMap is mapped by volunteers and is far from complete in Hong Kong. It holds 4,910 restaurants where the government licenses over 17,000, and 57 gyms.
@@ -131,4 +196,7 @@ The data is © the Government of the Hong Kong SAR and may be kept and republish
 - Its convenience stores are 7-Eleven (1,094) and Circle K (388) only, and its supermarkets the large chains: Wellcome (283), PARKnSHOP (142), Fusion (61), Market Place (42). Other brands are absent.
 - iGeoCom's bus places are termini, not every stop.
 - iGeoCom places are revised one at a time: 6,638 were last revised in January 2020, so a shop listed may have closed.
-- The portal has no list for beauty salons, hairdressers, massage establishments or private gyms. Its fitness rooms are the public ones run by the LCSD.
+- The portal's fitness rooms are the public ones run by the LCSD.
+- Beauty salons, hair and nail salons and gyms need no licence of their own in Hong Kong, so no government list of them exists. Massage establishments are licensed by the Police, who publish no list.
+- Retailers of Chinese herbal medicines (4,879 at September 2026) are listed by the Chinese Medicine Council behind a disclaimer that must be accepted first; they are not collected.
+- `orphf.csv` has no positions.
