@@ -3,6 +3,7 @@
     python centaline.py listings                       # shops to let now -> out/centaline_listings.csv
     python centaline.py transactions --start 2016-01   # leases done since then -> out/centaline_transactions.csv
     python centaline.py geocode                        # give those leases a map position
+    python centaline.py rebuild                        # write both CSVs again from the saved answers
 
 `listings` are asking rents: every retail unit Centaline advertises for lease, with size,
 rent, rent per square foot, the trades it suits and its position. Each run is kept under
@@ -13,6 +14,11 @@ market.
 units alike, one month at a time. A finished month is kept in data/centaline/transactions/
 and not asked for again; the current and previous month are refreshed on every run.
 
+Centaline numbers every unit within the department that handles it (`dept` and
+`property_no`), and a lease carries the same number as a listing of that unit. Each lease
+therefore shows the lease of the same unit before it, and each listing the last lease of
+the unit it advertises: when, at what rent, and under which building or street number.
+
 `geocode` looks up each building or address named in the saved leases with the government's
 Address Lookup Service and writes the transactions CSV again with `lat`, `lon` and
 `placed_by`. A lookup is kept only when it agrees with the lease: `address` when the street
@@ -21,6 +27,9 @@ only the street is known and the point is some building on it. Where several bui
 Hong Kong share the name, the one nearest the lease's district is taken, and none is
 accepted if even that one is more than 2 km from the district. Answers are kept in
 data/centaline/places.json, so a later run only looks up new places.
+
+`rebuild` asks for nothing: it writes the listings CSV from the newest saved run and the
+transactions CSV from the saved months.
 
 Agents' names and phone numbers are not kept.
 
@@ -51,14 +60,17 @@ PLACES = RAW / "places.json"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/130.0 Safari/537.36")
 
-LISTING_COLS = ["id", "adv_no", "property_no", "building_id", "name_en", "name_tc", "zone",
+LISTING_COLS = ["id", "adv_no", "dept", "property_no", "building_id", "name_en", "name_tc", "zone",
                 "district", "street", "floor", "usage", "size_sqft", "rent", "rent_per_sqft",
                 "rent_inclusive", "sale_price", "sale_price_per_sqft", "suited_to", "labels",
-                "mtr_station", "walk", "built", "air_con", "sole_agent", "lat", "lon",
-                "published", "rent_published", "collected"]
+                "mtr_station", "walk", "built", "air_con", "sole_agent", "with_key", "media", "photo",
+                "lat", "lon", "published", "rent_published", "collected", "unit_leases",
+                "last_lease_id", "last_let", "last_rent", "last_area_sqft", "last_name_tc"]
 DEAL_COLS = ["id", "date", "usage", "name_en", "name_tc", "zone", "district", "floor", "unit",
-             "area_sqft", "rent", "rent_per_sqft", "estimated", "source", "address",
-             "building_id", "property_no", "lat", "lon", "placed_by", "placed_at"]
+             "area_sqft", "rent", "rent_per_sqft", "estimated", "source", "address", "dept",
+             "building_id", "building_no", "property_no", "unit_leases", "previous_date",
+             "previous_rent", "previous_area_sqft", "lat", "lon", "placed_by", "placed_at"]
+MEDIA = {"isVideo": "video", "is360": "360", "isVR": "VR"}
 STREET = re.compile(r"([\u4e00-\u9fff]+?(?:大道|道|街|路|里|坊|巷|徑|臺|台|圍|段)[東南西北中]?)\s*"
                     r"(\d+)[A-Z]?(?:\s*[-–至]\s*(\d+)[A-Z]?)?\s*號")
 NUMBER_FIRST = re.compile(r"^(\d+)[A-Z]?(?:\s*[-–至]\s*(\d+)[A-Z]?)?\s*號?\s*"
@@ -120,11 +132,25 @@ def number(v):
     return round(v, 1) if v else ""
 
 
-def listing_row(p, collected):
+def unit_leases(deals):
+    """The leases of each unit, oldest first, under its department and property number."""
+    units = {}
+    for t in deals:
+        if t.get("ibsPropertyNo"):
+            units.setdefault((t["ibsDept"], t["ibsPropertyNo"]), []).append(t)
+    for leases in units.values():
+        leases.sort(key=lambda t: t["transactionDate"])
+    return units
+
+
+def listing_row(p, collected, units):
     area, price, where = p.get("areaInfo") or {}, p.get("priceInfo") or {}, p.get("mapInfo") or {}
+    station = (p.get("mtrStation") or "").strip()
+    leases = units.get((p["ibsDept"], p["ibsPropertyNo"])) or []
+    last = leases[-1] if leases else {}
     return {
-        "id": p["id"], "adv_no": p.get("advNo") or "", "property_no": p.get("ibsPropertyNo") or "",
-        "building_id": p.get("centabldg") or "",
+        "id": p["id"], "adv_no": p.get("advNo") or "", "dept": p.get("deptDisplayName") or "",
+        "property_no": p.get("ibsPropertyNo") or "", "building_id": p.get("centabldg") or "",
         "name_en": p.get("propertyNameEn") or "", "name_tc": p.get("propertyNameCn") or "",
         "zone": area.get("zoneEn") or "", "district": area.get("districtNameEn") or "",
         "street": p.get("address") or "", "floor": p.get("floor") or "",
@@ -134,13 +160,20 @@ def listing_row(p, collected):
         "sale_price": number(price.get("price")), "sale_price_per_sqft": number(price.get("avgPrice")),
         "suited_to": "|".join(p.get("display") or []),
         "labels": "|".join(x["value"] for x in p.get("labels") or [] if x.get("value")),
-        "mtr_station": p.get("mtrStation") or "", "walk": p.get("duration") or "",
+        "mtr_station": "" if station == "Station" else station, "walk": p.get("duration") or "",
         "built": (p.get("operationData") or "")[:4],
         "air_con": "" if p.get("airCon") in (None, "--") else p["airCon"],
-        "sole_agent": 1 if p.get("isSoleAgent") else "",
+        "sole_agent": 1 if p.get("isSoleAgent") else "", "with_key": 1 if p.get("withKey") else "",
+        "media": "|".join(name for key, name in MEDIA.items() if (p.get("mediaTagInfo") or {}).get(key)),
+        "photo": p.get("thumbnailPath") or "",
         "lat": where.get("lat") or "", "lon": where.get("lng") or "",
         "published": (p.get("publishDate") or "")[:10],
         "rent_published": (p.get("rentPublishDate") or "")[:10], "collected": collected,
+        "unit_leases": len(leases) or "", "last_lease_id": last.get("id", ""),
+        "last_let": last.get("transactionDate", "")[:10],
+        "last_rent": number((last.get("priceInfo") or {}).get("rental")),
+        "last_area_sqft": number(last.get("transactionArea")),
+        "last_name_tc": last.get("propertyNameCn") or "",
     }
 
 
@@ -150,9 +183,12 @@ def place_key(t):
     return f"{' '.join((t.get('propertyNameCn') or '').split())}|{'' if district == '--' else district}"
 
 
-def deal_row(t, places):
+def deal_row(t, places, units):
     area, price = t.get("areaInfo") or {}, t.get("priceInfo") or {}
     at = places.get(place_key(t)) or {}
+    leases = units.get((t["ibsDept"], t.get("ibsPropertyNo"))) or []
+    earlier = [x for x in leases if x["transactionDate"] < t["transactionDate"]]
+    previous = earlier[-1] if earlier else {}
     blank = lambda v: "" if v in (None, "--") else v
     return {
         "id": t["id"], "date": (t.get("transactionDate") or "")[:10],
@@ -165,7 +201,11 @@ def deal_row(t, places):
         "estimated": 1 if t.get("isPriceEstimated") else "",
         "source": t.get("sourceDisplayName") or "",
         "address": " ".join(w for w in (t.get("addressDisplayName") or "").split() if w != "--"),
-        "building_id": t.get("centabldg") or "", "property_no": t.get("ibsPropertyNo") or "",
+        "dept": t.get("deptDisplayName") or "", "building_id": t.get("centabldg") or "",
+        "building_no": t.get("ibsBuildingID") or "", "property_no": t.get("ibsPropertyNo") or "",
+        "unit_leases": len(leases) or "", "previous_date": previous.get("transactionDate", "")[:10],
+        "previous_rent": number((previous.get("priceInfo") or {}).get("rental")),
+        "previous_area_sqft": number(previous.get("transactionArea")),
         "lat": at.get("lat", ""), "lon": at.get("lon", ""),
         "placed_by": at.get("by", ""), "placed_at": at.get("at", ""),
     }
@@ -178,9 +218,13 @@ def cmd_listings(args):
     for p in items:
         p.pop("agentInfos", None)
     save(RAW / "listings" / f"{today.replace('-', '')}_{args.usage.lower()}.json.gz", items)
+    write_listings(items, today, unit_leases(saved_deals()))
+
+
+def write_listings(items, collected, units):
     seen = {}
     for p in items:
-        seen.setdefault(p["id"], listing_row(p, today))
+        seen.setdefault(p["id"], listing_row(p, collected, units))
     write_csv(OUT / "centaline_listings.csv", LISTING_COLS, list(seen.values()))
 
 
@@ -215,9 +259,10 @@ def saved_deals():
 
 def write_deals(deals):
     places = json.loads(PLACES.read_text()) if PLACES.exists() else {}
+    units = unit_leases(deals)
     seen = {}
     for t in deals:
-        seen.setdefault(t["id"], deal_row(t, places))
+        seen.setdefault(t["id"], deal_row(t, places, units))
     write_csv(OUT / "centaline_transactions.csv", DEAL_COLS,
               sorted(seen.values(), key=lambda r: (r["date"], r["id"])))
     placed = sum(1 for r in seen.values() if r["lat"])
@@ -339,6 +384,14 @@ def cmd_geocode(args):
     write_deals(deals)
 
 
+def cmd_rebuild(args):
+    deals = saved_deals()
+    for path in sorted((RAW / "listings").glob("*.json.gz"))[-1:]:
+        day = path.name[:8]
+        write_listings(load(path), f"{day[:4]}-{day[4:6]}-{day[6:]}", unit_leases(deals))
+    write_deals(deals)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--pause", type=float, default=1.0, help="seconds between requests")
@@ -352,6 +405,7 @@ def main():
     p = sub.add_parser("geocode")
     p.add_argument("--limit", type=int, help="look up at most this many places this run")
     p.set_defaults(fn=cmd_geocode)
+    sub.add_parser("rebuild").set_defaults(fn=cmd_rebuild)
     args = ap.parse_args()
     args.fn(args)
 

@@ -18,14 +18,19 @@ python3 centaline.py transactions --start 2016-01
 python3 centaline.py geocode
 ```
 
+```bash
+python3 centaline.py rebuild
+```
+
 - `listings` writes `out/centaline_listings.csv`: every retail unit advertised for lease (3,219 on 22 Nov 2026). These are asking rents. Each run is kept under its date, so repeated runs show units coming on and off the market. `--usage Office` or `--usage Industrial` reads those instead.
 - `transactions` writes `out/centaline_transactions.csv`: leases recorded as done, for shops, offices and industrial units, one month at a time. A finished month is not asked for again; the current and previous month are refreshed on every run.
 
 - `geocode` gives the saved leases a map position, looking up each building or address they name with the government's Address Lookup Service, and writes the transactions CSV again. Answers are kept, so a later run only looks up new places. The first run looks up about 16,500 places and takes around six hours; on 23 Nov 2026 it placed 165,563 of 188,941 leases (88%).
+- `rebuild` writes both CSVs again from the saved answers without asking Centaline for anything.
 
-Listing columns: `id`, `adv_no`, `property_no`, `building_id`, `name_en`, `name_tc`, `zone`, `district`, `street`, `floor`, `usage`, `size_sqft`, `rent`, `rent_per_sqft`, `rent_inclusive`, `sale_price`, `sale_price_per_sqft`, `suited_to`, `labels`, `mtr_station`, `walk`, `built`, `air_con`, `sole_agent`, `lat`, `lon`, `published`, `rent_published`, `collected`.
+Listing columns: `id`, `adv_no`, `dept`, `property_no`, `building_id`, `name_en`, `name_tc`, `zone`, `district`, `street`, `floor`, `usage`, `size_sqft`, `rent`, `rent_per_sqft`, `rent_inclusive`, `sale_price`, `sale_price_per_sqft`, `suited_to`, `labels`, `mtr_station`, `walk`, `built`, `air_con`, `sole_agent`, `with_key`, `media`, `photo`, `lat`, `lon`, `published`, `rent_published`, `collected`, `unit_leases`, `last_lease_id`, `last_let`, `last_rent`, `last_area_sqft`, `last_name_tc`.
 
-Transaction columns: `id`, `date`, `usage`, `name_en`, `name_tc`, `zone`, `district`, `floor`, `unit`, `area_sqft`, `rent`, `rent_per_sqft`, `estimated`, `source`, `address`, `building_id`, `property_no`, `lat`, `lon`, `placed_by`, `placed_at`.
+Transaction columns: `id`, `date`, `usage`, `name_en`, `name_tc`, `zone`, `district`, `floor`, `unit`, `area_sqft`, `rent`, `rent_per_sqft`, `estimated`, `source`, `address`, `dept`, `building_id`, `building_no`, `property_no`, `unit_leases`, `previous_date`, `previous_rent`, `previous_area_sqft`, `lat`, `lon`, `placed_by`, `placed_at`.
 
 - Rents are HK$ a month and `rent_per_sqft` is HK$ per square foot a month, as Centaline states them.
 - `floor` is `Shop` or `Ground Shop` for a street-level shop; other values are bands such as `Upstairs Shop`, `Shopping Mall` or `Basement`.
@@ -33,6 +38,11 @@ Transaction columns: `id`, `date`, `usage`, `name_en`, `name_tc`, `zone`, `distr
 - `estimated` marks a transaction whose rent Centaline estimated rather than recorded.
 - Listings give a street but no street number, and a map position for most.
 - Transactions give a building or address and no position of their own. After `geocode`, `placed_by` says how sure the position is: `address` when the street and street number matched, `building` when the building or estate name matched, `street` when only the street is known and the point is some building on it. `placed_at` is the address the lookup returned. Where several buildings share a name, the one nearest the lease's district is taken, and none if even that one is more than 2 km away.
+- `dept` is the Centaline department that handles the unit: Retail, Office or Industrial. Centaline numbers units and buildings within each department, so `property_no` and `building_no` identify a unit or building only together with `dept`.
+- `building_no` is Centaline's own building number on a lease. It is present on 33,159 of the 39,598 retail leases, against 17,270 for `building_id`.
+- `unit_leases` counts the saved leases of the same unit. On a transaction, `previous_date`, `previous_rent` and `previous_area_sqft` are the lease of that unit before this one; 5,485 retail leases have one.
+- On a listing, `last_let`, `last_rent`, `last_area_sqft` and `last_name_tc` are the latest saved lease of the advertised unit, and `last_lease_id` is its `id` in the transactions file. `last_name_tc` gives the building or street number the listing leaves out. 913 of the 3,219 listings have one. Run `listings` or `rebuild` after `transactions` to refresh them.
+- `with_key` marks a unit whose key the agent holds. `media` lists what the listing page carries: `video`, `360`, `VR`. `photo` is the cover picture's address.
 - Agents' names and phone numbers are not kept.
 
 Centaline's terms restrict copying its content. Keep the collected files for your own analysis and do not republish them.
@@ -80,4 +90,5 @@ Columns: `lease_id`, `lease_date`, `building_tc`, `building_en`, `district`, `le
 - A lease is linked only when its building resolves to a street number that the licence also states.
 - Asking rents are what landlords advertise, not what tenants pay.
 - Transactions cover the leases Centaline hears of, mostly through market news, not every lease in Hong Kong.
+- Centaline answers only from some countries; from elsewhere every request gets `403 Access denied`. Hong Kong works.
 - Few transactions say which unit: 2,375 of the 39,598 retail leases give a shop number. The rest give the building and a floor band, and 27,131 of them are marked as street-level shops.

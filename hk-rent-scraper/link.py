@@ -164,7 +164,7 @@ def main():
             })
 
     order = {"strong": 0, "fair": 1, "weak": 2}
-    rows.sort(key=lambda r: (order[r["confidence"]], r["lease_date"], r["lease_id"]))
+    rows.sort(key=lambda r: (order[r["confidence"]], r["lease_date"], r["lease_id"], r["licence_nos"]))
     with open(OUT / "lease_links.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=COLS)
         w.writeheader()
