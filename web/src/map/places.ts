@@ -1,9 +1,9 @@
 import type { Map as MLMap } from "maplibre-gl";
 import { dataUrl } from "../data";
 
-// Places that draw people, from OpenStreetMap: neutral ink icons on white tiles,
+// Places that draw people, from OpenStreetMap, and pharmacies from the Drug Office: neutral ink icons on white tiles,
 // so they sit under the coloured shop pins and never compete with them.
-export const PLACE_KINDS = ["mtr", "transit", "hotel", "school", "mall", "landmark", "hospital"] as const;
+export const PLACE_KINDS = ["mtr", "transit", "hotel", "school", "mall", "landmark", "hospital", "pharmacy"] as const;
 export type PlaceKind = (typeof PLACE_KINDS)[number];
 
 export const PLACE_LABEL: Record<PlaceKind, string> = {
@@ -14,6 +14,7 @@ export const PLACE_LABEL: Record<PlaceKind, string> = {
   mall: "Mall or market",
   landmark: "Landmark or venue",
   hospital: "Hospital",
+  pharmacy: "Pharmacy or medicine shop",
 };
 
 // 20 x 20 icon paths, 1.6 px strokes, drawn to match the interface icon set
@@ -25,6 +26,7 @@ export const PLACE_PATH: Record<PlaceKind, string> = {
   mall: "M5 7h10l-1 9.5H6L5 7zM7.5 7V6a2.5 2.5 0 0 1 5 0v1",
   landmark: "M10 3.5l1.9 4 4.3.5-3.2 3 .9 4.3L10 13.2l-3.9 2.1.9-4.3-3.2-3 4.3-.5L10 3.5z",
   hospital: "M4 4h12v12H4zM10 6.8v6.4M6.8 10h6.4",
+  pharmacy: "M7.4 16.4a3.2 3.2 0 0 1-4.5-4.5l5-5a3.2 3.2 0 0 1 4.5 4.5zM5.4 9.4l4.5 4.5M13.5 4.5h4M15.5 2.5v4",
 };
 
 const SRC = "places";

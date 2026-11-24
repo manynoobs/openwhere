@@ -428,6 +428,7 @@ export default function App() {
         pinned={selected ? pinned.includes(selected.id) : false}
         canPin={pinned.length < 3}
         priceBands={meta?.price_bands ?? []}
+        rentMeta={meta?.rent ?? null}
         onPin={togglePin}
         onClose={() => setSelected(null)}
         onCheck={(u) => {

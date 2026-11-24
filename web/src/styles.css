@@ -305,6 +305,7 @@ details.records[open] summary svg { transform: rotate(90deg); }
 
 @media (max-width: 720px) {
   .brand .where { display: none; }
+  .topleft:has(.results) { z-index: 5; }
   /* phone: mode switch and buttons sit in a row under the search card */
   .topright { top: calc(132px + env(safe-area-inset-top, 0px)); left: 12px; right: 12px; }
   .topright .segmented { flex: 1; }
@@ -402,6 +403,9 @@ details.records[open] summary svg { transform: rotate(90deg); }
 .keyfacts .nodata { color: var(--ink-3); font-weight: 500; }
 .keyfacts .with-pin { display: flex; align-items: center; gap: 6px; }
 .keyfacts .with-pin .pinmark { margin-top: -3px; }
+.rent { margin-bottom: 18px; }
+.rent .keyfacts { margin-top: 0; padding-top: 4px; border-top: 0; }
+.nodata-line { font-size: 13px; color: var(--ink-3); }
 .shops { list-style: none; margin: 0; padding: 0; }
 .shops li { display: grid; grid-template-columns: 84px 1fr; gap: 2px 12px; padding: 10px 0; border-top: 0.5px solid var(--line); }
 .shops li:first-child { border-top: 0; }

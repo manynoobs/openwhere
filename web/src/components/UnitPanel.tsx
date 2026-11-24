@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { isPlaceholder, loadUnit, monthYear, signNames, TYPE_LABEL, yearOf } from "../data";
-import { CUISINE_LABEL, type SignHistory, type UnitDetail, type UnitProps } from "../types";
+import { CUISINE_LABEL, type RentMeta, type SignHistory, type UnitDetail, type UnitProps } from "../types";
 import { Icon } from "./Icon";
 import { PinMark } from "./PinMark";
 import { shortAddress } from "./Search";
@@ -11,12 +11,13 @@ interface Props {
   pinned: boolean;
   canPin: boolean;
   priceBands: string[];
+  rentMeta: RentMeta | null;
   onPin: () => void;
   onClose: () => void;
   onCheck: (u: UnitProps) => void;
 }
 
-export function UnitPanel({ id, props, pinned, canPin, priceBands, onPin, onClose, onCheck }: Props) {
+export function UnitPanel({ id, props, pinned, canPin, priceBands, rentMeta, onPin, onClose, onCheck }: Props) {
   const [unit, setUnit] = useState<UnitDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,6 +105,7 @@ export function UnitPanel({ id, props, pinned, canPin, priceBands, onPin, onClos
       <div className="panel-body">
         {error && <p className="loading">This shopfront’s history could not be loaded. {error}</p>}
         {!u && !error && open && <p className="loading">Loading history…</p>}
+        {u && <Rent u={u} district={rentMeta} />}
         {u && <History u={u} />}
       </div>
     </aside>
@@ -120,6 +122,70 @@ function Cuisine({ u, props }: { u: UnitDetail | null; props: UnitProps }) {
       </p>
     );
   return null;
+}
+
+const hkd = (n: number) => `$${n.toLocaleString("en-HK")}`;
+
+function Rent({ u, district }: { u: UnitDetail; district: RentMeta | null }) {
+  const r = u.rent;
+  if (!r) return null;
+  const where = r.level === "street" ? "street-level shops" : "upstairs shops";
+  return (
+    <section className="rent">
+      <h3>Rent nearby</h3>
+      {r.leases ? (
+        <dl className="keyfacts num">
+          <div>
+            <dt>Per sq ft a month</dt>
+            <dd>
+              {hkd(r.leases.psf)}
+              <small>
+                most {hkd(r.leases.psf_low)}–{hkd(r.leases.psf_high)}
+              </small>
+            </dd>
+          </div>
+          <div>
+            <dt>Typical lease</dt>
+            <dd>
+              {hkd(r.leases.rent)}
+              <small>a month for {r.leases.area.toLocaleString("en-HK")} sq ft</small>
+            </dd>
+          </div>
+          {r.asking && (
+            <div>
+              <dt>Asking now</dt>
+              <dd>
+                {hkd(r.asking.psf)}
+                <small>
+                  per sq ft, {r.asking.n} {r.asking.n === 1 ? "unit" : "units"} within {r.asking.radius} m
+                </small>
+              </dd>
+            </div>
+          )}
+          {district && (
+            <div>
+              <dt>Kowloon average</dt>
+              <dd>
+                {hkd(Math.round(district.kowloon_psf))}
+                <small>
+                  per sq ft, {district.kowloon_period.replace("-", " ")}
+                  {district.kowloon_provisional ? ", provisional" : ""}
+                </small>
+              </dd>
+            </div>
+          )}
+        </dl>
+      ) : (
+        <p className="nodata-line">Fewer than five recorded leases of {where} within 300 m since {monthYear(r.since)}.</p>
+      )}
+      {r.leases && (
+        <p className="fine">
+          Median of {r.leases.n} {where} leased within {r.leases.radius} m since {monthYear(r.since)}, from Centaline Commercial.
+          Kowloon average from the Rating and Valuation Department.
+        </p>
+      )}
+    </section>
+  );
 }
 
 function lastListed(u: UnitDetail) {

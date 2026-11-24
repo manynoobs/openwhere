@@ -47,12 +47,13 @@ interface Props {
   onClose: () => void;
 }
 
-const PLACE_WORD: Partial<Record<PlaceKind, [string, string]>> & Record<"hotel" | "school" | "mall" | "landmark" | "transit", [string, string]> = {
+const PLACE_WORD: Partial<Record<PlaceKind, [string, string]>> & Record<"hotel" | "school" | "mall" | "landmark" | "transit" | "pharmacy", [string, string]> = {
   hotel: ["hotel", "hotels"],
   school: ["school", "schools"],
   mall: ["mall", "malls"],
   landmark: ["landmark", "landmarks"],
   transit: ["station", "stations"],
+  pharmacy: ["pharmacy", "pharmacies"],
 };
 
 const metres = (m: number) => (m < 1000 ? `${Math.round(m / 5) * 5} m` : `${(m / 1000).toFixed(1)} km`);
@@ -190,7 +191,7 @@ export function SiteCheck({ site, result, grid, typical, district, counts, price
           </dl>
 
           <div className="site-places">
-            {(["hotel", "school", "mall", "landmark", "transit"] as const).map((k) => (
+            {(["hotel", "school", "mall", "landmark", "transit", "pharmacy"] as const).map((k) => (
               <span key={k} title={k}>
                 <PlaceIcon k={k} />
                 <b className="num">{result.places[k]}</b>
@@ -201,7 +202,7 @@ export function SiteCheck({ site, result, grid, typical, district, counts, price
 
           <p className="fine">
             Price and cuisine from OpenRice where a listing matched; otherwise cuisine is guessed from the shop’s name. Distances
-            are straight-line. Places from OpenStreetMap.
+            are straight-line. Places from OpenStreetMap; pharmacies and medicine shops from the Drug Office register.
           </p>
         </div>
       )}

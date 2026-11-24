@@ -1,11 +1,14 @@
-"""Places that draw people, and MTR exits, around the district, from OpenStreetMap.
+"""Places that draw people, and MTR exits, around the district, from OpenStreetMap,
+and pharmacies and medicine shops from the Drug Office register.
 
     python pipeline/facilities.py     # writes web/public/data/facilities.geojson
                                       # and adds `mtr` (metres to the nearest MTR exit) to units
 
-Fetched once from the Overpass API and cached in data/osm_facilities.json. Distances are
+OpenStreetMap is fetched once from the Overpass API and cached in data/osm_facilities.json.
+The register is read from hk-places-scraper/out/drugoffice.csv when it is there. Distances are
 straight-line, not walking routes, and the app says so.
 """
+import csv
 import json
 import math
 import re
@@ -15,6 +18,7 @@ import urllib.request
 from ingest import ROOT
 
 CACHE = ROOT / "data" / "osm_facilities.json"
+DRUG_OFFICE = ROOT / "hk-places-scraper" / "out" / "drugoffice.csv"
 OUT = ROOT / "web" / "public" / "data"
 BBOX = (22.282, 114.148, 22.330, 114.200)  # south, west, north, east: Yau Tsim and a margin
 KOWLOON_SOUTH = 22.2915  # drop Hong Kong Island features that fall inside the box
@@ -29,6 +33,7 @@ KINDS = {
     "mall": "Mall or market",
     "landmark": "Landmark or venue",
     "hospital": "Hospital",
+    "pharmacy": "Pharmacy or medicine shop",
 }
 
 QUERY = """
@@ -120,6 +125,16 @@ def main():
             props["mtrst"] = 1
         feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
                       "properties": props})
+
+    if DRUG_OFFICE.exists():
+        for r in csv.DictReader(open(DRUG_OFFICE, encoding="utf-8-sig")):
+            if not r["lat"]:
+                continue
+            lat, lon = float(r["lat"]), float(r["lon"])
+            if not (KOWLOON_SOUTH <= lat <= BBOX[2] and BBOX[1] <= lon <= BBOX[3]):
+                continue
+            feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
+                          "properties": {"k": "pharmacy", "en": r["name_en"].title(), "tc": r["name_tc"]}})
 
     # name each MTR exit after its nearest station
     stations = [f for f in feats if f["properties"].get("mtrst")]

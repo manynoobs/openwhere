@@ -47,7 +47,7 @@ export function Controls({ heat, setHeat, filters, setFilters, shown, meta, plac
         <Icon name="target" />
         Site check
       </button>
-      <button className={`iconbtn glass ${places ? "on" : ""}`} aria-pressed={places} onClick={() => setPlaces(!places)} title="Show hotels, schools, malls, landmarks and MTR exits">
+      <button className={`iconbtn glass ${places ? "on" : ""}`} aria-pressed={places} onClick={() => setPlaces(!places)} title="Show hotels, schools, malls, landmarks, pharmacies and MTR exits">
         <Icon name="places" />
         Places
       </button>
@@ -176,7 +176,11 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
       <p>
         <b>Price per person and cuisine</b> come from OpenRice where a listing matched the shop. Otherwise cuisine is guessed
         from the shop’s name, and left as unclear when the name doesn’t say. <b>Places</b>{" "}
-        and MTR exits come from OpenStreetMap; distances are straight-line.
+        and MTR exits come from OpenStreetMap, and pharmacies from the Drug Office register; distances are straight-line.
+      </p>
+      <p>
+        <b>Rent nearby</b> is the median of shop leases Centaline Commercial recorded within 150 m (300 m where fewer than five)
+        over the last three years, on the same level as the shop: street level or upstairs.
       </p>
       <dl className="num">
         <dt>Monthly files read (English and Chinese)</dt>

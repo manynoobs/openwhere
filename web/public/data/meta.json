@@ -103,5 +103,13 @@
   "$401–800",
   "Over $800"
  ],
- "openrice_matched": 963
+ "openrice_matched": 963,
+ "rent": {
+  "kowloon_psf": 96.0,
+  "kowloon_period": "2026-Q3",
+  "kowloon_provisional": true,
+  "since": "2023-11-01",
+  "listings_collected": "2026-11-23",
+  "units_with_leases": 2073
+ }
 }

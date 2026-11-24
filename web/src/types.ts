@@ -94,8 +94,36 @@ export interface UnitDetail {
   unlisted_gaps: { from: string; to: string; months: number }[];
   sign_histories: SignHistory[];
   openrice: { price: string | null; cuisines: string[] } | null;
+  rent?: UnitRent;
   first_file: string;
   latest_file: string;
+}
+
+/** median rents of Centaline leases or listings near a unit, on the same level */
+export interface RentSummary {
+  n: number;
+  psf: number; // HK$ per square foot a month, median
+  psf_low: number; // lower and upper quartile
+  psf_high: number;
+  area: number; // square feet, median
+  rent: number; // HK$ a month, median
+  radius: number; // metres searched
+}
+
+export interface UnitRent {
+  level: "street" | "upstairs";
+  since: string;
+  leases: RentSummary | null;
+  asking: RentSummary | null;
+}
+
+export interface RentMeta {
+  kowloon_psf: number;
+  kowloon_period: string;
+  kowloon_provisional: boolean;
+  since: string;
+  listings_collected: string;
+  units_with_leases: number;
 }
 
 export interface Meta {
@@ -120,6 +148,7 @@ export interface Meta {
   generated: string;
   price_bands: string[];
   openrice_matched: number;
+  rent?: RentMeta;
 }
 
 export type SearchRow = [id: number, en: string, tc: string, signs: string, chg: number, lon: number, lat: number];

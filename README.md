@@ -51,15 +51,15 @@ It is a reference for anyone in the food business, from a single noodle shop to 
 
 ## Run it
 
-You need Node 18 or newer. All the data the app needs is in the repository, and the app runs offline: it makes no network requests at all, not even for map tiles.
+Use Node.js 24. All the data the app needs is in the repository, and the app runs offline: it makes no network requests at all, not even for map tiles.
 
 ```bash
 cd web
-npm install
+npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. For a static build, run `npm run build` and serve `web/dist` from any web server, or run `npm run preview`.
+Open http://localhost:5173. For a static build, run `npm run build` and serve `web/dist` from a web server that supports HTTP range requests for the map tiles, or run `npm run preview`.
 
 ## How the numbers are made
 
@@ -86,8 +86,7 @@ A **store change** is a history with a different sign listed after the previous 
 
 Only shops that opened after January 2016 are used, so each one's start date is known: 907 at street level in Yau Tsim. Shops that are still listed today count as lasting *at least* as long as they have so far; they are not dropped. This is the Kaplan–Meier method, weighted by distance (σ ≈ 150 m) around every point.
 
-- The colour is the share still listed three years after opening.
-- Across the district that share is **75%**, and half of new shops are still listed after about **7¼ years**.
+- Across the district, the share still listed three years after opening is **75%**, and half of new shops are still listed after about **7¼ years**.
 - The legend reads this as turnover, the share no longer listed within three years: yellow is the district average (25%), 40% and above is red, 10% and below is green.
 - Colour fades toward white as the number of nearby shops falls from 15 to 3. Below 3 shops nothing is drawn.
 
@@ -116,7 +115,19 @@ OpenRice's terms restrict copying, so the raw listings stay out of this reposito
 
 ### Places and MTR exits
 
-Places and MTR exits come from OpenStreetMap via the Overpass API. Tutoring centres tagged as schools are dropped. Distances are straight-line, not walking routes: the median shop is 149 m from its nearest MTR exit.
+Places and MTR exits come from OpenStreetMap via the Overpass API. Tutoring centres tagged as schools are dropped. Pharmacies and medicine shops come from the Drug Office's register of poison licences, which includes the Mannings, Watsons and convenience-store branches. Distances are straight-line, not walking routes: the median shop is 149 m from its nearest MTR exit.
+
+### Rent nearby
+
+Each shop's panel gives the rents of shops let around it, from the leases Centaline Commercial records. `pipeline/rents.py` takes recorded (not estimated) retail leases of the last three years on the shop's own level: street-level shops for a street-level shopfront, upstairs shops otherwise. It uses the leases within 150 m, or within 300 m where 150 m holds fewer than five. Leases that Centaline places only by street are left out.
+
+The panel shows:
+- the median rent per square foot a month, with the middle half of the range;
+- the median lease, in HK$ a month and square feet;
+- the median asking rent of units advertised now within 300 m;
+- the Rating and Valuation Department's latest average for Kowloon, to read the street against.
+
+Only these medians reach the app, never a single lease. **2,073 of the 2,200 shopfronts (94%)** have five or more leases nearby. Street-level medians run from $25 to $257 per square foot, with $67 the middle shopfront; upstairs, from $19 to $80, with $32 in the middle.
 
 ## Numbers for Yau Tsim
 
@@ -130,7 +141,8 @@ Places and MTR exits come from OpenStreetMap via the Overpass API. Tutoring cent
 | New street-level shops since 2016 still listed after 3 years | 75% |
 | Current shops with a cuisine label | 1,460 of 1,587 (92%), from OpenRice or the name |
 | Current shops with an OpenRice price per person | 963 of 1,562 named shops (62%) |
-| Places on the map | 160 MTR exits, 138 hotels, 161 schools, 95 malls and markets, 69 landmarks, 60 stations, 7 hospitals |
+| Places on the map | 160 MTR exits, 138 hotels, 161 schools, 95 malls and markets, 69 landmarks, 60 stations, 7 hospitals, 815 pharmacies and medicine shops |
+| Shopfronts with a rent median nearby | 2,073 of 2,200 (94%), from 2,994 street-level and 382 upstairs leases since Nov 2023 |
 
 Yau Tsim was picked from the 19 FEHD districts by running the same counting over all of them. It has:
 - the highest rate of store changes per street-level shop: 0.34, against 0.09 to 0.28 elsewhere;
@@ -139,7 +151,9 @@ Yau Tsim was picked from the 19 FEHD districts by running the same counting over
 
 ## Rebuild the data
 
-The pipeline is Python 3 with DuckDB. A full run downloads about 1.3 GB and takes around an hour, mostly spent waiting on the archive and the Address Lookup Service.
+Use Python 3.12 with DuckDB. A full run downloads about 1.3 GB and takes around an hour, mostly spent waiting on the archive and the Address Lookup Service.
+
+The public checkout includes the app’s exported data. To rebuild the OpenRice price and cuisine matches, you need the original `data/openrice/openrice.md` and the reviewed `data/openrice/rejected.json` from the team. For a rebuild using only public inputs, skip `python openrice.py` and continue with `python export.py`. Prices will be unavailable and cuisine labels will come from shop names.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -153,10 +167,11 @@ python units.py geocode --dist 61      # Address Lookup Service, cached
 python units.py build                  # addresses -> units
 python histories.py                    # link rules, store changes
 python cuisine.py                      # cuisine guessed from current signs
-python openrice.py                     # match OpenRice listings (needs data/openrice/openrice.md)
+python openrice.py                     # optional: match OpenRice listings using the team files
 python export.py                       # web/public/data
-python facilities.py                   # OpenStreetMap places, MTR exit distance
+python facilities.py                   # OpenStreetMap places and pharmacies, MTR exit distance
 python heat.py                         # shop lifespan surface
+python rents.py                        # rent medians near each shop (needs hk-rent-scraper/out)
 ```
 
 | Step | File | What it does |
@@ -168,8 +183,9 @@ python heat.py                         # shop lifespan surface
 | Cuisine | `cuisine.py` | Keyword rules plus hand labels for shops listed now. |
 | OpenRice | `openrice.py` | Matches OpenRice listings to current shops for price and cuisine. |
 | Export | `export.py` | GeoJSON, one history file per unit, a search index. |
-| Places | `facilities.py` | OpenStreetMap places and each shop's distance to the nearest MTR exit. |
+| Places | `facilities.py` | OpenStreetMap places, Drug Office pharmacies, and each shop's distance to the nearest MTR exit. |
 | Lifespan | `heat.py` | Distance-weighted Kaplan–Meier surface, its image and a readout grid. |
+| Rent | `rents.py` | Median lease and asking rents near each shop, and the Kowloon average. |
 
 ## How it was built
 
@@ -213,13 +229,16 @@ docs/             screenshots and brand files
 - Where OpenRice has no match, cuisine is a guess from the name, and 127 current shops can't be guessed at all.
 - OpenRice prices are the listing's own price band, as collected; they may be out of date for some shops.
 - Shop lifespan compares areas within this district only. Its colours are centred on Yau Tsim's own average.
-- No rent data: there is no reliable public source for the current rent of individual shops.
+- Rent nearby is what shops around a unit let for, not the rent of that unit. Centaline records the leases it hears of, not every lease, and leases in large malls are few. Asking rents are what landlords advertise.
 
 ## Sources and credits
 
 - Restaurant licence lists: Food and Environmental Hygiene Department, via the [DATA.GOV.HK historical archive](https://data.gov.hk/en/help/api-spec).
 - Building locations: [Address Lookup Service](https://www.als.gov.hk), Office of the Government Chief Information Officer.
 - Price per person and cuisine for matched shops: [OpenRice](https://www.openrice.com), collected by a teammate.
+- Shop rents: [Centaline Commercial](https://oir.centanet.com) leases and listings, as medians.
+- Kowloon average rent: Rating and Valuation Department, via [DATA.GOV.HK](https://data.gov.hk).
+- Pharmacies and medicine shops: Drug Office, Department of Health.
 - Places, MTR exits and basemap: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), rendered with [Protomaps](https://protomaps.com) and [MapLibre GL JS](https://maplibre.org).
 
 Reconstructed from FEHD licence lists. Not a record of ownership, tenancy or business performance.
