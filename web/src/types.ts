@@ -112,18 +112,24 @@ export interface RentSummary {
 
 export interface UnitRent {
   level: "street" | "upstairs";
+  area: string | null; // Rating and Valuation Department area: Hong Kong, Kowloon or New Territories
   since: string;
   leases: RentSummary | null;
   asking: RentSummary | null;
 }
 
 export interface RentMeta {
-  kowloon_psf: number;
-  kowloon_period: string;
-  kowloon_provisional: boolean;
+  area_psf: Record<string, number>; // latest average per area, HK$ per sq ft a month
+  area_period: string;
+  area_provisional: boolean;
   since: string;
   listings_collected: string;
   units_with_leases: number;
+}
+
+export interface HeatTile {
+  image: string;
+  bounds: [[number, number], [number, number], [number, number], [number, number]];
 }
 
 export interface Meta {
@@ -135,13 +141,12 @@ export interface Meta {
   units: number;
   units_street_level: number;
   units_resolved: number;
-  districts: string[];
+  district_names: Record<string, string>; // FEHD district code -> name
   renewal_lag_months: number;
   heat: {
-    bounds: [[number, number], [number, number], [number, number], [number, number]];
-    image: string;
+    tiles: HeatTile[];
     stops: [number, string][];
-    district: number; // the district's own three-year share, the middle of the colour scale
+    district: number; // Hong Kong's own three-year share, the middle of the colour scale
     horizon_months: number;
     new_histories: number;
   };

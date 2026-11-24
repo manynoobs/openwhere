@@ -1,7 +1,7 @@
 import type { Map as MLMap } from "maplibre-gl";
 import { dataUrl } from "../data";
 
-// Places that draw people, from OpenStreetMap, and pharmacies from the Drug Office: neutral ink icons on white tiles,
+// Places that draw people, from iGeoCom, and pharmacies from the Drug Office: neutral ink icons on white tiles,
 // so they sit under the coloured shop pins and never compete with them.
 export const PLACE_KINDS = ["mtr", "transit", "hotel", "school", "mall", "landmark", "hospital", "pharmacy"] as const;
 export type PlaceKind = (typeof PLACE_KINDS)[number];

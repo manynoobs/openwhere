@@ -7,7 +7,9 @@
 Parsing is by rule on the English address: floors, shop numbers, street number and street
 name. The building comes from the Address Lookup Service (ALS), cached in
 data/geocode_cache.sqlite, and is accepted only when ALS returns the same street name and a
-street number that matches the one parsed from the licence. The unit key is building +
+street number that matches the one parsed from the licence. Where ALS gives nothing it
+accepts, the building is FEHD's own map position for a licence at that address, read from
+hk-catering-scraper/data/positions.json when it is there. The unit key is building +
 floor set + shop set. Addresses marked "portion", or with no shop number in a building
 where other licences give one on that floor, are kept at building level only.
 """
@@ -27,6 +29,24 @@ import duckdb
 from ingest import DB, ROOT
 
 CACHE = ROOT / "data" / "geocode_cache.sqlite"
+FEHD_POSITIONS = ROOT / "hk-catering-scraper" / "data" / "positions.json"
+
+
+def fehd_positions(con):
+    """address -> FEHD's map position of a licence at it, for licences FEHD still lists."""
+    if not FEHD_POSITIONS.exists():
+        return {}
+    pos = json.load(open(FEHD_POSITIONS)).get("restaurant", {})
+    out = {}
+    for address, licnos in con.execute("""SELECT address, list(DISTINCT licno ORDER BY licno DESC)
+                                          FROM spans WHERE lang='en' GROUP BY address""").fetchall():
+        for n in licnos:
+            if n in pos:
+                lat, lon = pos[n]
+                out[address] = {"geo": f"FEHD|{lat:.5f},{lon:.5f}", "lat": lat, "lon": lon, "score": None,
+                                "bname": None}
+                break
+    return out
 
 STREET_WORDS = (r"STREET|ROAD|AVENUE|LANE|TERRACE|PATH|DRIVE|SQUARE|CIRCUIT|CRESCENT|"
                 r"BOULEVARD|HIGHWAY|PLACE|COURT|WAY|BAZAAR|RISE|HILL|PARADE|PROMENADE|"
@@ -271,14 +291,20 @@ def cmd_build(_):
     db = cache()
     bodies = dict(db.execute("SELECT q, body FROM als"))
     addrs = con.execute("SELECT * FROM addresses").fetchall()
+    fehd = fehd_positions(con)
     # address -> building
     bld = {}
+    from_fehd = 0
     for address, dist, floors, shops, street_no, street, portion in addrs:
         body = bodies.get(query_for(street_no, street, dist, address))
         hit = accept(body, street, street_no) if street else accept_text(body)
         if street and not hit:
             hit = accept_text(bodies.get(query_for(None, None, dist, address)))
+        if not hit and address in fehd:
+            hit = fehd[address]
+            from_fehd += 1
         bld[address] = hit
+    print(f"{from_fehd} addresses placed by FEHD's position")
     # group per building+floor set to decide shop-level resolution
     groups = {}
     for address, dist, floors, shops, street_no, street, portion in addrs:

@@ -8,7 +8,7 @@ import { addUnitLayers, changedInFilter, setDarkTheme, setHeatMode, SRC, updateU
 import { heatUrl, unitsUrl } from "../data";
 import { addPlaces, showPlaces } from "./places";
 import { circlePolygon } from "./geo";
-import { YEARS, type Filters, type UnitProps } from "../types";
+import { YEARS, type Filters, type HeatTile, type UnitProps } from "../types";
 
 maplibregl.addProtocol("pmtiles", new Protocol().tile);
 
@@ -22,7 +22,7 @@ interface Props {
   year: number;
   heat: boolean;
   filters: Filters;
-  heatMeta: { bounds: [number, number][]; image: string } | null;
+  heatMeta: { tiles: HeatTile[] } | null;
   selectedId: number | null;
   focusIds: number[];
   fly: FlyTarget | null;
@@ -64,8 +64,8 @@ export function MapView(p: Props) {
       minZoom: 12.5,
       maxZoom: 18.5,
       maxBounds: [
-        [113.98, 22.2],
-        [114.32, 22.42],
+        [113.82, 22.15],
+        [114.45, 22.57],
       ],
       attributionControl: { compact: window.innerWidth < 720 },
       dragRotate: false,
@@ -290,31 +290,39 @@ export function MapView(p: Props) {
   return <div id="map" ref={el} role="application" aria-label="Map of licensed shopfronts" />;
 }
 
-function addHeat(map: MLMap, hm: { bounds: [number, number][]; image: string }) {
-  const coords = hm.bounds as [[number, number], [number, number], [number, number], [number, number]];
+let heatLayers: string[] = [];
+
+function addHeat(map: MLMap, hm: { tiles: HeatTile[] }) {
   // the wash sits under the basemap's labels so street names stay readable
   const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
-  map.addSource("heat", { type: "image", url: heatUrl(hm.image), coordinates: coords });
-  map.addLayer(
-    {
-      id: "heat",
-      type: "raster",
-      source: "heat",
-      paint: { "raster-opacity": 0, "raster-fade-duration": 0, "raster-resampling": "linear" },
-      layout: { visibility: "none" },
-    },
-    firstLabel,
-  );
+  heatLayers = hm.tiles.map((t, i) => {
+    const id = `heat-${i}`;
+    map.addSource(id, { type: "image", url: heatUrl(t.image), coordinates: t.bounds });
+    map.addLayer(
+      {
+        id,
+        type: "raster",
+        source: id,
+        paint: { "raster-opacity": 0, "raster-fade-duration": 0, "raster-resampling": "linear" },
+        layout: { visibility: "none" },
+      },
+      firstLabel,
+    );
+    return id;
+  });
 }
 
 function showHeat(map: MLMap, on: boolean) {
-  if (!map.getLayer("heat")) return;
-  if (on) map.setLayoutProperty("heat", "visibility", "visible");
-  map.setPaintProperty("heat", "raster-opacity", on ? 1 : 0);
+  for (const id of heatLayers) {
+    if (!map.getLayer(id)) continue;
+    if (on) map.setLayoutProperty(id, "visibility", "visible");
+    map.setPaintProperty(id, "raster-opacity", on ? 1 : 0);
+  }
   if (!on) {
-    // hide after the fade so the hidden layer costs nothing
+    // hide after the fade so the hidden layers cost nothing
     window.setTimeout(() => {
-      if (map.getLayer("heat") && map.getPaintProperty("heat", "raster-opacity") === 0) map.setLayoutProperty("heat", "visibility", "none");
+      for (const id of heatLayers)
+        if (map.getLayer(id) && map.getPaintProperty(id, "raster-opacity") === 0) map.setLayoutProperty(id, "visibility", "none");
     }, 500);
   }
 }

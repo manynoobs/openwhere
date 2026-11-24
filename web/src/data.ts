@@ -22,18 +22,21 @@ export function loadUnit(id: number) {
 let searchIndex: Promise<SearchRow[]> | null = null;
 export const loadSearch = () => (searchIndex ??= json<SearchRow[]>("search.json"));
 
+/** the lifespan readout, kept only for cells with colour on the map */
 export interface HeatGrid {
   x0: number;
   y1: number;
   cell: number;
-  w: number;
-  h: number;
-  v: (number | null)[]; // share of new shops still listed after three years
+  stride: number; // cell key = row * stride + col
+  i: number[]; // cell keys, ascending
+  v: number[]; // share of new shops still listed after three years
   median: (number | null)[]; // years until half stopped being listed, where reached
   n: number[]; // shops the estimate rests on
+  at?: Map<number, number>; // cell key -> position in the arrays, built on load
 }
 let heatGrid: Promise<HeatGrid> | null = null;
-export const loadHeatGrid = () => (heatGrid ??= json<HeatGrid>("heat/grid.json"));
+export const loadHeatGrid = () =>
+  (heatGrid ??= json<HeatGrid>("heat/grid.json").then((g) => ({ ...g, at: new Map(g.i.map((k, j) => [k, j])) })));
 
 /** how long shops last around a lon/lat, from the readout grid */
 export function heatAt(g: HeatGrid, lon: number, lat: number) {
@@ -42,9 +45,9 @@ export function heatAt(g: HeatGrid, lon: number, lat: number) {
   const y = R * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
   const col = Math.floor((x - g.x0) / g.cell);
   const row = Math.floor((g.y1 - y) / g.cell);
-  if (col < 0 || row < 0 || col >= g.w || row >= g.h) return null;
-  const i = row * g.w + col;
-  return { v: g.v[i], median: g.median[i], n: g.n[i] };
+  const j = g.at?.get(row * g.stride + col);
+  if (j == null) return null;
+  return { v: g.v[j] as number | null, median: g.median[j], n: g.n[j] };
 }
 
 // --- formatting -------------------------------------------------------------

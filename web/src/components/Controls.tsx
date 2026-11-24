@@ -176,7 +176,8 @@ function About({ meta }: { meta: Meta & { district?: string; district_detail?: s
       <p>
         <b>Price per person and cuisine</b> come from OpenRice where a listing matched the shop. Otherwise cuisine is guessed
         from the shop’s name, and left as unclear when the name doesn’t say. <b>Places</b>{" "}
-        and MTR exits come from OpenStreetMap, and pharmacies from the Drug Office register; distances are straight-line.
+        and MTR exits come from the Lands Department’s iGeoCom, and pharmacies from the Drug Office register; distances are
+        straight-line.
       </p>
       <p>
         <b>Rent nearby</b> is the median of shop leases Centaline Commercial recorded within 150 m (300 m where fewer than five)

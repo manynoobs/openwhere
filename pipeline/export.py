@@ -1,4 +1,4 @@
-"""Write the files the map app loads, for the demo district only.
+"""Write the files the map app loads, for every FEHD district.
 
     python pipeline/export.py        # after histories.py and cuisine.py;
                                      # then run facilities.py and heat.py
@@ -18,7 +18,14 @@ import duckdb
 
 from ingest import DB, ROOT
 
-DISTRICTS = ["61"]  # Yau Tsim: Tsim Sha Tsui, Jordan, Yau Ma Tei
+# FEHD district codes and names; every one is exported
+DISTRICT_NAMES = {
+    "18": "Central/Western", "12": "Wan Chai", "11": "Eastern", "15": "Southern", "17": "Islands",
+    "61": "Yau Tsim", "62": "Mong Kok", "63": "Sham Shui Po", "52": "Kowloon City", "53": "Wong Tai Sin",
+    "51": "Kwun Tong", "91": "Kwai Tsing", "92": "Tsuen Wan", "93": "Tuen Mun", "94": "Yuen Long",
+    "96": "North", "95": "Tai Po", "97": "Sha Tin", "98": "Sai Kung",
+}
+DISTRICTS = list(DISTRICT_NAMES)
 YEARS = list(range(2016, 2027))
 OUT = ROOT / "web" / "public" / "data"
 
@@ -130,8 +137,9 @@ def main():
     meta_path = OUT / "meta.json"
     meta = json.load(open(meta_path)) if meta_path.exists() else {}
     meta.update({
-        "district": "Yau Tsim",
-        "district_detail": "Tsim Sha Tsui, Jordan and Yau Ma Tei (FEHD district 61)",
+        "district": "Hong Kong",
+        "district_detail": "all 18 districts of Hong Kong (19 FEHD licensing districts)",
+        "district_names": DISTRICT_NAMES,
         "first_file": recs[0]["first_file"],
         "latest_file": recs[0]["latest_file"],
         "files_good": sum(s["status"] == "good" for s in snaps),

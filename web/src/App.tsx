@@ -14,7 +14,7 @@ import { metres } from "./map/geo";
 import { PLACE_KINDS, PLACE_LABEL, type PlaceKind } from "./map/places";
 import { CUISINE_LABEL, DEFAULT_FILTERS, normName, YEARS, type Filters, type Meta, type UnitProps } from "./types";
 
-type FullMeta = Meta & { heat: Meta["heat"] & { stops: [number, string][] }; district?: string };
+type FullMeta = Meta & { district?: string };
 type Hover = { x: number; y: number; props?: UnitProps; lngLat: [number, number] } | null;
 
 const LAST = YEARS[YEARS.length - 1];
@@ -140,10 +140,23 @@ export default function App() {
     return () => window.clearTimeout(t);
   }, [brandIds, all]);
 
-  // the typical spot: around each restaurant listed now, how many others (of the chosen cuisine) are within the radius
+  // the district a site check falls in: that of the nearest shopfront
+  const siteDistrict = useMemo(() => {
+    if (!siteOpen || site.lon == null || site.lat == null || !all.length) return null;
+    let best = all[0];
+    let bestD = Infinity;
+    for (const u of all) {
+      const d = metres(site.lon, site.lat, u.lon!, u.lat!);
+      if (d < bestD) [best, bestD] = [u, d];
+    }
+    return best.d;
+  }, [siteOpen, site.lon, site.lat, all]);
+
+  // the typical spot: around each restaurant listed now in the same district, how many others
+  // (of the chosen cuisine) are within the radius
   const typical = useMemo(() => {
-    if (!siteOpen) return null;
-    const now = all.filter(listedNow);
+    if (!siteOpen || siteDistrict == null) return null;
+    const now = all.filter((u) => listedNow(u) && u.d === siteDistrict);
     const rivals = site.cuisine ? now.filter((u) => u.cu === site.cuisine) : now;
     return median(
       now.map((u) => {
@@ -152,7 +165,7 @@ export default function App() {
         return n;
       }),
     );
-  }, [siteOpen, all, site.radius, site.cuisine]);
+  }, [siteOpen, siteDistrict, all, site.radius, site.cuisine]);
 
   const siteResult = useMemo<SiteResult | null>(() => {
     if (!siteOpen || site.lon == null || site.lat == null) return null;
@@ -344,10 +357,10 @@ export default function App() {
               <b>Open</b>Where
             </span>
           </h1>
-          <span className="where">{meta?.district ?? "Yau Tsim"} · 2016–2026</span>
+          <span className="where">{meta?.district ?? "Hong Kong"} · 2016–2026</span>
         </div>
         <Search
-          district={meta?.district ?? "Yau Tsim"}
+          district={meta?.district ?? "Hong Kong"}
           onPick={(r) => {
             const props = byId.get(r[0]);
             if (props) open(props);
@@ -392,6 +405,7 @@ export default function App() {
           result={siteResult}
           grid={grid}
           typical={typical}
+          typicalWhere={siteDistrict ? meta?.district_names?.[siteDistrict] ?? null : null}
           district={meta?.heat.district ?? null}
           counts={cuisineCounts}
           priceBands={meta?.price_bands ?? []}

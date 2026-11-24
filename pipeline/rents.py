@@ -1,7 +1,7 @@
 """Shop rents around each unit, from Centaline Commercial leases and listings.
 
     python pipeline/rents.py     # after export.py; adds `rent` to web/public/data/units/<id>.json
-                                 # and `rent` to meta.json
+                                 # and `rent` to meta.json, with the average for each area
 
 Reads the CSVs that hk-rent-scraper writes (centaline_transactions.csv, centaline_listings.csv,
 rvd_retail_rents.csv) from hk-rent-scraper/out/. Only medians reach the app, never a single lease.
@@ -25,6 +25,10 @@ OUT = ROOT / "web" / "public" / "data"
 RADII = (150, 300)
 MIN_LEASES = 5
 YEARS_BACK = 3
+# the Rating and Valuation Department's three areas, by FEHD district code
+AREA = {**{d: "Hong Kong" for d in ("11", "12", "15", "18")},
+        **{d: "Kowloon" for d in ("51", "52", "53", "61", "62", "63")},
+        **{d: "New Territories" for d in ("17", "91", "92", "93", "94", "95", "96", "97", "98")}}
 STREET = {"Shop", "Ground Shop"}
 UPSTAIRS = {"Upstairs Shop", "1/F"}
 STREET_LISTING = {"Shop", "Ground Floor"}
@@ -92,7 +96,7 @@ def main():
         p = f["properties"]
         at = tuple(f["geometry"]["coordinates"])
         level = "street" if p["sl"] else "upstairs"
-        rent = {"level": level, "since": since, "leases": None, "asking": None}
+        rent = {"level": level, "area": AREA.get(p["d"]), "since": since, "leases": None, "asking": None}
         for radius in RADII:
             got = near(leases[level], at, radius)
             if len(got) >= MIN_LEASES:
@@ -108,14 +112,15 @@ def main():
         detail["rent"] = rent
         json.dump(detail, open(path, "w"), ensure_ascii=False, separators=(",", ":"))
 
-    rvd = [r for r in read("rvd_retail_rents.csv") if r["frequency"] == "quarter" and r["area"] == "Kowloon"]
-    last = max(rvd, key=lambda r: r["period"])
+    rvd = [r for r in read("rvd_retail_rents.csv") if r["frequency"] == "quarter" and not r.get("district")]
+    period = max(r["period"] for r in rvd)
+    latest = {r["area"]: r for r in rvd if r["period"] == period}
     meta_path = OUT / "meta.json"
     meta = json.load(open(meta_path))
     meta["rent"] = {
-        "kowloon_psf": round(float(last["rent_per_sqft"]), 1),
-        "kowloon_period": last["period"],
-        "kowloon_provisional": last["rent_note"] == "P",
+        "area_psf": {a: round(float(r["rent_per_sqft"]), 1) for a, r in latest.items() if a in set(AREA.values())},
+        "area_period": period,
+        "area_provisional": any(r["rent_note"] == "P" for r in latest.values()),
         "since": since,
         "listings_collected": max(t["collected"] for t in listings),
         "units_with_leases": with_leases,

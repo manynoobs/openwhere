@@ -105,7 +105,7 @@ export function UnitPanel({ id, props, pinned, canPin, priceBands, rentMeta, onP
       <div className="panel-body">
         {error && <p className="loading">This shopfront’s history could not be loaded. {error}</p>}
         {!u && !error && open && <p className="loading">Loading history…</p>}
-        {u && <Rent u={u} district={rentMeta} />}
+        {u && <Rent u={u} areas={rentMeta} />}
         {u && <History u={u} />}
       </div>
     </aside>
@@ -126,9 +126,12 @@ function Cuisine({ u, props }: { u: UnitDetail | null; props: UnitProps }) {
 
 const hkd = (n: number) => `$${n.toLocaleString("en-HK")}`;
 
-function Rent({ u, district }: { u: UnitDetail; district: RentMeta | null }) {
+const AREA_LABEL: Record<string, string> = { "Hong Kong": "Hong Kong Island" };
+
+function Rent({ u, areas }: { u: UnitDetail; areas: RentMeta | null }) {
   const r = u.rent;
   if (!r) return null;
+  const area = areas && r.area && areas.area_psf?.[r.area] != null ? areas : null;
   const where = r.level === "street" ? "street-level shops" : "upstairs shops";
   return (
     <section className="rent">
@@ -162,14 +165,14 @@ function Rent({ u, district }: { u: UnitDetail; district: RentMeta | null }) {
               </dd>
             </div>
           )}
-          {district && (
+          {area && r.area && (
             <div>
-              <dt>Kowloon average</dt>
+              <dt>{AREA_LABEL[r.area] ?? r.area} average</dt>
               <dd>
-                {hkd(Math.round(district.kowloon_psf))}
+                {hkd(Math.round(area.area_psf[r.area]))}
                 <small>
-                  per sq ft, {district.kowloon_period.replace("-", " ")}
-                  {district.kowloon_provisional ? ", provisional" : ""}
+                  per sq ft, {area.area_period.replace("-", " ")}
+                  {area.area_provisional ? ", provisional" : ""}
                 </small>
               </dd>
             </div>
@@ -181,7 +184,7 @@ function Rent({ u, district }: { u: UnitDetail; district: RentMeta | null }) {
       {r.leases && (
         <p className="fine">
           Median of {r.leases.n} {where} leased within {r.leases.radius} m since {monthYear(r.since)}, from Centaline Commercial.
-          Kowloon average from the Rating and Valuation Department.
+          Area average from the Rating and Valuation Department.
         </p>
       )}
     </section>

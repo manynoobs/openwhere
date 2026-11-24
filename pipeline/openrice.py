@@ -1,22 +1,26 @@
 """Attach OpenRice price range and cuisine to shops listed now.
 
-    python pipeline/openrice.py     # reads data/openrice/openrice.md, writes data/openrice/matches.json
+    python pipeline/openrice.py     # reads hk-catering-scraper/out/openrice_latest.csv,
+                                    # writes data/openrice/matches.json
 
-The table was collected by a teammate from OpenRice. It stays in data/openrice/ (git-ignored):
-OpenRice's terms restrict copying, so only the matched price band and cuisine labels reach
-the app, credited to OpenRice.
+The listings are every OpenRice restaurant and beverage shop in Hong Kong, collected by
+hk-catering-scraper; only those OpenRice marks as operating are used. They stay out of this
+repository (data/openrice/ is git-ignored): OpenRice's terms restrict copying, so only the
+matched price band and cuisine labels reach the app, credited to OpenRice.
 
 An OpenRice entry is attached to one of our shops only when the two clearly describe the
 same place:
   - names match closely (85+) and the points are within 150 m, or
   - the street number and street agree and the names are similar (60+), or
   - names fairly close (70+) and the points within 60 m.
-Each entry and each shop is used once, best score first. Every match scoring under 85 on the
-name was read by hand; the ones judged wrong are listed in data/openrice/rejected.json.
+Each entry and each shop is used once, best score first. Matches judged wrong by hand can be
+listed in data/openrice/rejected.json.
 """
+import csv
 import json
 import math
 import re
+from collections import defaultdict
 
 from rapidfuzz import fuzz
 
@@ -25,10 +29,13 @@ from histories import core, is_placeholder
 from ingest import ROOT
 from units import parse
 
-SRC = ROOT / "data" / "openrice" / "openrice.md"
+SRC = ROOT / "hk-catering-scraper" / "out" / "openrice_latest.csv"
 OUT = ROOT / "data" / "openrice" / "matches.json"
-OUR_AREAS = {"Tsim Sha Tsui", "Jordan", "Yau Ma Tei"}  # OpenRice areas inside Yau Tsim
+OPERATING = "10"  # OpenRice status of a listing still trading
 
+# OpenRice's own price labels -> the app's
+PRICE_LABELS = {"Under $50": "0", "$51-100": "51", "$101-200": "101", "$201-400": "201", "$401-800": "401",
+                "Over $800": "801"}
 PRICE_BANDS = {"0": "Under $50", "51": "$51–100", "101": "$101–200", "201": "$201–400", "401": "$401–800", "801": "Over $800"}
 
 # OpenRice cuisines -> the app's cuisine groups
@@ -49,14 +56,15 @@ DISH_TYPES = {"noodles", "hotpot_bbq", "cafe", "bar", "fast_food"}
 
 
 def rows():
-    for line in open(SRC):
-        if not line.startswith("|") or line.startswith("|---") or line.startswith("|Name"):
+    for r in csv.DictReader(open(SRC, encoding="utf-8-sig")):
+        if r["status"] != OPERATING or not r["lat"] or not r["lon"]:
             continue
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) != 8 or c[2] not in OUR_AREAS or not c[3] or not c[4]:
+        names = [n for n in (r["name_tc"], r["name_en"]) if n]
+        if not names:
             continue
-        yield {"name": c[0], "address": c[1], "lat": float(c[3]), "lon": float(c[4]),
-               "min": c[5], "max": c[6], "cuisines": [x for x in c[7].split(",") if x]}
+        yield {"name": names[0], "names": names, "address": r["address_en"], "lat": float(r["lat"]),
+               "lon": float(r["lon"]), "min": PRICE_LABELS.get(r["price"]),
+               "cuisines": [x for x in r["cuisines"].split("|") if x]}
 
 
 def metres(a, b):
@@ -103,15 +111,23 @@ def main():
                       "street": a["street"], "no": first_no(a["street_no"])})
     ors = list(rows())
 
+    # shops bucketed on a ~150 m grid, so each listing is compared only with shops nearby
+    B = 0.0015
+    bucket = defaultdict(list)
+    for j, s in enumerate(shops):
+        bucket[(int(s["xy"][0] // B), int(s["xy"][1] // B))].append(j)
+
     pairs = []
     for i, o in enumerate(ors):
         oa = parse(o["address"])
         ono = first_no(oa["street_no"])
-        for j, s in enumerate(shops):
+        bx, by = int(o["lon"] // B), int(o["lat"] // B)
+        for j in (j for dx in (-1, 0, 1) for dy in (-1, 0, 1) for j in bucket.get((bx + dx, by + dy), ())):
+            s = shops[j]
             d = metres((o["lon"], o["lat"]), s["xy"])
             if d > 150:
                 continue
-            ns = name_score(o["name"], s["names"])
+            ns = max(name_score(n, s["names"]) for n in o["names"])
             same_addr = oa["street"] and oa["street"] == s["street"] and ono is not None and ono == s["no"]
             if (ns >= 85) or (same_addr and ns >= 60) or (ns >= 70 and d <= 60):
                 pairs.append((ns + (10 if same_addr else 0) - d / 30, i, j, ns, round(d), bool(same_addr)))
@@ -131,8 +147,9 @@ def main():
             "cuisines": o["cuisines"], "name_score": ns, "metres": d, "same_address": same_addr,
             "our_name": s["names"][0],
         }
+    OUT.parent.mkdir(parents=True, exist_ok=True)
     json.dump(matches, open(OUT, "w"), ensure_ascii=False, indent=1)
-    print(f"{len(ors)} OpenRice entries in Yau Tsim, {len(shops)} shops listed now with a name; "
+    print(f"{len(ors)} OpenRice listings trading, {len(shops)} shops listed now with a name; "
           f"{len(matches)} matched ({100 * len(matches) / len(shops):.0f}% of shops)")
 
 
