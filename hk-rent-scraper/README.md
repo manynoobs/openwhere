@@ -1,6 +1,6 @@
 # hk-rent-scraper
 
-Collects commercial rents in Hong Kong from public sources, one script per source, and links leases to the food shops that took them.
+Collects shop rents in Hong Kong from an estate agency and from government sources, one script per source, and links leases to the food shops that took them.
 
 ## centaline.py: Centaline Commercial
 
@@ -47,6 +47,80 @@ Transaction columns: `id`, `date`, `usage`, `name_en`, `name_tc`, `zone`, `distr
 
 Centaline's terms restrict copying its content. Keep the collected files for your own analysis and do not republish them.
 
+## rvd.py: Rating and Valuation Department
+
+Reads the department's Property Market Statistics for private retail premises and its yearly summary of the Valuation List, both open data on DATA.GOV.HK.
+
+```bash
+python3 rvd.py
+```
+
+One run makes 18 requests a second apart and writes four files. On 24 Nov 2026:
+
+| File | Holds | Rows | Covers |
+| --- | --- | --- | --- |
+| `out/rvd_retail_rents.csv` | Average rent and price by area | 1,613 | Years and quarters from 1989, months from 1999, to Sep 2026 |
+| `out/rvd_retail_indices.csv` | Rental and price indices, 1999 = 100 | 648 | Years and quarters from 1978, months from 1993, to Sep 2026 |
+| `out/rvd_yields.csv` | Market yields for retail, offices and flatted factories | 519 | Years from 1987, quarters from 1990, months from 1999 |
+| `out/rvd_shop_rateable_values.csv` | Shops and their rateable value in each district | 132 | As at 1 April, 2021 to 2026 |
+
+Rent columns: `frequency`, `period`, `area`, `rent_per_sqm`, `rent_per_sqft`, `rent_note`, `price_per_sqm`, `price_per_sqft`, `price_note`.
+
+Index columns: `frequency`, `period`, `rent_index`, `rent_note`, `price_index`, `price_note`.
+
+Yield columns: `frequency`, `period`, then `_yield` and `_note` for each of `retail`, `office_a`, `office_b` and `flatted_factory`.
+
+Rateable value columns: `as_at`, `area`, `district`, `shops`, `shop_rateable_value_000`, `shop_mean_rateable_value`, `other_commercial`, `other_commercial_rateable_value_000`.
+
+- `frequency` is `year`, `quarter` or `month`, and `period` reads `1999`, `1999-Q1` or `1999-01`.
+- `area` is Hong Kong (the island), Kowloon or New Territories, and New Kowloon as well until 1998.
+- Rents are HK$ per square metre of internal floor area a month and prices HK$ per square metre, as published. The per square foot columns are the same figures divided by 10.764, to sit beside Centaline's.
+- Notes are the department's: `P` provisional, `Z` fewer than 20 transactions, `@` and `~` an office yield that leaves out some months.
+- Rateable value is the department's estimate of a year's rent at the 1 October before. `shop_rateable_value_000` is the total for the district in HK$ thousand, and `shop_mean_rateable_value` is that total divided by the number of shops, in HK$ a year.
+- Rows with an empty `district` are the totals for the area, and `Overall` is all Hong Kong.
+
+The data is from DATA.GOV.HK and may be kept and republished, crediting the Rating and Valuation Department.
+
+## gpa.py: Government Property Agency
+
+Reads the agency's open list of tenancies awarded by tender for shops, car parks, vending machines and cash machines in government buildings.
+
+```bash
+python3 gpa.py
+```
+
+The result is `out/gpa_awards.csv`, one row per award: 79 on 24 Nov 2026, for tenancies starting between February 2021 and October 2023. 39 are shops, 18 car parks, 16 vending machine sites and 6 ATM sites.
+
+Columns: `ref`, `kind`, `food`, `premises`, `premises_tc`, `district`, `tenant`, `tenant_tc`, `start`, `years`, `renewal_years`, `rent`, `turnover_pct`, `lat`, `lon`.
+
+- `kind` is `shop`, `car park`, `vending machine` or `ATM`, read from the description of the premises.
+- `food` marks a shop let to a restaurant, caterer or food retailer: 13 of the 39. The list does not say what a shop may be used for, so this is judged from the tenant's name.
+- `rent` is HK$ a month, exclusive of rates. Where `turnover_pct` is filled, `rent` is the minimum and the tenant pays that share of gross takings when it comes to more.
+- `years` is the length of the term and `renewal_years` the further term the tenant may renew for.
+- `lat` and `lon` are WGS84, as published, to about 10 metres.
+
+The data is from DATA.GOV.HK and may be kept and republished, crediting the Government Property Agency.
+
+## ha.py: Housing Authority
+
+Reads the Housing Authority's notice of premises let by tender: shops, market stalls and factory units in public housing estates, with the area of each and the monthly rent the winning tender offered.
+
+```bash
+python3 ha.py
+```
+
+The notice is one PDF covering the latest twelve months. Each run keeps it under its date and writes `out/ha_awards.csv` from every kept copy, so months that have dropped off the notice stay in the file. On 24 Nov 2026 it held 265 awards from November 2025 to October 2026: 197 shops, 40 market stalls, 26 factory units and 2 large ground-floor units.
+
+Columns: `month`, `estate`, `unit`, `kind`, `area_sqm`, `advertising_sqm`, `rent`, `later_rent`, `premium`, `rent_per_sqm`, `rent_per_sqft`.
+
+- `month` is the month the tender was awarded.
+- `rent` is HK$ a month, for shops and stalls exclusive of rates and air-conditioning charges and for factory units inclusive of rates.
+- `area_sqm` is the unit alone. Where a shop is let with an advertising light box or signboard, that area is in `advertising_sqm`.
+- Where the rent steps up, `rent` is for the first three years and `later_rent` for the next three.
+- `premium` is the lump sum bid in a tender decided on a premium instead of a rent.
+
+The Housing Authority keeps the copyright and allows downloading for personal or non-commercial use. Keep the collected files for your own analysis and do not republish them.
+
 ## link.py: leases joined to food shops
 
 Links each retail lease to the food business that probably took it. It reads the transactions file and the licence history from `hk-catering-scraper`, which must sit beside this folder with `fehd.py spans` already run.
@@ -92,3 +166,7 @@ Columns: `lease_id`, `lease_date`, `building_tc`, `building_en`, `district`, `le
 - Transactions cover the leases Centaline hears of, mostly through market news, not every lease in Hong Kong.
 - Centaline answers only from some countries; from elsewhere every request gets `403 Access denied`. Hong Kong works.
 - Few transactions say which unit: 2,375 of the 39,598 retail leases give a shop number. The rest give the building and a floor band, and 27,131 of them are marked as street-level shops.
+- The Rating and Valuation Department publishes retail rents for three areas only, not by district, grade or street. An average moves with the mix of premises let in the period, so change over time is read from the indices.
+- Rateable values are the department's estimates for every shop in a district, not rents agreed in the period, and are available by district only from 2021. The value of a single shop is in the department's Valuation List, which is free to search only from mid-March to the end of May each year.
+- The Government Property Agency list has not been updated since October 2023 and gives no floor area. 25 of its 39 shops are in one building, Shun Lee Disciplined Services Quarters in Kwun Tong.
+- The Housing Authority notice names neither the tenant nor the trade and gives no position. It is read from the layout of a PDF, so a change to the notice's layout would stop the script reading it.
