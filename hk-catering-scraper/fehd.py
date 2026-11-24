@@ -3,6 +3,7 @@
     python fehd.py latest                         # today's lists -> out/fehd_latest.csv
     python fehd.py history --start 2016-01-01     # archived monthly lists since then
     python fehd.py spans                          # out/fehd_spans.csv from every list on disk
+    python fehd.py positions                      # give the licences a map position
 
 Four public lists are read, each in English and Chinese:
   restaurant   general, light refreshment and marine restaurant licences
@@ -17,10 +18,18 @@ since 2016, liquor since November 2019). `spans` turns them into one row per lic
 unbroken run with the same name, address and type, so openings, closures and name changes
 can be dated.
 
+`positions` reads the map position the department publishes for every restaurant, food and
+liquor licence in force (point data on portal.csdi.gov.hk, joined by licence number), keeps
+it in data/positions.json and writes both CSVs again with `lat`, `lon` and `placed_by`:
+`licence` when the position is the licence's own, `address` when it is that of another
+licence at the same written address. Positions are kept from run to run, so a licence that
+later lapses keeps the one it had. Permits have no published position.
+
 Standard library only; Python 3.9 or newer.
 """
 import argparse
 import csv
+import gzip
 import json
 import random
 import re
@@ -30,6 +39,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -38,6 +48,8 @@ ROOT = Path(__file__).resolve().parent
 RAW = ROOT / "data" / "raw"
 OUT = ROOT / "out"
 ARCHIVE = "https://api.data.gov.hk/v1/historical-archive"
+POINTS = "https://portal.csdi.gov.hk/csdi-webpage/file-api"
+POSITIONS = ROOT / "data" / "positions.json"
 HOST = "www.fehd.gov.hk"
 TEXT = "licensing/license/text"
 SOURCES = {
@@ -46,14 +58,19 @@ SOURCES = {
     "permit": {"en": f"english/{TEXT}/LP_Permits_EN.XML", "tc": f"tc_chi/{TEXT}/LP_Permits_TC.XML"},
     "liquor": {"en": f"english/{TEXT}/edatabase_liquor.xml", "tc": f"tc_chi/{TEXT}/database_liquor.xml"},
 }
+POINT_LISTS = {  # source: (dataset id, layer) on the CSDI portal
+    "restaurant": ("fehd_rcd_1630036390312_58893", "FEHD_RL"),
+    "food": ("fehd_rcd_1630036111498_75446", "FEHD_FL"),
+    "liquor": ("fehd_rcd_1695972959083_79626", "FEHD_LL"),
+}
 CAPACITY = re.compile(r"Not more than\s*\(?\s*(\d+)\s*\)?\s*persons", re.I)
 
 LATEST_COLS = ["source", "licence_no", "type_code", "type", "district_code", "district",
                "name_en", "name_tc", "address_en", "address_tc", "info_codes", "expiry",
-               "capacity", "list_date"]
+               "capacity", "list_date", "lat", "lon", "placed_by"]
 SPAN_COLS = ["source", "licence_no", "type_code", "type", "district_code", "district",
              "name_en", "name_tc", "address_en", "address_tc",
-             "first_seen", "last_seen", "gone_by", "lists"]
+             "first_seen", "last_seen", "gone_by", "lists", "lat", "lon", "placed_by"]
 
 
 def http_get(url, tries=6):
@@ -125,6 +142,23 @@ def write_csv(path, cols, rows):
         w.writerows(rows)
 
 
+def place(rows):
+    """Fill lat, lon and placed_by from the saved positions."""
+    positions = json.loads(POSITIONS.read_text()) if POSITIONS.exists() else {}
+    written = lambda r: "".join(r["address_tc"].split())
+    at_address = {}
+    for r in rows:
+        r["at"] = positions.get(r["source"], {}).get(r["licence_no"])
+        if r["at"] and r["address_tc"]:
+            at_address.setdefault(written(r), r["at"])
+    for r in rows:
+        at = r.pop("at")
+        by = "licence" if at else "address" if written(r) in at_address else ""
+        r["lat"], r["lon"] = at or at_address.get(written(r), ("", ""))
+        r["placed_by"] = by
+    return rows
+
+
 def iso(stamp):
     return f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}"
 
@@ -138,7 +172,7 @@ def cmd_latest(args):
         mine = [{"source": source, "list_date": iso(stamp), **r} for r in records(paths["en"], paths["tc"])]
         print(f"{source}: {len(mine)} licences")
         rows += mine
-    write_csv(OUT / "fehd_latest.csv", LATEST_COLS, rows)
+    write_csv(OUT / "fehd_latest.csv", LATEST_COLS, place(rows))
     print(f"{len(rows)} rows -> {OUT / 'fehd_latest.csv'}")
 
 
@@ -252,13 +286,41 @@ def cmd_spans(args):
         print(f"{source}: {len(mine)} spans, {len({s['licence_no'] for s in mine})} licences, "
               f"{still} on the newest list")
         rows += mine
-    write_csv(OUT / "fehd_spans.csv", SPAN_COLS, rows)
+    write_csv(OUT / "fehd_spans.csv", SPAN_COLS, place(rows))
     print(f"{len(rows)} rows -> {OUT / 'fehd_spans.csv'}")
+
+
+def cmd_positions(args):
+    positions = json.loads(POSITIONS.read_text()) if POSITIONS.exists() else {}
+    today = date.today().strftime("%Y%m%d")
+    for source, (dataset, layer) in POINT_LISTS.items():
+        q = urllib.parse.urlencode({"dataset_id": dataset, "format": "geojson", "layer_name": layer})
+        body = http_get(f"{POINTS}?{q}")
+        out = RAW.parent / "positions" / f"{today}_{source}.geojson.gz"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with gzip.open(out, "wb") as f:
+            f.write(body)
+        features = json.loads(body)["features"]
+        for feature in features:
+            lon, lat = feature["geometry"]["coordinates"][:2]
+            positions.setdefault(source, {})[feature["properties"]["SEARCH02_EN"]] = [lat, lon]
+        print(f"{source}: {len(features)} positions")
+        time.sleep(1)
+    POSITIONS.write_text(json.dumps(positions))
+    for name, cols in (("fehd_latest.csv", LATEST_COLS), ("fehd_spans.csv", SPAN_COLS)):
+        if (OUT / name).exists():
+            with open(OUT / name, encoding="utf-8-sig", newline="") as f:
+                rows = place(list(csv.DictReader(f)))
+            write_csv(OUT / name, cols, rows)
+            how = Counter(r["placed_by"] for r in rows)
+            print(f"{name}: {how['licence']} placed by licence, {how['address']} by address, "
+                  f"{how['']} without a position")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("positions").set_defaults(fn=cmd_positions)
     for name, fn in (("latest", cmd_latest), ("history", cmd_history), ("spans", cmd_spans)):
         p = sub.add_parser(name)
         p.add_argument("--source", nargs="+", choices=list(SOURCES), default=list(SOURCES))

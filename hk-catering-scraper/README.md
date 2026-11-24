@@ -27,8 +27,13 @@ python3 fehd.py history --start 2016-01-01
 python3 fehd.py spans
 ```
 
+```bash
+python3 fehd.py positions
+```
+
 - `latest` downloads today's lists and writes `out/fehd_latest.csv`, one row per licence.
 - `history` downloads past lists from the DATA.GOV.HK historical archive: the first list of each month by default, or `--step weekly` / `--step daily`. Lists already on disk are not downloaded again. The archive goes back to January 2016, and to November 2019 for liquor.
+- `positions` gives the licences a map position. The department publishes one for every restaurant, food and liquor licence in force, as point data on the government's spatial data portal; the command joins them by licence number, keeps them in `data/positions.json` and writes both CSVs again. Three requests. Positions are kept from run to run, so a licence that later lapses keeps the one it had.
 - `spans` reads every list on disk and writes `out/fehd_spans.csv`: one row per licence per unbroken run with the same name, address and type. `first_seen` and `last_seen` are the first and last lists showing it; `gone_by` is the first list without it.
 
 Every command takes `--source` to work on some of the lists, for example `--source food liquor`.
@@ -37,11 +42,12 @@ Run `latest` on a schedule (weekly is enough) and each run adds a dated list tha
 
 ### Columns
 
-`source`, `licence_no`, `type_code`, `type`, `district_code`, `district`, `name_en`, `name_tc`, `address_en`, `address_tc`, `info_codes`, `expiry`, `capacity`, `list_date`.
+`source`, `licence_no`, `type_code`, `type`, `district_code`, `district`, `name_en`, `name_tc`, `address_en`, `address_tc`, `info_codes`, `expiry`, `capacity`, `list_date`, `lat`, `lon`, `placed_by`.
 
 - `info_codes` are FEHD's endorsement marks, such as outside seating; the legend is in each downloaded file.
 - `capacity` is the head-count limit written into a liquor licence. About 750 liquor licences state one.
 - The liquor list gives type and district as text, so its `type_code` and `district_code` are empty.
+- `lat` and `lon` are WGS84. `placed_by` is `licence` when the position is the one the department publishes for that licence, and `address` when it is that of another licence at the same written address. On 24 Nov 2026, 42,699 of the 42,738 restaurant, food and liquor licences in force had a position of their own. The spans file has the same three columns: 111,490 of its 194,807 spans have a position.
 
 ## openrice.py: OpenRice listings
 
@@ -145,3 +151,4 @@ OpenRice's terms restrict copying its content. Keep the collected files for your
 - The same premises can appear in several lists under different licence numbers. Licences joined to one OpenRice listing share its `poi_id`; licences with no listing are not grouped.
 - Permit type `IP` has no name in FEHD's own legend, so its `type` is empty.
 - A shop that opened and closed between two downloaded lists is not seen.
+- Permits have no published position, and neither has a licence that lapsed before the first `positions` run unless a later licence was written at the same address. 9,050 licences in force, nearly all permits, and 83,317 past spans are without one.
