@@ -1,0 +1,6 @@
+{
+  "endpoint": "https://<account id>.r2.cloudflarestorage.com",
+  "bucket": "hk-data",
+  "access_key_id": "",
+  "secret_access_key": ""
+}
